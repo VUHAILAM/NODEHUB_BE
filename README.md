@@ -2,7 +2,7 @@
 
 This is backend source from JOB4E final project.
 
-##Structure Project
+## Structure Project
 * cmd: Chứa main của các services.
 * endpoints(Controllers): Xử lý về nhận request và trả respsonse
 * transports(Router): Define các endpoints, ví dụ như gắn middleware hoặc define các methods
