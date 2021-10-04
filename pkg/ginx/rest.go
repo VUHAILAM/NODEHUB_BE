@@ -14,13 +14,15 @@ const (
 )
 
 var (
-	CodeClientClosed        interface{} = 499001
-	CodeInternalServerError interface{} = 500000
+	CodeClientClosed        interface{} = 499
+	CodeInternalServerError interface{} = 500
+	CodeBadRequest          interface{} = 400
 )
 
 var (
 	internalErrMeta     = ErrorMeta{HTTPStatus: http.StatusInternalServerError, Code: CodeInternalServerError, Message: "Internal server error"}
 	clientClosedErrMeta = ErrorMeta{HTTPStatus: httpCodeClientClosed, Code: CodeClientClosed}
+	badRequestErrMeta   = ErrorMeta{HTTPStatus: http.StatusBadRequest, Code: CodeBadRequest}
 	defaultErrsMaps     = make(ErrMap)
 )
 
@@ -76,7 +78,7 @@ func calculateStatusAndResponseMeta(ctx *gin.Context, rootErr error, errMapsList
 		if isCanceledRequest(ctx.Request) && errors.Is(err, context.Canceled) {
 			return clientClosedErrMeta.HTTPStatus, clientClosedErrMeta.ToResponseMeta()
 		}
-		return internalErrMeta.HTTPStatus, internalErrMeta.ToResponseMeta()
+		return badRequestErrMeta.HTTPStatus, badRequestErrMeta.ToResponseMeta()
 	}
 
 	return meta.HTTPStatus, meta.ToResponseMeta()
