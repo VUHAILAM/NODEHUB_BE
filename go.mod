@@ -5,6 +5,7 @@ go 1.16
 require (
 	github.com/avast/retry-go v3.0.0+incompatible
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
+	github.com/gin-contrib/cors v1.3.1 // indirect
 	github.com/gin-gonic/gin v1.7.4
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/pkg/errors v0.9.1
