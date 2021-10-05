@@ -53,7 +53,7 @@ func (a *Account) Login(ctx context.Context, email string, password string) (str
 	err = bcrypt.CompareHashAndPassword([]byte(acc.Password), []byte(password))
 	if err != nil {
 		a.Logger.Error("Incorrect password")
-		return "", errors.New("Incorrect password")
+		return "", errors.Wrap(err, "Incorrect password")
 	}
 
 	claims := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.StandardClaims{
