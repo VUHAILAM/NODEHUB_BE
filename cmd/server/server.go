@@ -38,7 +38,7 @@ func InitServer() *Server {
 	ginDepen := transport.GinDependencies{
 		AccountSerializer: accountSerializer,
 	}
-	ginHandler := ginDepen.InitGinEngine(nil)
+	ginHandler := ginDepen.InitGinEngine(conf)
 	return &Server{
 		HttpServer: &http.Server{
 			Addr:    conf.HTTP.Addr,
