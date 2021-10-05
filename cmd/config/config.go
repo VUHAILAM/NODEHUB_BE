@@ -15,6 +15,7 @@ type Config struct {
 	MySQL config.MySQLConfig
 
 	SecretKey string `envconfig:"SECRET_KEY" default:"secret"`
+	Origin    string `envconfig:"ORIGIN"`
 }
 
 func NewConfig() (*Config, error) {
