@@ -75,10 +75,11 @@ func (a *Account) Logout(ctx context.Context, email string) error {
 }
 
 func (a *Account) Register(ctx context.Context, account *models.RequestRegisterAccount) error {
+	hashedPassword, _ := bcrypt.GenerateFromPassword([]byte(account.Password), 8)
 	accountModels := &models.Account{
 		Email:    account.Email,
 		Phone:    account.Phone,
-		Password: account.Password,
+		Password: string(hashedPassword),
 		Type:     account.Type,
 	}
 	err := a.AccountGorm.Create(ctx, accountModels)
