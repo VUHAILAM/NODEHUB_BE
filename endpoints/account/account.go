@@ -49,7 +49,9 @@ func (as *AccountSerializer) Login(ginCtx *gin.Context) {
 	}
 	ginCtx.SetCookie(cookieName, token, time.Now().Add(time.Hour*24).Second(), "/", "", true, true)
 
-	ginx.BuildSuccessResponse(ginCtx, http.StatusAccepted, nil)
+	ginx.BuildSuccessResponse(ginCtx, http.StatusAccepted, gin.H{
+		"token": token,
+	})
 }
 
 func (as *AccountSerializer) Logout(ginCtx *gin.Context) {
