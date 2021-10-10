@@ -2,7 +2,7 @@ package account
 
 import (
 	"context"
-	"strconv"
+	"encoding/json"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
@@ -55,9 +55,13 @@ func (a *Account) Login(ctx context.Context, email string, password string) (str
 		a.Logger.Error("Incorrect password")
 		return "", errors.Wrap(err, "Incorrect password")
 	}
-
+	jsonAccount, err := json.Marshal(acc)
+	if err != nil {
+		a.Logger.Error("Can not convert account to json", zap.Error(err))
+		return "", err
+	}
 	claims := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.StandardClaims{
-		Issuer:    strconv.Itoa(int(acc.Id)),
+		Issuer:    string(jsonAccount),
 		ExpiresAt: time.Now().Add(time.Hour * 24).Unix(), //1 day
 	})
 
