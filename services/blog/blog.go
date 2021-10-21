@@ -2,112 +2,72 @@ package blog
 
 import (
 	"context"
-	"encoding/json"
-	"time"
 
-	"github.com/dgrijalva/jwt-go"
-	"github.com/pkg/errors"
 	"gitlab.com/hieuxeko19991/job4e_be/pkg/models"
 	"go.uber.org/zap"
-	"golang.org/x/crypto/bcrypt"
 )
 
 type IBlogService interface {
-	Login(ctx context.Context, email string, password string) (string, error)
-	Logout(ctx context.Context, email string) error
-	Register(ctx context.Context, account *models.RequestRegisterAccount) error
-	GetUserFromCookie(ctx context.Context, cookie string) (*models.Account, error)
+	GetListBlog(ctx context.Context, title string, page int64, size int64) (*models.ResponsetListBlog, error)
+	CreateBlog(ctx context.Context, blog *models.RequestCreateBlog) error
+	UpdateBlog(ctx context.Context, blog *models.RequestCreateBlog, Blog_id int64) error
 }
 
-type IAccountDatabase interface {
-	Create(ctx context.Context, account *models.Account) error
-	GetAccountByEmail(ctx context.Context, email string) (*models.Account, error)
-	GetAccountByID(ctx context.Context, id string) (*models.Account, error)
+type IBlogDatabase interface {
+	GetListBlog(ctx context.Context, title string, page int64, size int64) (*models.ResponsetListBlog, error)
+	Create(ctx context.Context, blog *models.Blog) error
+	Update(ctx context.Context, blog *models.RequestUpdateBlog, Blog_id int64) error
 }
 
-type Account struct {
-	AccountGorm *AccountGorm
-	SecretKey   string
-	Logger      *zap.Logger
+type Blog struct {
+	BlogGorm  *BlogGorm
+	SecretKey string
+	Logger    *zap.Logger
 }
 
-func NewAccount(accountGorm *AccountGorm, secretKey string, logger *zap.Logger) *Account {
-	return &Account{
-		AccountGorm: accountGorm,
-		SecretKey:   secretKey,
-		Logger:      logger,
+func NewBlog(blogGorm *BlogGorm, secretKey string, logger *zap.Logger) *Blog {
+	return &Blog{
+		BlogGorm:  blogGorm,
+		SecretKey: secretKey,
+		Logger:    logger,
 	}
 }
 
-func (a *Account) Login(ctx context.Context, email string, password string) (string, error) {
-	acc, err := a.AccountGorm.GetAccountByEmail(ctx, email)
+func (b *Blog) GetListBlog(ctx context.Context, title string, page int64, size int64) (*models.ResponsetListBlog, error) {
+	acc, err := b.BlogGorm.GetListBlog(ctx, title, page, size)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-
-	if acc.Id == 0 {
-		a.Logger.Error("Account by email not found")
-		return "", errors.New("Account not found")
-	}
-
-	err = bcrypt.CompareHashAndPassword([]byte(acc.Password), []byte(password))
-	if err != nil {
-		a.Logger.Error("Incorrect password")
-		return "", errors.Wrap(err, "Incorrect password")
-	}
-	jsonAccount, err := json.Marshal(acc)
-	if err != nil {
-		a.Logger.Error("Can not convert account to json", zap.Error(err))
-		return "", err
-	}
-	claims := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.StandardClaims{
-		Issuer:    string(jsonAccount),
-		ExpiresAt: time.Now().Add(time.Hour * 24).Unix(), //1 day
-	})
-
-	token, err := claims.SignedString([]byte(a.SecretKey))
-	if err != nil {
-		a.Logger.Error("Cannot get token", zap.Error(err))
-		return "", err
-	}
-
-	return token, nil
+	return acc, nil
 }
 
-func (a *Account) Logout(ctx context.Context, email string) error {
-	return nil
-}
-
-func (a *Account) Register(ctx context.Context, account *models.RequestRegisterAccount) error {
-	hashedPassword, _ := bcrypt.GenerateFromPassword([]byte(account.Password), 8)
-	accountModels := &models.Account{
-		Email:    account.Email,
-		Phone:    account.Phone,
-		Password: string(hashedPassword),
-		Type:     account.Type,
+func (b *Blog) CreateBlog(ctx context.Context, blog *models.RequestCreateBlog) error {
+	blogModels := &models.Blog{
+		Title:       blog.Title,
+		Category_id: blog.Category_id,
+		Icon:        blog.Icon,
+		Description: blog.Description,
+		Excerpts:    blog.Excerpts,
+		Status:      blog.Status,
 	}
-	err := a.AccountGorm.Create(ctx, accountModels)
+	err := b.BlogGorm.Create(ctx, blogModels)
 	if err != nil {
 		return err
 	}
 	return nil
 }
-
-func (a *Account) GetUserFromCookie(ctx context.Context, cookie string) (*models.Account, error) {
-	token, err := jwt.ParseWithClaims(cookie, &jwt.StandardClaims{}, func(token *jwt.Token) (interface{}, error) {
-		return []byte(a.SecretKey), nil
-	})
-	if err != nil {
-		a.Logger.Error("Unauthenticated!!", zap.Error(err))
-		return nil, err
+func (b *Blog) UpdateBlog(ctx context.Context, blog *models.RequestCreateBlog, Blog_id int64) error {
+	blogModels := &models.RequestUpdateBlog{
+		Title:       blog.Title,
+		Category_id: blog.Category_id,
+		Icon:        blog.Icon,
+		Description: blog.Description,
+		Excerpts:    blog.Excerpts,
+		Status:      blog.Status,
 	}
-
-	claims := token.Claims.(*jwt.StandardClaims)
-
-	acc, err := a.AccountGorm.GetAccountByID(ctx, claims.Issuer)
+	err := b.BlogGorm.Update(ctx, blogModels, Blog_id)
 	if err != nil {
-		a.Logger.Error("Can not get Account by ID", zap.Error(err))
-		return nil, err
+		return err
 	}
-	return acc, nil
+	return nil
 }

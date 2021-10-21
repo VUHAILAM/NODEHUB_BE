@@ -2,24 +2,46 @@ package models
 
 import "time"
 
-type Account struct {
-	Id        int64     `json:"id" gorm:"primaryKey"`
-	Email     string    `json:"email" gorm:"unique,index"`
-	Password  string    `json:"password"`
-	Phone     string    `json:"phone"`
-	Type      int64     `json:"type"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
+type Blog struct {
+	Blog_id     int64     `json:"blog_id" gorm:"primaryKey"`
+	Category_id int64     `json:"category_id"`
+	Title       string    `json:"title"`
+	Icon        string    `json:"icon"`
+	Excerpts    string    `json:"excerpts"`
+	Description string    `json:"description"`
+	Status      bool      `json:"status"`
+	CreatedAt   time.Time `json:"created_at"`
+	UpdatedAt   time.Time `json:"updated_at"`
 }
 
-type RequestRegisterAccount struct {
-	Email    string `json:"email"`
-	Phone    string `json:"phone"`
-	Password string `json:"password"`
-	Type     int64  `json:"type"`
+type RequestCreateBlog struct {
+	Blog_id     int64  `json:"blog_id" gorm:"primaryKey"`
+	Category_id int64  `json:"category_id"`
+	Title       string `json:"title"`
+	Icon        string `json:"icon"`
+	Excerpts    string `json:"excerpts"`
+	Description string `json:"description"`
+	Status      bool   `json:"status"`
 }
 
-type RequestLogin struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
+type RequestUpdateBlog struct {
+	Category_id int64  `json:"category_id"`
+	Title       string `json:"title"`
+	Icon        string `json:"icon"`
+	Excerpts    string `json:"excerpts"`
+	Description string `json:"description"`
+	Status      bool   `json:"status"`
+}
+
+type ResponsetListBlog struct {
+	TotalBlog   int64   `json:"totalBlog"`
+	TotalPage   float64 `json:"totalPage"`
+	CurrentPage int64   `json:"currentPage"`
+	Data        []Blog  `json:"data"`
+}
+
+type RequestGetListBlog struct {
+	Title string `json:"title"`
+	Page  int64  `json:"page"`
+	Size  int64  `json:"size"`
 }

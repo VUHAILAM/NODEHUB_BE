@@ -2,6 +2,7 @@ package blog
 
 import (
 	"context"
+	"math"
 
 	"go.uber.org/zap"
 
@@ -9,49 +10,70 @@ import (
 	"gorm.io/gorm"
 )
 
-const tableAccount = "account"
+const tableAccount = "blog"
 
-type AccountGorm struct {
+type BlogGorm struct {
 	db     *gorm.DB
 	logger *zap.Logger
 }
 
-func NewAccountGorm(db *gorm.DB, logger *zap.Logger) *AccountGorm {
-	return &AccountGorm{
+func NewBlogGorm(db *gorm.DB, logger *zap.Logger) *BlogGorm {
+	return &BlogGorm{
 		db:     db,
 		logger: logger,
 	}
 }
 
-func (g *AccountGorm) Create(ctx context.Context, account *models.Account) error {
+func (g *BlogGorm) GetListBlog(ctx context.Context, title string, page int64, size int64) (*models.ResponsetListBlog, error) {
 	db := g.db.WithContext(ctx)
-	err := db.Table(tableAccount).Create(account).Error
+	arr := []models.Blog{}
+	resutl := models.ResponsetListBlog{}
+	offset := (page - 1) * size
+	limit := size
+	var total int64
+	//search query
+	data, err := db.Raw(`SELECT blog_id, category_id, title, icon, description, excerpts, status, created_at, updated_at FROM nodehub.blog where  title like ? and status = 1 ORDER BY blog_id desc LIMIT ?, ?`, "%"+title+"%", offset, limit).Rows()
+	// count query
+	db.Raw(`SELECT count(*) FROM nodehub.blog where  title like ? and status = 1`, "%"+title+"%").Scan(&total)
 	if err != nil {
-		g.logger.Error("AccountGorm: Create account error", zap.Error(err))
+		g.logger.Error("BlogGorm: Get blog error", zap.Error(err))
+		return nil, err
+	}
+	defer data.Close()
+	for data.Next() {
+		// ScanRows scan a row into user
+		db.ScanRows(data, &arr)
+	}
+	var temp float64 = math.Ceil(float64(total) / float64(size))
+	resutl.TotalBlog = total
+	resutl.TotalPage = temp
+	resutl.CurrentPage = page
+	resutl.Data = arr
+
+	return &resutl, nil
+}
+
+func (g *BlogGorm) Create(ctx context.Context, blog *models.Blog) error {
+	db := g.db.WithContext(ctx)
+	err := db.Table(tableAccount).Create(blog).Error
+	if err != nil {
+		g.logger.Error("BlogGorm: Create blog error", zap.Error(err))
 		return err
 	}
 	return nil
 }
-
-func (g *AccountGorm) GetAccountByEmail(ctx context.Context, email string) (*models.Account, error) {
+func (g *BlogGorm) Update(ctx context.Context, blog *models.RequestUpdateBlog, Blog_id int64) error {
 	db := g.db.WithContext(ctx)
-	acc := models.Account{}
-	err := db.Table(tableAccount).Where("email=?", email).First(&acc).Error
+	err := db.Table(tableAccount).Where("blog_id = ?", Blog_id).Updates(map[string]interface{}{
+		"category_id": blog.Category_id,
+		"title":       blog.Title,
+		"icon":        blog.Icon,
+		"excerpts":    blog.Excerpts,
+		"description": blog.Description,
+		"status":      blog.Status}).Error
 	if err != nil {
-		g.logger.Error("AccountGorm: Get account error", zap.Error(err))
-		return nil, err
+		g.logger.Error("BlogGorm: Update blog error", zap.Error(err))
+		return err
 	}
-
-	return &acc, nil
-}
-
-func (g *AccountGorm) GetAccountByID(ctx context.Context, id string) (*models.Account, error) {
-	db := g.db.WithContext(ctx)
-	acc := models.Account{}
-	err := db.Table(tableAccount).Where("id=?", id).First(&acc).Error
-	if err != nil {
-		g.logger.Error("AccountGorm: Get account error", zap.Error(err))
-		return nil, err
-	}
-	return &acc, nil
+	return nil
 }

@@ -1,11 +1,9 @@
-package account
+package blog
 
 import (
 	"encoding/json"
 	"net/http"
-	"time"
 
-	"gitlab.com/hieuxeko19991/job4e_be/services/account"
 	"gitlab.com/hieuxeko19991/job4e_be/services/blog"
 
 	"github.com/gin-gonic/gin"
@@ -14,68 +12,59 @@ import (
 	"go.uber.org/zap"
 )
 
-const cookieName = "blog"
-
 type BlogSerializer struct {
 	blogService blog.IBlogService
 	Logger      *zap.Logger
 }
 
-func NewAccountSerializer(accountService account.IAccountService, logger *zap.Logger) *AccountSerializer {
-	return &AccountSerializer{
-		accountService: accountService,
-		Logger:         logger,
+func NewBlogSerializer(blogService blog.IBlogService, logger *zap.Logger) *BlogSerializer {
+	return &BlogSerializer{
+		blogService: blogService,
+		Logger:      logger,
 	}
 }
 
-func (as *AccountSerializer) Login(ginCtx *gin.Context) {
+func (bl *BlogSerializer) Getlist(ginCtx *gin.Context) {
 	ctx := ginCtx.Request.Context()
-	req := models.RequestLogin{}
+	req := models.RequestGetListBlog{}
 	err := json.NewDecoder(ginCtx.Request.Body).Decode(&req)
 	if err != nil {
-		as.Logger.Error("Parse request Login error", zap.Error(err))
+		bl.Logger.Error("Parse request get list error", zap.Error(err))
 		ginx.BuildErrorResponse(ginCtx, err, gin.H{
 			"message": err.Error(),
 		})
 		return
 	}
-	as.Logger.Info("Request", zap.Reflect("request", req))
-	token, err := as.accountService.Login(ctx, req.Email, req.Password)
+	data, err := bl.blogService.GetListBlog(ctx, req.Title, req.Page, req.Size)
 	if err != nil {
-		as.Logger.Error("Login error", zap.Error(err))
+		bl.Logger.Error("getlistBlog error", zap.Error(err))
 		ginx.BuildErrorResponse(ginCtx, err, gin.H{
 			"message": err.Error(),
 		})
 		return
 	}
-	ginCtx.SetCookie(cookieName, token, time.Now().Add(time.Hour*24).Second(), "/", "", true, true)
 
 	ginx.BuildSuccessResponse(ginCtx, http.StatusAccepted, gin.H{
-		"token": token,
+		"data": data,
 	})
 }
 
-func (as *AccountSerializer) Logout(ginCtx *gin.Context) {
-	ginCtx.SetCookie(cookieName, "", -1, "/", "", true, true)
-	ginx.BuildSuccessResponse(ginCtx, http.StatusOK, nil)
-}
-
-func (as *AccountSerializer) Register(ginCtx *gin.Context) {
+func (bl *BlogSerializer) CreateBlog(ginCtx *gin.Context) {
 	ctx := ginCtx.Request.Context()
-	req := models.RequestRegisterAccount{}
+	req := models.RequestCreateBlog{}
 	err := json.NewDecoder(ginCtx.Request.Body).Decode(&req)
 
 	if err != nil {
-		as.Logger.Error("Parse request Register account error", zap.Error(err))
+		bl.Logger.Error("Parse request create blog error", zap.Error(err))
 		ginx.BuildErrorResponse(ginCtx, err, gin.H{
 			"message": err.Error(),
 		})
 		return
 	}
 
-	err = as.accountService.Register(ctx, &req)
+	err = bl.blogService.CreateBlog(ctx, &req)
 	if err != nil {
-		as.Logger.Error("Register account error", zap.Error(err))
+		bl.Logger.Error("Create blog error", zap.Error(err))
 		ginx.BuildErrorResponse(ginCtx, err, gin.H{
 			"message": err.Error(),
 		})
@@ -85,24 +74,27 @@ func (as *AccountSerializer) Register(ginCtx *gin.Context) {
 	ginx.BuildSuccessResponse(ginCtx, http.StatusAccepted, nil)
 }
 
-func (as *AccountSerializer) GetUserFromCookie(ginCtx *gin.Context) {
+func (bl *BlogSerializer) UpdateBlog(ginCtx *gin.Context) {
 	ctx := ginCtx.Request.Context()
-	cookie, err := ginCtx.Cookie(cookieName)
+	req := models.RequestCreateBlog{}
+	err := json.NewDecoder(ginCtx.Request.Body).Decode(&req)
+
 	if err != nil {
+		bl.Logger.Error("Parse request update blog error", zap.Error(err))
 		ginx.BuildErrorResponse(ginCtx, err, gin.H{
 			"message": err.Error(),
 		})
 		return
 	}
 
-	acc, err := as.accountService.GetUserFromCookie(ctx, cookie)
-
+	err = bl.blogService.UpdateBlog(ctx, &req, req.Blog_id)
 	if err != nil {
+		bl.Logger.Error("Update blog error", zap.Error(err))
 		ginx.BuildErrorResponse(ginCtx, err, gin.H{
 			"message": err.Error(),
 		})
 		return
 	}
 
-	ginx.BuildSuccessResponse(ginCtx, http.StatusOK, acc)
+	ginx.BuildSuccessResponse(ginCtx, http.StatusAccepted, nil)
 }
