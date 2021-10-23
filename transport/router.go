@@ -4,23 +4,23 @@ import (
 	"fmt"
 	"net/http"
 
+	"gitlab.com/hieuxeko19991/job4e_be/middlewares"
+
+	"gitlab.com/hieuxeko19991/job4e_be/pkg/auth"
+
 	"gitlab.com/hieuxeko19991/job4e_be/cmd/config"
 
 	"github.com/gin-contrib/cors"
 
-	"github.com/gin-gonic/gin"
 	"gitlab.com/hieuxeko19991/job4e_be/endpoints/account"
-	"gitlab.com/hieuxeko19991/job4e_be/endpoints/blog"
-	"gitlab.com/hieuxeko19991/job4e_be/endpoints/category"
-	"gitlab.com/hieuxeko19991/job4e_be/endpoints/skill"
+
+	"github.com/gin-gonic/gin"
 	"gitlab.com/hieuxeko19991/job4e_be/pkg/ginx"
 )
 
 type GinDependencies struct {
-	AccountSerializer  *account.AccountSerializer
-	BlogSerializer     *blog.BlogSerializer
-	SkillSerializer    *skill.SkillSerializer
-	CategorySerializer *category.CategorySerializer
+	AccountSerializer *account.AccountSerializer
+	Auth              *auth.AuthHandler
 }
 
 func (g *GinDependencies) InitGinEngine(config *config.Config) *gin.Engine {
@@ -31,26 +31,17 @@ func (g *GinDependencies) InitGinEngine(config *config.Config) *gin.Engine {
 	corsConfig.AllowMethods = []string{"GET", "POST", "PATCH", "DELETE"}
 	corsConfig.AllowOrigins = []string{config.Origin}
 	nodehub.Use(cors.New(corsConfig))
-	// authen
 	nodehub.GET("/health", Health)
-	nodehub.POST("/login", g.AccountSerializer.Login)
-	nodehub.POST("/logout", g.AccountSerializer.Logout)
-	nodehub.POST("/register", g.AccountSerializer.Register)
-	nodehub.GET("/user", g.AccountSerializer.GetUserFromCookie)
-	// blog
-	nodehub.POST("/blog/getList", g.BlogSerializer.Getlist)
-	nodehub.POST("/blog/createBlog", g.BlogSerializer.CreateBlog)
-	nodehub.POST("/blog/updateBlog", g.BlogSerializer.UpdateBlog)
-	// skill
-	nodehub.POST("/skill/createSkill", g.SkillSerializer.CreateSkill)
-	nodehub.POST("/skill/updateSkill", g.SkillSerializer.UpdateSkill)
-	nodehub.POST("/skill/getListSkill", g.SkillSerializer.GetlistSkill)
-	// category
-	nodehub.POST("/category/createCategory", g.CategorySerializer.CreateCategory)
-	nodehub.POST("/category/updateCategory", g.CategorySerializer.UpdateCategory)
-	nodehub.POST("/category/getListCategoryPaging", g.CategorySerializer.GetListCategoryPaging)
-	nodehub.GET("/category/getAllCategory", g.CategorySerializer.GetAllCategory)
+	authen := nodehub.Group("/account")
+	authen.POST("/login", g.AccountSerializer.Login)
+	authen.POST("/logout", g.AccountSerializer.Logout)
+	authen.POST("/register", g.AccountSerializer.Register)
+	authen.POST("/forgot-password", g.AccountSerializer.ForgotPassword)
+	authen.PUT("/reset-password", g.AccountSerializer.ResetPassword)
+	authen.PUT("/verify-email", g.AccountSerializer.VerifyEmail)
 
+	authen.Use(middlewares.AuthorizationMiddleware(g.Auth)).PUT("/change-password", g.AccountSerializer.ChangePassword)
+	authen.Use(middlewares.MiddlewareValidateRefreshToken(g.Auth)).GET("/access-token", g.AccountSerializer.GetAccessToken)
 	return engine
 }
 
