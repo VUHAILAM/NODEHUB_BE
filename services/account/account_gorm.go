@@ -55,3 +55,23 @@ func (g *AccountGorm) GetAccountByID(ctx context.Context, id string) (*models.Ac
 	}
 	return &acc, nil
 }
+
+func (g *AccountGorm) UpdatePassword(ctx context.Context, email, password, tokenHash string) error {
+	db := g.db.WithContext(ctx)
+	err := db.Table(tableAccount).Where("email=?", email).Updates(map[string]interface{}{"password": password, "token_hash": tokenHash}).Error
+	if err != nil {
+		g.logger.Error("AccountGorm: Update account password error", zap.Error(err))
+		return err
+	}
+	return nil
+}
+
+func (g *AccountGorm) UpdateVerifyEmail(ctx context.Context, email string) error {
+	db := g.db.WithContext(ctx)
+	err := db.Table(tableAccount).Where("email=?", email).Update("is_verify", true).Error
+	if err != nil {
+		g.logger.Error("AccountGorm: Update verify email error", zap.Error(err))
+		return err
+	}
+	return nil
+}
