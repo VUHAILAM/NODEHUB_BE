@@ -45,9 +45,10 @@ func (g *GinDependencies) InitGinEngine(config *config.Config) *gin.Engine {
 	authenCommon.POST("/forgot-password", g.AccountSerializer.ForgotPassword)
 	authenCommon.PUT("/reset-password", g.AccountSerializer.ResetPassword)
 	authenCommon.PUT("/verify-email", g.AccountSerializer.VerifyEmail)
-
 	authenCommon.Use(middlewares.AuthorizationMiddleware(g.Auth, auth.UserRole)).PUT("/change-password", g.AccountSerializer.ChangePassword)
-	authenCommon.Use(middlewares.MiddlewareValidateRefreshToken(g.Auth)).GET("/access-token", g.AccountSerializer.GetAccessToken)
+
+	accessToken := nodehub.Group("")
+	accessToken.Use(middlewares.MiddlewareValidateRefreshToken(g.Auth)).GET("/access-token", g.AccountSerializer.GetAccessToken)
 	// blog
 	blogCtl := nodehub.Group("/blog").Use(middlewares.AuthorizationMiddleware(g.Auth, auth.UserRole))
 	blogCtl.GET("/getList", g.BlogSerializer.Getlist)

@@ -27,14 +27,14 @@ type IAccountService interface {
 	ForgotPassword(ctx context.Context, email string) error
 	ChangePassword(ctx context.Context, req *models.RequestChangePassword) error
 	ResetPassword(ctx context.Context, token string, newPassword string) error
-	GetAccessToken(ctx context.Context, accountID, customKey string) (string, error)
+	GetAccessToken(ctx context.Context, accountID int64, customKey string) (string, error)
 	VerifyEmail(ctx context.Context, email string) error
 }
 
 type IAccountDatabase interface {
 	Create(ctx context.Context, account *models.Account) error
 	GetAccountByEmail(ctx context.Context, email string) (*models.Account, error)
-	GetAccountByID(ctx context.Context, id string) (*models.Account, error)
+	GetAccountByID(ctx context.Context, id int64) (*models.Account, error)
 	UpdatePassword(ctx context.Context, email, password, tokenHash string) error
 	UpdateVerifyEmail(ctx context.Context, email string) error
 }
@@ -66,6 +66,13 @@ func (a *Account) Login(ctx context.Context, email string, password string) (str
 	if acc.Id == 0 {
 		a.Logger.Error("Account by email not found")
 		return "", "", errors.New("Account not found")
+	}
+
+	a.Logger.Info("Account", zap.Reflect("account", acc))
+
+	if !acc.IsVerify {
+		a.Logger.Error("Account not verified")
+		return "", "", errors.New("Account not verified")
 	}
 	reqAccount := &models.Account{
 		Email:    email,
@@ -105,7 +112,7 @@ func (a *Account) Register(ctx context.Context, account *models.RequestRegisterA
 		a.Logger.Error("Cannot gen Verify Email token", zap.Error(err))
 		return err
 	}
-	linkReset := a.Conf.Origin + "/verify-email?token=" + token
+	linkReset := a.Conf.Origin + "verify-email?token=" + token
 	a.Logger.Info("Link verify email", zap.String("url", linkReset))
 
 	from := "lamvhhe130764@fpt.edu.vn"
@@ -146,6 +153,7 @@ func (a *Account) generateVerifyToken(ctx context.Context, email string) (string
 		},
 	}
 
+	a.Logger.Info("AccessPrivateKey", zap.String("key", a.Conf.AccessTokenPrivateKey))
 	signKey, err := jwt.ParseRSAPrivateKeyFromPEM([]byte(a.Conf.AccessTokenPrivateKey))
 	if err != nil {
 		a.Logger.Error("unable to parse private key", zap.Error(err))
@@ -174,7 +182,7 @@ func (a *Account) ForgotPassword(ctx context.Context, email string) error {
 		a.Logger.Error("Cannot gen Reset password token", zap.Error(err))
 		return err
 	}
-	linkReset := a.Conf.Origin + "/reset-password?token=" + token
+	linkReset := a.Conf.Origin + "reset-password?token=" + token
 	a.Logger.Info("Link reset password", zap.String("url", linkReset))
 
 	from := "lamvhhe130764@fpt.edu.vn"
@@ -230,7 +238,7 @@ func (a *Account) ChangePassword(ctx context.Context, req *models.RequestChangeP
 		return errors.New("Account " + req.Email + " not existed")
 	}
 
-	if err := bcrypt.CompareHashAndPassword([]byte(req.OldPassword), []byte(acc.Password)); err != nil {
+	if err := bcrypt.CompareHashAndPassword([]byte(acc.Password), []byte(req.OldPassword)); err != nil {
 		a.Logger.Error("Password not same", zap.Error(err))
 		return err
 	}
@@ -280,10 +288,10 @@ func (a *Account) ResetPassword(ctx context.Context, token string, newPassword s
 	return nil
 }
 
-func (a *Account) GetAccessToken(ctx context.Context, accountID, customKey string) (string, error) {
+func (a *Account) GetAccessToken(ctx context.Context, accountID int64, customKey string) (string, error) {
 	account, err := a.AccountGorm.GetAccountByID(ctx, accountID)
 	if err != nil {
-		a.Logger.Error("Can not use AccountID to get", zap.Error(err), zap.String("account_id", accountID))
+		a.Logger.Error("Can not use AccountID to get", zap.Error(err), zap.Int64("account_id", accountID))
 		return "", err
 	}
 	actualCustomKey := a.Auth.GenerateCustomKey(string(account.Id), account.TokenHash)

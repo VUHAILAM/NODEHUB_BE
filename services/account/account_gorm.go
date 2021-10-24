@@ -48,7 +48,7 @@ func (g *AccountGorm) GetAccountByEmail(ctx context.Context, email string) (*mod
 	return &acc, nil
 }
 
-func (g *AccountGorm) GetAccountByID(ctx context.Context, id string) (*models.Account, error) {
+func (g *AccountGorm) GetAccountByID(ctx context.Context, id int64) (*models.Account, error) {
 	db := g.db.WithContext(ctx)
 	acc := models.Account{}
 	err := db.Table(tableAccount).Joins("JOIN "+tableSetting+" ON setting.setting_id = account.type").Where("account.id=?&&setting.type=?", id, "role").First(&acc).Error

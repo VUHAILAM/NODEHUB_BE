@@ -98,9 +98,10 @@ type Authentication interface {
 
 // RefreshTokenCustomClaims specifies the claims for refresh token
 type RefreshTokenCustomClaims struct {
-	AccountID string `json:"account_id"`
-	CustomKey string `json:"custom_key"`
-	KeyType   string `json:"key_type"`
+	AccountID    string `json:"account_id"`
+	CustomKey    string `json:"custom_key"`
+	KeyType      string `json:"key_type"`
+	AccountInfor string `json:"account_infor"`
 	jwt.StandardClaims
 }
 
@@ -126,11 +127,16 @@ func (auth *AuthHandler) GenerateRefreshToken(account *models.Account) (string, 
 
 	cusKey := auth.GenerateCustomKey(string(account.Id), account.TokenHash)
 	tokenType := "refresh"
-
+	jsonAccount, err := json.Marshal(account)
+	if err != nil {
+		auth.Logger.Error("Can not convert account to json", zap.Error(err))
+		return "", err
+	}
 	claims := RefreshTokenCustomClaims{
 		string(account.Id),
 		cusKey,
 		tokenType,
+		string(jsonAccount),
 		jwt.StandardClaims{
 			Issuer: "job4e.auth.service",
 		},
@@ -229,7 +235,7 @@ func (auth *AuthHandler) ValidateRefreshToken(tokenString string) (string, strin
 			return nil, errors.New("Unexpected signing method in auth token")
 		}
 
-		verifyKey, err := jwt.ParseRSAPublicKeyFromPEM([]byte(auth.Config.RefreshTokenPrivateKey))
+		verifyKey, err := jwt.ParseRSAPublicKeyFromPEM([]byte(auth.Config.RefreshTokenPublicKey))
 		if err != nil {
 			auth.Logger.Error("unable to parse public key", zap.Error(err))
 			return nil, err
@@ -249,5 +255,5 @@ func (auth *AuthHandler) ValidateRefreshToken(tokenString string) (string, strin
 		auth.Logger.Error("could not extract claims from token")
 		return "", "", errors.New("invalid token: authentication failed")
 	}
-	return claims.AccountID, claims.CustomKey, nil
+	return claims.AccountInfor, claims.CustomKey, nil
 }
