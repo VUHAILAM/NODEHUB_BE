@@ -39,7 +39,6 @@ func (g *GinDependencies) InitGinEngine(config *config.Config) *gin.Engine {
 	// authen
 	nodehub.GET("/health", Health)
 	authenCommon := nodehub.Group("/account")
-	authenCandidate := nodehub.Group("/blog").Group("/skill")
 	authenCommon.POST("/login", g.AccountSerializer.Login)
 	authenCommon.POST("/logout", g.AccountSerializer.Logout)
 	authenCommon.POST("/register", g.AccountSerializer.Register)
@@ -50,18 +49,21 @@ func (g *GinDependencies) InitGinEngine(config *config.Config) *gin.Engine {
 	authenCommon.Use(middlewares.AuthorizationMiddleware(g.Auth, 1)).PUT("/change-password", g.AccountSerializer.ChangePassword)
 	authenCommon.Use(middlewares.MiddlewareValidateRefreshToken(g.Auth)).GET("/access-token", g.AccountSerializer.GetAccessToken)
 	// blog
-	nodehub.POST("/blog/getList", g.BlogSerializer.Getlist)
-	nodehub.POST("/blog/createBlog", g.BlogSerializer.CreateBlog)
-	nodehub.POST("/blog/updateBlog", g.BlogSerializer.UpdateBlog)
+	blogCtl := nodehub.Group("/blog").Use(middlewares.AuthorizationMiddleware(g.Auth, 1))
+	blogCtl.GET("/getList", g.BlogSerializer.Getlist)
+	blogCtl.POST("/createBlog", g.BlogSerializer.CreateBlog)
+	blogCtl.PUT("/updateBlog", g.BlogSerializer.UpdateBlog)
 	// skill
-	nodehub.POST("/skill/createSkill", g.SkillSerializer.CreateSkill)
-	nodehub.POST("/skill/updateSkill", g.SkillSerializer.UpdateSkill)
-	nodehub.POST("/skill/getListSkill", g.SkillSerializer.GetlistSkill)
+	skillCtl := nodehub.Group("/skill").Use(middlewares.AuthorizationMiddleware(g.Auth, 1))
+	skillCtl.POST("/createSkill", g.SkillSerializer.CreateSkill)
+	skillCtl.PUT("/updateSkill", g.SkillSerializer.UpdateSkill)
+	skillCtl.GET("/getListSkill", g.SkillSerializer.GetlistSkill)
 	// category
-	nodehub.POST("/category/createCategory", g.CategorySerializer.CreateCategory)
-	nodehub.POST("/category/updateCategory", g.CategorySerializer.UpdateCategory)
-	nodehub.POST("/category/getListCategoryPaging", g.CategorySerializer.GetListCategoryPaging)
-	nodehub.GET("/category/getAllCategory", g.CategorySerializer.GetAllCategory)
+	categoryCtl := nodehub.Group("/category").Use(middlewares.AuthorizationMiddleware(g.Auth, 1))
+	categoryCtl.POST("/createCategory", g.CategorySerializer.CreateCategory)
+	categoryCtl.PUT("/updateCategory", g.CategorySerializer.UpdateCategory)
+	categoryCtl.GET("/getListCategoryPaging", g.CategorySerializer.GetListCategoryPaging)
+	categoryCtl.GET("/getAllCategory", g.CategorySerializer.GetAllCategory)
 
 	return engine
 }
