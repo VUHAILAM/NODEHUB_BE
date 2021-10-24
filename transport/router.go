@@ -46,20 +46,20 @@ func (g *GinDependencies) InitGinEngine(config *config.Config) *gin.Engine {
 	authenCommon.PUT("/reset-password", g.AccountSerializer.ResetPassword)
 	authenCommon.PUT("/verify-email", g.AccountSerializer.VerifyEmail)
 
-	authenCommon.Use(middlewares.AuthorizationMiddleware(g.Auth, 1)).PUT("/change-password", g.AccountSerializer.ChangePassword)
+	authenCommon.Use(middlewares.AuthorizationMiddleware(g.Auth, auth.UserRole)).PUT("/change-password", g.AccountSerializer.ChangePassword)
 	authenCommon.Use(middlewares.MiddlewareValidateRefreshToken(g.Auth)).GET("/access-token", g.AccountSerializer.GetAccessToken)
 	// blog
-	blogCtl := nodehub.Group("/blog").Use(middlewares.AuthorizationMiddleware(g.Auth, 1))
+	blogCtl := nodehub.Group("/blog").Use(middlewares.AuthorizationMiddleware(g.Auth, auth.UserRole))
 	blogCtl.GET("/getList", g.BlogSerializer.Getlist)
 	blogCtl.POST("/createBlog", g.BlogSerializer.CreateBlog)
 	blogCtl.PUT("/updateBlog", g.BlogSerializer.UpdateBlog)
 	// skill
-	skillCtl := nodehub.Group("/skill").Use(middlewares.AuthorizationMiddleware(g.Auth, 1))
+	skillCtl := nodehub.Group("/skill").Use(middlewares.AuthorizationMiddleware(g.Auth, auth.UserRole))
 	skillCtl.POST("/createSkill", g.SkillSerializer.CreateSkill)
 	skillCtl.PUT("/updateSkill", g.SkillSerializer.UpdateSkill)
 	skillCtl.GET("/getListSkill", g.SkillSerializer.GetlistSkill)
 	// category
-	categoryCtl := nodehub.Group("/category").Use(middlewares.AuthorizationMiddleware(g.Auth, 1))
+	categoryCtl := nodehub.Group("/category").Use(middlewares.AuthorizationMiddleware(g.Auth, auth.UserRole))
 	categoryCtl.POST("/createCategory", g.CategorySerializer.CreateCategory)
 	categoryCtl.PUT("/updateCategory", g.CategorySerializer.UpdateCategory)
 	categoryCtl.GET("/getListCategoryPaging", g.CategorySerializer.GetListCategoryPaging)

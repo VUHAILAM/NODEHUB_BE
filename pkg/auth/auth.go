@@ -22,6 +22,13 @@ const (
 	VerificationDataKey = "verification_data_key"
 )
 
+const (
+	UserRole    = 1
+	AdminRole   = 2
+	CompanyRole = 3
+	CommonRole  = 0
+)
+
 type AuthHandler struct {
 	Logger *zap.Logger
 	Config *config.Config

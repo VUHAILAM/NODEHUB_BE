@@ -34,7 +34,7 @@ func AuthorizationMiddleware(authHandler *auth.AuthHandler, role int64) gin.Hand
 		err = json.Unmarshal([]byte(accountInfor), &account)
 		roleAccount := account.Type
 
-		if roleAccount != role {
+		if roleAccount != role && role != auth.CommonRole {
 			zap.L().Error("unauthorized account error", zap.Error(err))
 			abortUnauthorizedRequest(ctx, err)
 			return
