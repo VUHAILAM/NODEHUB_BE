@@ -2,6 +2,7 @@ package middlewares
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strings"
 
@@ -21,8 +22,8 @@ const (
 )
 
 func AuthorizationMiddleware(authHandler *auth.AuthHandler, role int64) gin.HandlerFunc {
-
 	return func(ctx *gin.Context) {
+		zap.L().Info("Middleware Access Token")
 		jwt := extractToken(ctx)
 		accountInfor, err := authHandler.ValidateAccessToken(jwt)
 		if err != nil {
@@ -52,6 +53,7 @@ func AuthorizationMiddleware(authHandler *auth.AuthHandler, role int64) gin.Hand
 
 func MiddlewareValidateRefreshToken(authHandle *auth.AuthHandler) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
+		zap.L().Info("Middleware Refresh Token")
 		jwt := extractToken(ctx)
 		accountID, customKey, err := authHandle.ValidateRefreshToken(jwt)
 		if err != nil {
@@ -59,8 +61,13 @@ func MiddlewareValidateRefreshToken(authHandle *auth.AuthHandler) gin.HandlerFun
 			abortUnauthorizedRequest(ctx, err)
 			return
 		}
-
-		ctx.Set(auth.AccountIDKey, accountID)
+		account := models.Account{}
+		err = json.Unmarshal([]byte(accountID), &account)
+		if err != nil {
+			abortUnauthorizedRequest(ctx, err)
+		}
+		fmt.Println(account)
+		ctx.Set(auth.AccountKey, account)
 		ctx.Set(auth.VerificationDataKey, customKey)
 	}
 }

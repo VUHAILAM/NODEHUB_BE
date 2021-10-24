@@ -1,6 +1,7 @@
 package email
 
 import (
+	"github.com/pkg/errors"
 	"github.com/sendgrid/sendgrid-go"
 	"github.com/sendgrid/sendgrid-go/helpers/mail"
 	"gitlab.com/hieuxeko19991/job4e_be/cmd/config"
@@ -35,11 +36,11 @@ func NewSGMailService(logger *zap.Logger, conf *config.Config) *SGMailService {
 func (ms *SGMailService) CreateMail(mailReq *models.Mail) []byte {
 	m := mail.NewV3Mail()
 
-	from := mail.NewEmail("Job4e", mailReq.From)
+	from := mail.NewEmail("NodeHub", mailReq.From)
 	m.SetFrom(from)
-
+	m.Subject = mailReq.Subject
 	if mailReq.Mtype == MailConfirmation {
-		m.AddContent()
+		m.SetTemplateID(ms.Configs.MailVerifTemplateID)
 	} else if mailReq.Mtype == PassReset {
 		m.SetTemplateID(ms.Configs.PassResetTemplateID)
 	}
@@ -68,6 +69,10 @@ func (ms *SGMailService) SendMail(mailReq *models.Mail) error {
 	if err != nil {
 		ms.Logger.Error("unable to send mail", zap.Error(err))
 		return err
+	}
+	if !(response.StatusCode >= 200 && response.StatusCode < 300) {
+		ms.Logger.Error("Mail sent failed")
+		return errors.New("Request send mail failed: " + response.Body)
 	}
 	ms.Logger.Info("mail sent successfully", zap.Reflect("sent status code", response.StatusCode))
 	return nil

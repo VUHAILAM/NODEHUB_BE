@@ -168,15 +168,15 @@ func (as *AccountSerializer) ResetPassword(ginCtx *gin.Context) {
 
 func (as *AccountSerializer) GetAccessToken(ginCtx *gin.Context) {
 	ctx := ginCtx.Request.Context()
-	accountID, ok := ginCtx.Get(auth.AccountIDKey)
+	acc, ok := ginCtx.Get(auth.AccountKey)
 	if !ok {
-		as.Logger.Error("Can not get account id from context")
+		as.Logger.Error("Can not get account infor from context")
 		ginx.BuildErrorResponse(ginCtx, errors.New("Can not get account infor from context"), gin.H{
 			"message": "Can not get account infor from context",
 		})
 		return
 	}
-
+	as.Logger.Info("acc", zap.Reflect("acc", acc))
 	customKey, ok := ginCtx.Get(auth.VerificationDataKey)
 	if !ok {
 		as.Logger.Error("Can not get customKey from context")
@@ -185,7 +185,9 @@ func (as *AccountSerializer) GetAccessToken(ginCtx *gin.Context) {
 		})
 		return
 	}
-	accessToken, err := as.accountService.GetAccessToken(ctx, accountID.(string), customKey.(string))
+	id := acc.(models.Account).Id
+	as.Logger.Info("id", zap.Reflect("id", id))
+	accessToken, err := as.accountService.GetAccessToken(ctx, id, customKey.(string))
 	if err != nil {
 		as.Logger.Error("Can not get access token", zap.Error(err))
 		ginx.BuildErrorResponse(ginCtx, err, gin.H{
