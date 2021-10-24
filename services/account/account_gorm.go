@@ -9,7 +9,10 @@ import (
 	"gorm.io/gorm"
 )
 
-const tableAccount = "account"
+const (
+	tableSetting = "setting"
+	tableAccount = "account"
+)
 
 type AccountGorm struct {
 	db     *gorm.DB
@@ -36,7 +39,7 @@ func (g *AccountGorm) Create(ctx context.Context, account *models.Account) error
 func (g *AccountGorm) GetAccountByEmail(ctx context.Context, email string) (*models.Account, error) {
 	db := g.db.WithContext(ctx)
 	acc := models.Account{}
-	err := db.Table(tableAccount).Where("email=?", email).First(&acc).Error
+	err := db.Table(tableAccount).Joins("JOIN "+tableSetting+" ON setting.setting_id = account.type").Where("account.email=?&&setting.type=?", email, "role").First(&acc).Error
 	if err != nil {
 		g.logger.Error("AccountGorm: Get account error", zap.Error(err))
 		return nil, err
@@ -48,7 +51,7 @@ func (g *AccountGorm) GetAccountByEmail(ctx context.Context, email string) (*mod
 func (g *AccountGorm) GetAccountByID(ctx context.Context, id string) (*models.Account, error) {
 	db := g.db.WithContext(ctx)
 	acc := models.Account{}
-	err := db.Table(tableAccount).Where("id=?", id).First(&acc).Error
+	err := db.Table(tableAccount).Joins("JOIN "+tableSetting+" ON setting.setting_id = account.type").Where("account.id=?&&setting.type=?", id, "role").First(&acc).Error
 	if err != nil {
 		g.logger.Error("AccountGorm: Get account error", zap.Error(err))
 		return nil, err
