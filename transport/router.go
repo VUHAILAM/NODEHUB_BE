@@ -12,15 +12,20 @@ import (
 
 	"github.com/gin-contrib/cors"
 
-	"gitlab.com/hieuxeko19991/job4e_be/endpoints/account"
-
 	"github.com/gin-gonic/gin"
+	"gitlab.com/hieuxeko19991/job4e_be/endpoints/account"
+	"gitlab.com/hieuxeko19991/job4e_be/endpoints/blog"
+	"gitlab.com/hieuxeko19991/job4e_be/endpoints/category"
+	"gitlab.com/hieuxeko19991/job4e_be/endpoints/skill"
 	"gitlab.com/hieuxeko19991/job4e_be/pkg/ginx"
 )
 
 type GinDependencies struct {
-	AccountSerializer *account.AccountSerializer
-	Auth              *auth.AuthHandler
+	AccountSerializer  *account.AccountSerializer
+	Auth               *auth.AuthHandler
+	BlogSerializer     *blog.BlogSerializer
+	SkillSerializer    *skill.SkillSerializer
+	CategorySerializer *category.CategorySerializer
 }
 
 func (g *GinDependencies) InitGinEngine(config *config.Config) *gin.Engine {
@@ -31,17 +36,33 @@ func (g *GinDependencies) InitGinEngine(config *config.Config) *gin.Engine {
 	corsConfig.AllowMethods = []string{"GET", "POST", "PATCH", "DELETE"}
 	corsConfig.AllowOrigins = []string{config.Origin}
 	nodehub.Use(cors.New(corsConfig))
+	// authen
 	nodehub.GET("/health", Health)
-	authen := nodehub.Group("/account")
-	authen.POST("/login", g.AccountSerializer.Login)
-	authen.POST("/logout", g.AccountSerializer.Logout)
-	authen.POST("/register", g.AccountSerializer.Register)
-	authen.POST("/forgot-password", g.AccountSerializer.ForgotPassword)
-	authen.PUT("/reset-password", g.AccountSerializer.ResetPassword)
-	authen.PUT("/verify-email", g.AccountSerializer.VerifyEmail)
+	authenCommon := nodehub.Group("/account")
+	authenCandidate := nodehub.Group("/blog").Group("/skill")
+	authenCommon.POST("/login", g.AccountSerializer.Login)
+	authenCommon.POST("/logout", g.AccountSerializer.Logout)
+	authenCommon.POST("/register", g.AccountSerializer.Register)
+	authenCommon.POST("/forgot-password", g.AccountSerializer.ForgotPassword)
+	authenCommon.PUT("/reset-password", g.AccountSerializer.ResetPassword)
+	authenCommon.PUT("/verify-email", g.AccountSerializer.VerifyEmail)
 
-	authen.Use(middlewares.AuthorizationMiddleware(g.Auth)).PUT("/change-password", g.AccountSerializer.ChangePassword)
-	authen.Use(middlewares.MiddlewareValidateRefreshToken(g.Auth)).GET("/access-token", g.AccountSerializer.GetAccessToken)
+	authenCommon.Use(middlewares.AuthorizationMiddleware(g.Auth, 1)).PUT("/change-password", g.AccountSerializer.ChangePassword)
+	authenCommon.Use(middlewares.MiddlewareValidateRefreshToken(g.Auth)).GET("/access-token", g.AccountSerializer.GetAccessToken)
+	// blog
+	nodehub.POST("/blog/getList", g.BlogSerializer.Getlist)
+	nodehub.POST("/blog/createBlog", g.BlogSerializer.CreateBlog)
+	nodehub.POST("/blog/updateBlog", g.BlogSerializer.UpdateBlog)
+	// skill
+	nodehub.POST("/skill/createSkill", g.SkillSerializer.CreateSkill)
+	nodehub.POST("/skill/updateSkill", g.SkillSerializer.UpdateSkill)
+	nodehub.POST("/skill/getListSkill", g.SkillSerializer.GetlistSkill)
+	// category
+	nodehub.POST("/category/createCategory", g.CategorySerializer.CreateCategory)
+	nodehub.POST("/category/updateCategory", g.CategorySerializer.UpdateCategory)
+	nodehub.POST("/category/getListCategoryPaging", g.CategorySerializer.GetListCategoryPaging)
+	nodehub.GET("/category/getAllCategory", g.CategorySerializer.GetAllCategory)
+
 	return engine
 }
 

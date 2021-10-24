@@ -20,7 +20,8 @@ const (
 	headerAuthorization   = "Authorization"
 )
 
-func AuthorizationMiddleware(authHandler *auth.AuthHandler) gin.HandlerFunc {
+func AuthorizationMiddleware(authHandler *auth.AuthHandler, role int64) gin.HandlerFunc {
+
 	return func(ctx *gin.Context) {
 		jwt := extractToken(ctx)
 		accountInfor, err := authHandler.ValidateAccessToken(jwt)
@@ -31,12 +32,20 @@ func AuthorizationMiddleware(authHandler *auth.AuthHandler) gin.HandlerFunc {
 		}
 		account := models.Account{}
 		err = json.Unmarshal([]byte(accountInfor), &account)
+		roleAccount := account.Type
+
+		if roleAccount != role {
+			zap.L().Error("unauthorized account error", zap.Error(err))
+			abortUnauthorizedRequest(ctx, err)
+			return
+		}
+
 		if err != nil {
 			zap.L().Error("Unmarshal account error", zap.Error(err))
 			abortUnauthorizedRequest(ctx, err)
 			return
 		}
-		ctx.Set(auth.AccountIDKey, account)
+		ctx.Set(auth.AccountKey, account)
 		ctx.Next()
 	}
 }
