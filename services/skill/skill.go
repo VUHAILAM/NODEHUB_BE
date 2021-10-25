@@ -11,12 +11,14 @@ type ISkillService interface {
 	CreateSkill(ctx context.Context, skill *models.RequestCreateSkill) error
 	UpdateSkill(ctx context.Context, skill *models.RequestCreateSkill, skill_id int64) error
 	GetListSkill(ctx context.Context, name string, page int64, size int64) (*models.ResponsetListSkill, error)
+	GetAll(ctx context.Context, name string) ([]models.Skill, error)
 }
 
 type ISkillDatabase interface {
 	Create(ctx context.Context, skill *models.Skill) error
 	Update(ctx context.Context, skill *models.RequestUpdateSkill, Blog_id int64) error
 	Get(ctx context.Context, name string, page int64, size int64) (*models.ResponsetListSkill, error)
+	GetAll(ctx context.Context, name string) ([]models.Skill, error)
 }
 
 type Skill struct {
@@ -65,6 +67,14 @@ func (s *Skill) UpdateSkill(ctx context.Context, skill *models.RequestCreateSkil
 
 func (s *Skill) GetListSkill(ctx context.Context, name string, page int64, size int64) (*models.ResponsetListSkill, error) {
 	acc, err := s.SkillGorm.Get(ctx, name, page, size)
+	if err != nil {
+		return nil, err
+	}
+	return acc, nil
+}
+
+func (s *Skill) GetAll(ctx context.Context, name string) ([]models.Skill, error) {
+	acc, err := s.SkillGorm.GetAll(ctx, name)
 	if err != nil {
 		return nil, err
 	}
