@@ -100,3 +100,21 @@ func (s *SkillSerializer) GetlistSkill(ginCtx *gin.Context) {
 		"data": data,
 	})
 }
+
+/*Get All SKill*/
+func (s *SkillSerializer) GetAll(ginCtx *gin.Context) {
+	ctx := ginCtx.Request.Context()
+	req := ginCtx.Query("name")
+	data, err := s.skillService.GetAll(ctx, req)
+	if err != nil {
+		s.Logger.Error("getAllSkill error", zap.Error(err))
+		ginx.BuildErrorResponse(ginCtx, err, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	ginx.BuildSuccessResponse(ginCtx, http.StatusAccepted, gin.H{
+		"data": data,
+	})
+}

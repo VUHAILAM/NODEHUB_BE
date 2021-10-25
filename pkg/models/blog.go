@@ -33,11 +33,23 @@ type RequestUpdateBlog struct {
 	Status      bool   `json:"status"`
 }
 
+type ResponseBlog struct {
+	Blog_id       int64     `json:"blog_id" gorm:"primaryKey"`
+	Category_name string    `json:"category_name"`
+	Title         string    `json:"title"`
+	Icon          string    `json:"icon"`
+	Excerpts      string    `json:"excerpts"`
+	Description   string    `json:"description"`
+	Status        bool      `json:"status"`
+	CreatedAt     time.Time `json:"created_at"`
+	UpdatedAt     time.Time `json:"updated_at"`
+}
+
 type ResponsetListBlog struct {
-	TotalBlog   int64   `json:"totalBlog"`
-	TotalPage   float64 `json:"totalPage"`
-	CurrentPage int64   `json:"currentPage"`
-	Data        []Blog  `json:"data"`
+	TotalBlog   int64          `json:"totalBlog"`
+	TotalPage   float64        `json:"totalPage"`
+	CurrentPage int64          `json:"currentPage"`
+	Data        []ResponseBlog `json:"data"`
 }
 
 type RequestGetListBlog struct {
