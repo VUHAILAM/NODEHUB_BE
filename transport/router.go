@@ -33,7 +33,7 @@ func (g *GinDependencies) InitGinEngine(config *config.Config) *gin.Engine {
 	engine.Use(gin.Recovery())
 	nodehub := engine.Group("/node-hub/api/v1")
 	corsConfig := cors.DefaultConfig()
-	corsConfig.AllowMethods = []string{"GET", "POST", "PATCH", "DELETE"}
+	corsConfig.AllowMethods = []string{"GET", "POST", "PATCH", "DELETE", "PUT"}
 	corsConfig.AllowOrigins = []string{config.Origin}
 	nodehub.Use(cors.New(corsConfig))
 	// authen
@@ -45,8 +45,8 @@ func (g *GinDependencies) InitGinEngine(config *config.Config) *gin.Engine {
 	authenCommon.POST("/forgot-password", g.AccountSerializer.ForgotPassword)
 	authenCommon.PUT("/reset-password", g.AccountSerializer.ResetPassword)
 	authenCommon.PUT("/verify-email", g.AccountSerializer.VerifyEmail)
-	authenCommon.Use(middlewares.AuthorizationMiddleware(g.Auth, auth.UserRole)).PUT("/change-password", g.AccountSerializer.ChangePassword)
 
+	authenCommon.Use(middlewares.AuthorizationMiddleware(g.Auth, auth.UserRole)).PUT("/change-password", g.AccountSerializer.ChangePassword)
 	accessToken := nodehub.Group("")
 	accessToken.Use(middlewares.MiddlewareValidateRefreshToken(g.Auth)).GET("/access-token", g.AccountSerializer.GetAccessToken)
 	// blog
