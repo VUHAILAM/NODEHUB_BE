@@ -39,23 +39,36 @@ func (g *AccountGorm) Create(ctx context.Context, account *models.Account) error
 func (g *AccountGorm) GetAccountByEmail(ctx context.Context, email string) (*models.Account, error) {
 	db := g.db.WithContext(ctx)
 	acc := models.Account{}
-	err := db.Table(tableAccount).Joins("JOIN "+tableSetting+" ON setting.setting_id = account.type").Where("account.email=?&&setting.type=?", email, "role").First(&acc).Error
+	err := db.Table(tableAccount).Where("email=?", email).First(&acc).Error
 	if err != nil {
 		g.logger.Error("AccountGorm: Get account error", zap.Error(err))
 		return nil, err
 	}
-
+	setting := models.Setting{}
+	err = db.Table(tableSetting).Where("setting_id=?", acc.Type).First(&setting).Error
+	if err != nil {
+		g.logger.Error("AccountGorm: Get setting error", zap.Error(err))
+		return nil, err
+	}
+	acc.RoleName = setting.Name
 	return &acc, nil
 }
 
 func (g *AccountGorm) GetAccountByID(ctx context.Context, id int64) (*models.Account, error) {
 	db := g.db.WithContext(ctx)
 	acc := models.Account{}
-	err := db.Table(tableAccount).Joins("JOIN "+tableSetting+" ON setting.setting_id = account.type").Where("account.id=?&&setting.type=?", id, "role").First(&acc).Error
+	err := db.Table(tableAccount).Where("id=?", id).First(&acc).Error
 	if err != nil {
 		g.logger.Error("AccountGorm: Get account error", zap.Error(err))
 		return nil, err
 	}
+	setting := models.Setting{}
+	err = db.Table(tableSetting).Where("setting_id=?", acc.Type).First(&setting).Error
+	if err != nil {
+		g.logger.Error("AccountGorm: Get setting error", zap.Error(err))
+		return nil, err
+	}
+	acc.RoleName = setting.Name
 	return &acc, nil
 }
 
