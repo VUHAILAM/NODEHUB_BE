@@ -8,13 +8,9 @@ WORKDIR /app
 
 COPY go.mod .
 
-COPY go.sum .
-
 RUN go mod download
 
 COPY . .
-
-ENV MYSQL_DSN="admin:13091999@tcp(nodehubdb.coghck9xckk7.ap-southeast-1.rds.amazonaws.com:3306)/nodehub?parseTime=true"
 
 RUN go build
 

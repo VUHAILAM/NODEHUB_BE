@@ -11,11 +11,11 @@ type Media struct {
 	UpdatedAt time.Time `json:"updated_at"`
 }
 
-// type RequestCreateSetting struct {
-// 	Setting_id int64  `json:"setting_id" gorm:"primaryKey"`
-// 	Type       string `json:"type"`
-// 	Name       string `json:"name"`
-// }
+type RequestCreateMedia struct {
+	Type   string `json:"type"`
+	Name   string `json:"name"`
+	Status bool   `json:"status"`
+}
 
 // type RequestUpdateSetting struct {
 // 	Type string `json:"type"`

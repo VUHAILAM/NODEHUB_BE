@@ -7,3 +7,8 @@ CREATE TABLE `setting`
     `updated_at`  datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY(`setting_id`)
 )
+
+INSERT INTO nodehub.setting (`type`, name)
+VALUES ('role', 'candidate'),
+('role', 'admin'),
+('role', 'recruiter')
