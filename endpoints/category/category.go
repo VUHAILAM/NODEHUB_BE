@@ -62,7 +62,7 @@ func (c *CategorySerializer) UpdateCategory(ginCtx *gin.Context) {
 		return
 	}
 
-	err = c.categoryService.UpdateCategory(ctx, &req, req.Setting_id)
+	err = c.categoryService.UpdateCategory(ctx, &req, req.SettingID)
 	if err != nil {
 		c.Logger.Error("Update Category error", zap.Error(err))
 		ginx.BuildErrorResponse(ginCtx, err, gin.H{

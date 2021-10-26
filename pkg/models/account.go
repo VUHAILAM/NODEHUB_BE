@@ -9,7 +9,7 @@ type Account struct {
 	TokenHash string    `json:"token_hash"`
 	Phone     string    `json:"phone"`
 	Type      int64     `json:"type"`
-	RoleName  string    `json:"name,omitempty" gorm:"-"`
+	RoleName  string    `json:"role_name,omitempty" gorm:"-"`
 	IsVerify  bool      `json:"is_verify"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
