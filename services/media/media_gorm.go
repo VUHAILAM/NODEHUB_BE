@@ -23,13 +23,13 @@ func NewMediaGorm(db *gorm.DB, logger *zap.Logger) *MediaGorm {
 	}
 }
 
-/*Create Category*/
+/*Create Media*/
 
 func (m *MediaGorm) Create(ctx context.Context, media *models.Media) error {
-	db := c.db.WithContext(ctx)
+	db := m.db.WithContext(ctx)
 	err := db.Table(tableAccount).Create(media).Error
 	if err != nil {
-		c.logger.Error("MediaGorm: Create media error", zap.Error(err))
+		m.logger.Error("MediaGorm: Create media error", zap.Error(err))
 		return err
 	}
 	return nil

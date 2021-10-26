@@ -16,6 +16,7 @@ import (
 	"gitlab.com/hieuxeko19991/job4e_be/endpoints/account"
 	"gitlab.com/hieuxeko19991/job4e_be/endpoints/blog"
 	"gitlab.com/hieuxeko19991/job4e_be/endpoints/category"
+	"gitlab.com/hieuxeko19991/job4e_be/endpoints/media"
 	"gitlab.com/hieuxeko19991/job4e_be/endpoints/skill"
 	"gitlab.com/hieuxeko19991/job4e_be/pkg/ginx"
 )
@@ -26,6 +27,7 @@ type GinDependencies struct {
 	BlogSerializer     *blog.BlogSerializer
 	SkillSerializer    *skill.SkillSerializer
 	CategorySerializer *category.CategorySerializer
+	MediaSerializer    *media.MediaSerializer
 }
 
 func (g *GinDependencies) InitGinEngine(config *config.Config) *gin.Engine {
@@ -46,19 +48,19 @@ func (g *GinDependencies) InitGinEngine(config *config.Config) *gin.Engine {
 	authenCommon.PUT("/reset-password", g.AccountSerializer.ResetPassword)
 	authenCommon.PUT("/verify-email", g.AccountSerializer.VerifyEmail)
 
-	authenCommon.Use(middlewares.AuthorizationMiddleware(g.Auth, auth.UserRole)).PUT("/change-password", g.AccountSerializer.ChangePassword)
+	authenCommon.Use(middlewares.AuthorizationMiddleware(g.Auth, auth.CommonRole)).PUT("/change-password", g.AccountSerializer.ChangePassword)
 	accessToken := nodehub.Group("")
 	accessToken.Use(middlewares.MiddlewareValidateRefreshToken(g.Auth)).GET("/access-token", g.AccountSerializer.GetAccessToken)
 	// blog
 	blogCtlAdmin := nodehub.Group("/private/blog").Use(middlewares.AuthorizationMiddleware(g.Auth, auth.AdminRole))
-	blogCtlUser := nodehub.Group("/public/blog").Use(middlewares.AuthorizationMiddleware(g.Auth, auth.UserRole))
+	blogCtlUser := nodehub.Group("/public/blog").Use(middlewares.AuthorizationMiddleware(g.Auth, auth.CommonRole))
 	blogCtlUser.POST("/getList", g.BlogSerializer.Getlist)
 	blogCtlAdmin.POST("/getList", g.BlogSerializer.Getlist)
 	blogCtlAdmin.POST("/createBlog", g.BlogSerializer.CreateBlog)
 	blogCtlAdmin.POST("/updateBlog", g.BlogSerializer.UpdateBlog)
 	// skill
 	skillCtlAdmin := nodehub.Group("/private/skill").Use(middlewares.AuthorizationMiddleware(g.Auth, auth.AdminRole))
-	skillCtlUser := nodehub.Group("/public/skill").Use(middlewares.AuthorizationMiddleware(g.Auth, auth.UserRole))
+	skillCtlUser := nodehub.Group("/public/skill").Use(middlewares.AuthorizationMiddleware(g.Auth, auth.CommonRole))
 	skillCtlUser.GET("/getAllSkill", g.SkillSerializer.GetAll)
 	skillCtlAdmin.POST("/createSkill", g.SkillSerializer.CreateSkill)
 	skillCtlAdmin.POST("/updateSkill", g.SkillSerializer.UpdateSkill)
@@ -69,6 +71,9 @@ func (g *GinDependencies) InitGinEngine(config *config.Config) *gin.Engine {
 	categoryCtlAdmin.POST("/updateCategory", g.CategorySerializer.UpdateCategory)
 	categoryCtlAdmin.POST("/getListCategoryPaging", g.CategorySerializer.GetListCategoryPaging)
 	categoryCtlAdmin.GET("/getAllCategory", g.CategorySerializer.GetAllCategory)
+	// media
+	mediaCtlAdmin := nodehub.Group("/private/media").Use(middlewares.AuthorizationMiddleware(g.Auth, auth.AdminRole))
+	mediaCtlAdmin.POST("/createMedia", g.MediaSerializer.CreateMedia)
 
 	return engine
 }

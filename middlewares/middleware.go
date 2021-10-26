@@ -34,10 +34,9 @@ func AuthorizationMiddleware(authHandler *auth.AuthHandler, role int64) gin.Hand
 		account := models.Account{}
 		err = json.Unmarshal([]byte(accountInfor), &account)
 		roleAccount := account.Type
-
-		if roleAccount != role && role != auth.CommonRole {
-			zap.L().Error("unauthorized account error", zap.Error(err))
-			abortUnauthorizedRequest(ctx, err)
+		if role != 0 && roleAccount != role {
+			zap.L().Error("unauthorized account error")
+			abortUnauthorized(ctx, "No Permision")
 			return
 		}
 
@@ -85,6 +84,14 @@ func abortUnauthorizedRequest(ctx *gin.Context, err error) {
 	ginx.BuildStandardResponse(ctx, http.StatusUnauthorized, nil, ginx.ResponseMeta{
 		Code:    errorCodeUnauthorized,
 		Message: err.Error(),
+	})
+	ctx.Abort()
+}
+
+func abortUnauthorized(ctx *gin.Context, err string) {
+	ginx.BuildStandardResponse(ctx, http.StatusUnauthorized, nil, ginx.ResponseMeta{
+		Code:    errorCodeUnauthorized,
+		Message: err,
 	})
 	ctx.Abort()
 }
