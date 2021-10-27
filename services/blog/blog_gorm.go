@@ -26,13 +26,13 @@ func NewBlogGorm(db *gorm.DB, logger *zap.Logger) *BlogGorm {
 
 func (g *BlogGorm) GetListBlog(ctx context.Context, title string, page int64, size int64) (*models.ResponsetListBlog, error) {
 	db := g.db.WithContext(ctx)
-	arr := []models.Blog{}
+	arr := []models.ResponseBlog{}
 	resutl := models.ResponsetListBlog{}
 	offset := (page - 1) * size
 	limit := size
 	var total int64
 	//search query
-	data, err := db.Raw(`SELECT blog_id, category_id, title, icon, description, excerpts, status, created_at, updated_at FROM nodehub.blog where  title like ? and status = 1 ORDER BY blog_id desc LIMIT ?, ?`, "%"+title+"%", offset, limit).Rows()
+	data, err := db.Raw(`SELECT b.blog_id, s.name as 'category_name', b.title, b.icon, b.excerpts, b.description, b.status, b.created_at, b.updated_at FROM nodehub.blog b INNER join setting s on b.category_id = s.setting_id  where  b.title like ? and b.status = 1 ORDER BY b.blog_id desc LIMIT ?, ?`, "%"+title+"%", offset, limit).Rows()
 	// count query
 	db.Raw(`SELECT count(*) FROM nodehub.blog where  title like ? and status = 1`, "%"+title+"%").Scan(&total)
 	if err != nil {

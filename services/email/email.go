@@ -61,7 +61,9 @@ func (ms *SGMailService) CreateMail(mailReq *models.Mail) []byte {
 }
 
 func (ms *SGMailService) SendMail(mailReq *models.Mail) error {
-	request := sendgrid.GetRequest(ms.Configs.SendGridApiKey, "/v3/mail/send", "https://api.sendgrid.com")
+	SENDGRID_API_KEY := config.LoadConfig("SENDGRID_API_KEY")
+
+	request := sendgrid.GetRequest(SENDGRID_API_KEY, "/v3/mail/send", "https://api.sendgrid.com")
 	request.Method = "POST"
 	var Body = ms.CreateMail(mailReq)
 	request.Body = Body

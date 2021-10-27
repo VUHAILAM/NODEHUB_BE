@@ -16,6 +16,7 @@ import (
 	"gitlab.com/hieuxeko19991/job4e_be/endpoints/account"
 	"gitlab.com/hieuxeko19991/job4e_be/endpoints/blog"
 	"gitlab.com/hieuxeko19991/job4e_be/endpoints/category"
+	"gitlab.com/hieuxeko19991/job4e_be/endpoints/media"
 	"gitlab.com/hieuxeko19991/job4e_be/endpoints/skill"
 	"gitlab.com/hieuxeko19991/job4e_be/pkg/ginx"
 )
@@ -26,6 +27,7 @@ type GinDependencies struct {
 	BlogSerializer     *blog.BlogSerializer
 	SkillSerializer    *skill.SkillSerializer
 	CategorySerializer *category.CategorySerializer
+	MediaSerializer    *media.MediaSerializer
 }
 
 func (g *GinDependencies) InitGinEngine(config *config.Config) *gin.Engine {
@@ -33,7 +35,7 @@ func (g *GinDependencies) InitGinEngine(config *config.Config) *gin.Engine {
 	engine.Use(gin.Recovery())
 	nodehub := engine.Group("/node-hub/api/v1")
 	corsConfig := cors.DefaultConfig()
-	corsConfig.AllowMethods = []string{"GET", "POST", "PATCH", "DELETE"}
+	corsConfig.AllowMethods = []string{"GET", "POST", "PATCH", "DELETE", "PUT"}
 	corsConfig.AllowOrigins = []string{config.Origin}
 	nodehub.Use(cors.New(corsConfig))
 	// authen
@@ -45,26 +47,33 @@ func (g *GinDependencies) InitGinEngine(config *config.Config) *gin.Engine {
 	authenCommon.POST("/forgot-password", g.AccountSerializer.ForgotPassword)
 	authenCommon.PUT("/reset-password", g.AccountSerializer.ResetPassword)
 	authenCommon.PUT("/verify-email", g.AccountSerializer.VerifyEmail)
-	authenCommon.Use(middlewares.AuthorizationMiddleware(g.Auth, auth.UserRole)).PUT("/change-password", g.AccountSerializer.ChangePassword)
 
+	authenCommon.Use(middlewares.AuthorizationMiddleware(g.Auth, auth.CommonRole)).PUT("/change-password", g.AccountSerializer.ChangePassword)
 	accessToken := nodehub.Group("")
 	accessToken.Use(middlewares.MiddlewareValidateRefreshToken(g.Auth)).GET("/access-token", g.AccountSerializer.GetAccessToken)
 	// blog
-	blogCtl := nodehub.Group("/blog").Use(middlewares.AuthorizationMiddleware(g.Auth, auth.UserRole))
-	blogCtl.GET("/getList", g.BlogSerializer.Getlist)
-	blogCtl.POST("/createBlog", g.BlogSerializer.CreateBlog)
-	blogCtl.PUT("/updateBlog", g.BlogSerializer.UpdateBlog)
+	blogCtlAdmin := nodehub.Group("/private/blog").Use(middlewares.AuthorizationMiddleware(g.Auth, auth.AdminRole))
+	blogCtlUser := nodehub.Group("/public/blog").Use(middlewares.AuthorizationMiddleware(g.Auth, auth.CommonRole))
+	blogCtlUser.POST("/getList", g.BlogSerializer.Getlist)
+	blogCtlAdmin.POST("/getList", g.BlogSerializer.Getlist)
+	blogCtlAdmin.POST("/createBlog", g.BlogSerializer.CreateBlog)
+	blogCtlAdmin.POST("/updateBlog", g.BlogSerializer.UpdateBlog)
 	// skill
-	skillCtl := nodehub.Group("/skill").Use(middlewares.AuthorizationMiddleware(g.Auth, auth.UserRole))
-	skillCtl.POST("/createSkill", g.SkillSerializer.CreateSkill)
-	skillCtl.PUT("/updateSkill", g.SkillSerializer.UpdateSkill)
-	skillCtl.GET("/getListSkill", g.SkillSerializer.GetlistSkill)
+	skillCtlAdmin := nodehub.Group("/private/skill").Use(middlewares.AuthorizationMiddleware(g.Auth, auth.AdminRole))
+	skillCtlUser := nodehub.Group("/public/skill").Use(middlewares.AuthorizationMiddleware(g.Auth, auth.CommonRole))
+	skillCtlUser.GET("/getAllSkill", g.SkillSerializer.GetAll)
+	skillCtlAdmin.POST("/createSkill", g.SkillSerializer.CreateSkill)
+	skillCtlAdmin.POST("/updateSkill", g.SkillSerializer.UpdateSkill)
+	skillCtlAdmin.POST("/getListSkill", g.SkillSerializer.GetlistSkill)
 	// category
-	categoryCtl := nodehub.Group("/category").Use(middlewares.AuthorizationMiddleware(g.Auth, auth.UserRole))
-	categoryCtl.POST("/createCategory", g.CategorySerializer.CreateCategory)
-	categoryCtl.PUT("/updateCategory", g.CategorySerializer.UpdateCategory)
-	categoryCtl.GET("/getListCategoryPaging", g.CategorySerializer.GetListCategoryPaging)
-	categoryCtl.GET("/getAllCategory", g.CategorySerializer.GetAllCategory)
+	categoryCtlAdmin := nodehub.Group("/private/category").Use(middlewares.AuthorizationMiddleware(g.Auth, auth.AdminRole))
+	categoryCtlAdmin.POST("/createCategory", g.CategorySerializer.CreateCategory)
+	categoryCtlAdmin.POST("/updateCategory", g.CategorySerializer.UpdateCategory)
+	categoryCtlAdmin.POST("/getListCategoryPaging", g.CategorySerializer.GetListCategoryPaging)
+	categoryCtlAdmin.GET("/getAllCategory", g.CategorySerializer.GetAllCategory)
+	// media
+	mediaCtlAdmin := nodehub.Group("/private/media").Use(middlewares.AuthorizationMiddleware(g.Auth, auth.AdminRole))
+	mediaCtlAdmin.POST("/createMedia", g.MediaSerializer.CreateMedia)
 
 	return engine
 }
