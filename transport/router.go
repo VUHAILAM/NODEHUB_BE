@@ -10,8 +10,6 @@ import (
 
 	"gitlab.com/hieuxeko19991/job4e_be/cmd/config"
 
-	"github.com/gin-contrib/cors"
-
 	"github.com/gin-gonic/gin"
 	"gitlab.com/hieuxeko19991/job4e_be/endpoints/account"
 	"gitlab.com/hieuxeko19991/job4e_be/endpoints/blog"
@@ -32,12 +30,8 @@ type GinDependencies struct {
 
 func (g *GinDependencies) InitGinEngine(config *config.Config) *gin.Engine {
 	engine := gin.Default()
-	engine.Use(gin.Recovery())
+	engine.Use(gin.Recovery()).Use(middlewares.CORSMiddleware(config))
 	nodehub := engine.Group("/node-hub/api/v1")
-	corsConfig := cors.DefaultConfig()
-	corsConfig.AllowMethods = []string{"GET", "POST", "PATCH", "DELETE", "PUT"}
-	corsConfig.AllowOrigins = []string{config.Origin}
-	nodehub.Use(cors.New(corsConfig))
 	// authen
 	nodehub.GET("/health", Health)
 	authenCommon := nodehub.Group("/account")
