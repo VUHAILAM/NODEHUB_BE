@@ -23,14 +23,12 @@ type ISkillDatabase interface {
 
 type Skill struct {
 	SkillGorm *SkillGorm
-	SecretKey string
 	Logger    *zap.Logger
 }
 
-func NewSkill(skillGorm *SkillGorm, secretKey string, logger *zap.Logger) *Skill {
+func NewSkill(skillGorm *SkillGorm, logger *zap.Logger) *Skill {
 	return &Skill{
 		SkillGorm: skillGorm,
-		SecretKey: secretKey,
 		Logger:    logger,
 	}
 }

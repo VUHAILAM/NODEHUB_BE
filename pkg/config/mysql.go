@@ -12,8 +12,8 @@ import (
 )
 
 type MySQLConfig struct {
-	DSN                   string `envconfig:"MYSQL_DSN" required:"true"`
-	ConnMaxLifeTimeSecond int64  `envconfig:"MYSQL_CONN_MAX_LIFE_TIME_SECOND" default:"300"`
+	DSN                   string `envconfig:"MYSQL_DSN" mapstructure:"mysql_dsn" required:"true"`
+	ConnMaxLifeTimeSecond int64  `envconfig:"MYSQL_CONN_MAX_LIFE_TIME_SECOND" mapstructure:"mysql_conn_max_life_time_second" default:"300"`
 	Logger                *zap.Logger
 }
 
