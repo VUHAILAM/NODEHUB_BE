@@ -14,6 +14,14 @@ const (
 	tableAccount = "account"
 )
 
+type IAccountDatabase interface {
+	Create(ctx context.Context, account *models.Account) (int64, error)
+	GetAccountByEmail(ctx context.Context, email string) (*models.Account, error)
+	GetAccountByID(ctx context.Context, id int64) (*models.Account, error)
+	UpdatePassword(ctx context.Context, email, password, tokenHash string) error
+	UpdateVerifyEmail(ctx context.Context, email string) error
+}
+
 type AccountGorm struct {
 	db     *gorm.DB
 	logger *zap.Logger
@@ -26,14 +34,14 @@ func NewAccountGorm(db *gorm.DB, logger *zap.Logger) *AccountGorm {
 	}
 }
 
-func (g *AccountGorm) Create(ctx context.Context, account *models.Account) error {
+func (g *AccountGorm) Create(ctx context.Context, account *models.Account) (int64, error) {
 	db := g.db.WithContext(ctx)
 	err := db.Table(tableAccount).Create(account).Error
 	if err != nil {
 		g.logger.Error("AccountGorm: Create account error", zap.Error(err))
-		return err
+		return 0, err
 	}
-	return nil
+	return account.Id, nil
 }
 
 func (g *AccountGorm) GetAccountByEmail(ctx context.Context, email string) (*models.Account, error) {
@@ -84,7 +92,7 @@ func (g *AccountGorm) UpdatePassword(ctx context.Context, email, password, token
 
 func (g *AccountGorm) UpdateVerifyEmail(ctx context.Context, email string) error {
 	db := g.db.WithContext(ctx)
-	err := db.Table(tableAccount).Where("email=?", email).Update("is_verify", true).Error
+	err := db.Table(tableAccount).Where("email=?", email).Update("status", true).Error
 	if err != nil {
 		g.logger.Error("AccountGorm: Update verify email error", zap.Error(err))
 		return err

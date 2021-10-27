@@ -31,14 +31,6 @@ type IAccountService interface {
 	VerifyEmail(ctx context.Context, email string) error
 }
 
-type IAccountDatabase interface {
-	Create(ctx context.Context, account *models.Account) error
-	GetAccountByEmail(ctx context.Context, email string) (*models.Account, error)
-	GetAccountByID(ctx context.Context, id int64) (*models.Account, error)
-	UpdatePassword(ctx context.Context, email, password, tokenHash string) error
-	UpdateVerifyEmail(ctx context.Context, email string) error
-}
-
 type Account struct {
 	AccountGorm *AccountGorm
 	Auth        *auth.AuthHandler
@@ -70,7 +62,7 @@ func (a *Account) Login(ctx context.Context, email string, password string) (str
 
 	a.Logger.Info("Account", zap.Reflect("account", acc))
 
-	if !acc.IsVerify {
+	if !acc.Status {
 		a.Logger.Error("Account not verified")
 		return "", "", errors.New("Account not verified")
 	}
@@ -134,11 +126,11 @@ func (a *Account) Register(ctx context.Context, account *models.RequestRegisterA
 		Email:     account.Email,
 		Phone:     account.Phone,
 		Password:  string(hashedPassword),
-		IsVerify:  false,
+		Status:    false,
 		TokenHash: utils.GenerateRandomString(15),
 		Type:      account.Type,
 	}
-	err = a.AccountGorm.Create(ctx, accountModels)
+	_, err = a.AccountGorm.Create(ctx, accountModels)
 	if err != nil {
 		return err
 	}
