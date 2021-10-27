@@ -23,14 +23,12 @@ type ICategoryDatabase interface {
 
 type Category struct {
 	CategoryGorm *CategoryGorm
-	SecretKey    string
 	Logger       *zap.Logger
 }
 
-func NewCategory(categoryGorm *CategoryGorm, secretKey string, logger *zap.Logger) *Category {
+func NewCategory(categoryGorm *CategoryGorm, logger *zap.Logger) *Category {
 	return &Category{
 		CategoryGorm: categoryGorm,
-		SecretKey:    secretKey,
 		Logger:       logger,
 	}
 }

@@ -153,8 +153,7 @@ func (a *Account) generateVerifyToken(ctx context.Context, email string) (string
 		},
 	}
 
-	ACCESS_TOKEN_PRIVATE_KEY := config.LoadConfig("ACCESS_TOKEN_PRIVATE_KEY")
-	signKey, err := jwt.ParseRSAPrivateKeyFromPEM([]byte(ACCESS_TOKEN_PRIVATE_KEY))
+	signKey, err := jwt.ParseRSAPrivateKeyFromPEM([]byte(a.Conf.AccessTokenPrivateKey))
 	if err != nil {
 		a.Logger.Error("unable to parse private key", zap.Error(err))
 		return "", errors.New("could not generate access token. please try again later")
@@ -214,8 +213,7 @@ func (a *Account) generateResetToken(ctx context.Context, email string) (string,
 			ExpiresAt: time.Now().Add(time.Minute * time.Duration(a.Conf.ResetPasswordExpiration)).Unix(),
 		},
 	}
-	ACCESS_TOKEN_PRIVATE_KEY := config.LoadConfig("ACCESS_TOKEN_PRIVATE_KEY")
-	signKey, err := jwt.ParseRSAPrivateKeyFromPEM([]byte(ACCESS_TOKEN_PRIVATE_KEY))
+	signKey, err := jwt.ParseRSAPrivateKeyFromPEM([]byte(a.Conf.AccessTokenPrivateKey))
 	if err != nil {
 		a.Logger.Error("unable to parse private key", zap.Error(err))
 		return "", errors.New("could not generate access token. please try again later")
@@ -259,9 +257,7 @@ func (a *Account) ResetPassword(ctx context.Context, token string, newPassword s
 			a.Logger.Error("Unexpected signing method in reset token")
 			return nil, errors.New("Unexpected signing method in reset token")
 		}
-		ACCESS_TOKEN_PUBLIC_KEY := config.LoadConfig("ACCESS_TOKEN_PUBLIC_KEY")
-
-		verifyKey, err := jwt.ParseRSAPublicKeyFromPEM([]byte(ACCESS_TOKEN_PUBLIC_KEY))
+		verifyKey, err := jwt.ParseRSAPublicKeyFromPEM([]byte(a.Conf.AccessTokenPublicKey))
 		if err != nil {
 			a.Logger.Error("unable to parse public key", zap.Error(err))
 			return nil, err

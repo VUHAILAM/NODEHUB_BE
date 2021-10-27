@@ -50,15 +50,15 @@ func InitServer() *Server {
 	accountSerializer := account2.NewAccountSerializer(accountService, logger)
 	//int blog service
 	blogGorm := blog.NewBlogGorm(gormDB, logger)
-	blogService := blog.NewBlog(blogGorm, conf.SecretKey, logger)
+	blogService := blog.NewBlog(blogGorm, logger)
 	blogSerializer := blog2.NewBlogSerializer(blogService, logger)
 	//int skill service
 	skillGorm := skill.NewSkillGorm(gormDB, logger)
-	skillService := skill.NewSkill(skillGorm, conf.SecretKey, logger)
+	skillService := skill.NewSkill(skillGorm, logger)
 	skillSerializer := skill2.NewSkillSerializer(skillService, logger)
 	//int category service
 	categoryGorm := category.NewCategoryGorm(gormDB, logger)
-	categoryService := category.NewCategory(categoryGorm, conf.SecretKey, logger)
+	categoryService := category.NewCategory(categoryGorm, logger)
 	categorySerializer := category2.NewCategorySerializer(categoryService, logger)
 
 	ginDepen := transport.GinDependencies{

@@ -141,8 +141,7 @@ func (auth *AuthHandler) GenerateRefreshToken(account *models.Account) (string, 
 			Issuer: "job4e.auth.service",
 		},
 	}
-	REFRESH_TOKEN_PRIVATE_KEY := config.LoadConfig("REFRESH_TOKEN_PRIVATE_KEY")
-	signKey, err := jwt.ParseRSAPrivateKeyFromPEM([]byte(REFRESH_TOKEN_PRIVATE_KEY))
+	signKey, err := jwt.ParseRSAPrivateKeyFromPEM([]byte(auth.Config.RefreshTokenPrivateKey))
 	if err != nil {
 		auth.Logger.Error("unable to parse private key", zap.Error(err))
 		return "", errors.New("could not generate refresh token. please try again later")
@@ -172,8 +171,7 @@ func (auth *AuthHandler) GenerateAccessToken(account *models.Account) (string, e
 			Issuer:    "job4e.auth.service",
 		},
 	}
-	ACCESS_TOKEN_PRIVATE_KEY := config.LoadConfig("ACCESS_TOKEN_PRIVATE_KEY")
-	signKey, err := jwt.ParseRSAPrivateKeyFromPEM([]byte(ACCESS_TOKEN_PRIVATE_KEY))
+	signKey, err := jwt.ParseRSAPrivateKeyFromPEM([]byte(auth.Config.AccessTokenPrivateKey))
 	if err != nil {
 		auth.Logger.Error("unable to parse private key", zap.Error(err))
 		return "", errors.New("could not generate access token. please try again later")
@@ -203,8 +201,7 @@ func (auth *AuthHandler) ValidateAccessToken(tokenString string) (string, error)
 			auth.Logger.Error("Unexpected signing method in auth token")
 			return nil, errors.New("Unexpected signing method in auth token")
 		}
-		ACCESS_TOKEN_PUBLIC_KEY := config.LoadConfig("ACCESS_TOKEN_PUBLIC_KEY")
-		verifyKey, err := jwt.ParseRSAPublicKeyFromPEM([]byte(ACCESS_TOKEN_PUBLIC_KEY))
+		verifyKey, err := jwt.ParseRSAPublicKeyFromPEM([]byte(auth.Config.AccessTokenPublicKey))
 		if err != nil {
 			auth.Logger.Error("unable to parse public key", zap.Error(err))
 			return nil, err
@@ -234,8 +231,7 @@ func (auth *AuthHandler) ValidateRefreshToken(tokenString string) (string, strin
 			auth.Logger.Error("Unexpected signing method in auth token")
 			return nil, errors.New("Unexpected signing method in auth token")
 		}
-		REFRESH_TOKEN_PUBLIC_KEY := config.LoadConfig("REFRESH_TOKEN_PUBLIC_KEY")
-		verifyKey, err := jwt.ParseRSAPublicKeyFromPEM([]byte(REFRESH_TOKEN_PUBLIC_KEY))
+		verifyKey, err := jwt.ParseRSAPublicKeyFromPEM([]byte(auth.Config.RefreshTokenPublicKey))
 		if err != nil {
 			auth.Logger.Error("unable to parse public key", zap.Error(err))
 			return nil, err

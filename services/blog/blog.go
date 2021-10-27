@@ -20,16 +20,14 @@ type IBlogDatabase interface {
 }
 
 type Blog struct {
-	BlogGorm  *BlogGorm
-	SecretKey string
-	Logger    *zap.Logger
+	BlogGorm *BlogGorm
+	Logger   *zap.Logger
 }
 
-func NewBlog(blogGorm *BlogGorm, secretKey string, logger *zap.Logger) *Blog {
+func NewBlog(blogGorm *BlogGorm, logger *zap.Logger) *Blog {
 	return &Blog{
-		BlogGorm:  blogGorm,
-		SecretKey: secretKey,
-		Logger:    logger,
+		BlogGorm: blogGorm,
+		Logger:   logger,
 	}
 }
 
