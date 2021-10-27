@@ -70,6 +70,7 @@ func MiddlewareValidateRefreshToken(authHandle *auth.AuthHandler) gin.HandlerFun
 		fmt.Println(account)
 		ctx.Set(auth.AccountKey, account)
 		ctx.Set(auth.VerificationDataKey, customKey)
+		ctx.Next()
 	}
 }
 
