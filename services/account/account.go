@@ -23,7 +23,7 @@ import (
 )
 
 type IAccountService interface {
-	Login(ctx context.Context, email string, password string) (string, string, error)
+	Login(ctx context.Context, email string, password string, loginType int64) (string, string, error)
 	Logout(ctx context.Context, email string) error
 	Register(ctx context.Context, account *models.RequestRegisterAccount) error
 	ForgotPassword(ctx context.Context, email string) error
@@ -53,7 +53,7 @@ func NewAccount(accountGorm *AccountGorm, recruiterGorm *recruiter.RecruiterGorm
 	}
 }
 
-func (a *Account) Login(ctx context.Context, email string, password string) (string, string, error) {
+func (a *Account) Login(ctx context.Context, email string, password string, loginType int64) (string, string, error) {
 	acc, err := a.AccountGorm.GetAccountByEmail(ctx, email)
 	if err != nil {
 		return "", "", err
@@ -64,7 +64,7 @@ func (a *Account) Login(ctx context.Context, email string, password string) (str
 		return "", "", errors.New("Account not found")
 	}
 
-	if acc.Type == auth.AdminRole {
+	if acc.Type != loginType {
 		a.Logger.Error("Account is not author")
 		return "", "", errors.New("Account is not author")
 	}

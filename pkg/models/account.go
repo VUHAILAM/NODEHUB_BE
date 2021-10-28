@@ -27,6 +27,7 @@ type RequestRegisterAccount struct {
 type RequestLogin struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
+	Type     int64  `json:"type"`
 }
 
 type RequestForgotPassword struct {
