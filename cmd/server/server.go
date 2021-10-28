@@ -3,6 +3,8 @@ package server
 import (
 	"net/http"
 
+	"gitlab.com/hieuxeko19991/job4e_be/services/recruiter"
+
 	"gitlab.com/hieuxeko19991/job4e_be/services/email"
 
 	"gitlab.com/hieuxeko19991/job4e_be/pkg/auth"
@@ -45,8 +47,9 @@ func InitServer() *Server {
 	authHandler := auth.NewAuthHandler(logger, conf)
 	mailService := email.NewSGMailService(logger, conf)
 	// init account service
+	recruiterGorm := recruiter.NewRecruiterGorm(gormDB, logger)
 	accountGorm := account.NewAccountGorm(gormDB, logger)
-	accountService := account.NewAccount(accountGorm, authHandler, conf, mailService, logger)
+	accountService := account.NewAccount(accountGorm, recruiterGorm, authHandler, conf, mailService, logger)
 	accountSerializer := account2.NewAccountSerializer(accountService, logger)
 	//int blog service
 	blogGorm := blog.NewBlogGorm(gormDB, logger)

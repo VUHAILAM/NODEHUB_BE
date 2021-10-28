@@ -3,23 +3,25 @@ package models
 import "time"
 
 type Account struct {
-	Id        int64     `json:"id" gorm:"primaryKey"`
-	Email     string    `json:"email" gorm:"unique,index"`
-	Password  string    `json:"password"`
-	TokenHash string    `json:"token_hash"`
-	Phone     string    `json:"phone"`
-	Type      int64     `json:"type"`
-	RoleName  string    `json:"role_name,omitempty" gorm:"-"`
-	IsVerify  bool      `json:"is_verify"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
+	Id            int64     `json:"id" gorm:"primaryKey"`
+	Email         string    `json:"email" gorm:"unique,index"`
+	Password      string    `json:"password"`
+	TokenHash     string    `json:"token_hash"`
+	Phone         string    `json:"phone"`
+	Type          int64     `json:"type"`
+	RoleName      string    `json:"role_name,omitempty" gorm:"-"`
+	Status        bool      `json:"status"`
+	InformationID int64     `json:"information_id"`
+	CreatedAt     time.Time `json:"created_at"`
+	UpdatedAt     time.Time `json:"updated_at"`
 }
 
 type RequestRegisterAccount struct {
-	Email    string `json:"email"`
-	Phone    string `json:"phone"`
-	Password string `json:"password"`
-	Type     int64  `json:"type"`
+	Email          string           `json:"email"`
+	Phone          string           `json:"phone"`
+	Password       string           `json:"password"`
+	Type           int64            `json:"type"`
+	RecruiterInfor RequestRecruiter `json:"recruiter_infor,omitempty"`
 }
 
 type RequestLogin struct {
