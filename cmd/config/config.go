@@ -6,7 +6,6 @@ import (
 	"github.com/pkg/errors"
 	"github.com/spf13/viper"
 	"gitlab.com/hieuxeko19991/job4e_be/pkg/config"
-	"go.uber.org/zap"
 )
 
 type HTTPConf struct {
@@ -54,12 +53,10 @@ func NewConfig() (*Config, error) {
 		return &cnf, nil
 	}
 	mapCnf := viper.AllSettings()
-	zap.L().Info("Map Conf", zap.Reflect("mapConf", mapCnf))
 	err = mapStructureDecodeWithTextUnmarshaler(mapCnf, &cnf)
 	if err != nil {
 		return nil, errors.Wrap(err, "load config from Mapstructure fail")
 	}
-	zap.L().Info("Config", zap.Reflect("cnf", cnf))
 	return &cnf, nil
 }
 

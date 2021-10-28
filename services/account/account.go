@@ -4,6 +4,8 @@ import (
 	"context"
 	"time"
 
+	"gitlab.com/hieuxeko19991/job4e_be/services/recruiter"
+
 	email2 "gitlab.com/hieuxeko19991/job4e_be/services/email"
 
 	"github.com/dgrijalva/jwt-go"
@@ -32,20 +34,22 @@ type IAccountService interface {
 }
 
 type Account struct {
-	AccountGorm *AccountGorm
-	Auth        *auth.AuthHandler
-	MailService *email2.SGMailService
-	Conf        *config.Config
-	Logger      *zap.Logger
+	AccountGorm   *AccountGorm
+	RecruiterGorm *recruiter.RecruiterGorm
+	Auth          *auth.AuthHandler
+	MailService   *email2.SGMailService
+	Conf          *config.Config
+	Logger        *zap.Logger
 }
 
-func NewAccount(accountGorm *AccountGorm, auth *auth.AuthHandler, conf *config.Config, mailSV *email2.SGMailService, logger *zap.Logger) *Account {
+func NewAccount(accountGorm *AccountGorm, recruiterGorm *recruiter.RecruiterGorm, auth *auth.AuthHandler, conf *config.Config, mailSV *email2.SGMailService, logger *zap.Logger) *Account {
 	return &Account{
-		AccountGorm: accountGorm,
-		Auth:        auth,
-		Conf:        conf,
-		MailService: mailSV,
-		Logger:      logger,
+		AccountGorm:   accountGorm,
+		RecruiterGorm: recruiterGorm,
+		Auth:          auth,
+		Conf:          conf,
+		MailService:   mailSV,
+		Logger:        logger,
 	}
 }
 
@@ -60,6 +64,10 @@ func (a *Account) Login(ctx context.Context, email string, password string) (str
 		return "", "", errors.New("Account not found")
 	}
 
+	if acc.Type == auth.AdminRole {
+		a.Logger.Error("Account is not author")
+		return "", "", errors.New("Account is not author")
+	}
 	a.Logger.Info("Account", zap.Reflect("account", acc))
 
 	if !acc.Status {
@@ -121,14 +129,37 @@ func (a *Account) Register(ctx context.Context, account *models.RequestRegisterA
 		a.Logger.Error("Cannot send email", zap.Error(err))
 		return err
 	}
+	var inforID int64 = 0
+	if account.Type == auth.RecruiterRole {
+		recruiterModel := &models.Recruiter{
+			AccountID:        0,
+			CompanyName:      account.RecruiterInfor.CompanyName,
+			Address:          account.RecruiterInfor.Address,
+			Avartar:          account.RecruiterInfor.Avartar,
+			Banner:           account.RecruiterInfor.Banner,
+			Phone:            account.RecruiterInfor.Phone,
+			Website:          account.RecruiterInfor.Website,
+			Description:      account.RecruiterInfor.Description,
+			EmployeeQuantity: account.RecruiterInfor.EmployeeQuantity,
+			ContacterName:    account.RecruiterInfor.ContacterName,
+			ContacterPhone:   account.RecruiterInfor.ContacterPhone,
+			Media:            account.RecruiterInfor.Media,
+		}
+		inforID, err = a.RecruiterGorm.Create(ctx, recruiterModel)
+		if err != nil {
+			a.Logger.Error("Create Recruiter error", zap.Error(err))
+			return err
+		}
+	}
 	hashedPassword, _ := bcrypt.GenerateFromPassword([]byte(account.Password), 8)
 	accountModels := &models.Account{
-		Email:     account.Email,
-		Phone:     account.Phone,
-		Password:  string(hashedPassword),
-		Status:    false,
-		TokenHash: utils.GenerateRandomString(15),
-		Type:      account.Type,
+		Email:         account.Email,
+		Phone:         account.Phone,
+		Password:      string(hashedPassword),
+		Status:        false,
+		TokenHash:     utils.GenerateRandomString(15),
+		Type:          account.Type,
+		InformationID: inforID,
 	}
 	_, err = a.AccountGorm.Create(ctx, accountModels)
 	if err != nil {

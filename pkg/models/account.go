@@ -10,18 +10,18 @@ type Account struct {
 	Phone         string    `json:"phone"`
 	Type          int64     `json:"type"`
 	RoleName      string    `json:"role_name,omitempty" gorm:"-"`
-	Status        bool      `json:"is_verify"`
+	Status        bool      `json:"status"`
 	InformationID int64     `json:"information_id"`
 	CreatedAt     time.Time `json:"created_at"`
 	UpdatedAt     time.Time `json:"updated_at"`
 }
 
 type RequestRegisterAccount struct {
-	Email        string           `json:"email"`
-	Phone        string           `json:"phone"`
-	Password     string           `json:"password"`
-	Type         int64            `json:"type"`
-	RecruiterReq RequestRecruiter `json:"recruiter_req,omitempty"`
+	Email          string           `json:"email"`
+	Phone          string           `json:"phone"`
+	Password       string           `json:"password"`
+	Type           int64            `json:"type"`
+	RecruiterInfor RequestRecruiter `json:"recruiter_infor,omitempty"`
 }
 
 type RequestLogin struct {
