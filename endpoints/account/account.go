@@ -41,7 +41,7 @@ func (as *AccountSerializer) Login(ginCtx *gin.Context) {
 		return
 	}
 	as.Logger.Info("Request", zap.Reflect("request", req))
-	accessToken, refreshToken, err := as.accountService.Login(ctx, req.Email, req.Password)
+	accessToken, refreshToken, err := as.accountService.Login(ctx, req.Email, req.Password, req.Type)
 	if err != nil {
 		as.Logger.Error("Login error", zap.Error(err))
 		ginx.BuildErrorResponse(ginCtx, err, gin.H{
