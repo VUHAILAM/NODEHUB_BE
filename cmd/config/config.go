@@ -6,6 +6,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/spf13/viper"
 	"gitlab.com/hieuxeko19991/job4e_be/pkg/config"
+	"gitlab.com/hieuxeko19991/job4e_be/pkg/elasticsearch"
 )
 
 type HTTPConf struct {
@@ -15,6 +16,8 @@ type HTTPConf struct {
 type Config struct {
 	HTTP  HTTPConf           `mapstructure:"http"`
 	MySQL config.MySQLConfig `mapstructure:"mysql"`
+
+	ESConfig elasticsearch.Config `mapstructure:"es"`
 
 	Origin string `envconfig:"ORIGIN" mapstructure:"origin" default:"*"`
 
