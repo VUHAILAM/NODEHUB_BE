@@ -1,7 +1,6 @@
 CREATE TABLE `recruiter`
 (
-    `recruiter_id` bigint(20) NOT NULL AUTO_INCREMENT,
-    `account_id` bigint(20) NOT NULL,
+    `recruiter_id` bigint(20) NOT NULL,
     `company_name` varchar(255) CHARSET utf8 NOT NULL,
     `address` varchar(255) CHARSET utf8 NOT NULL,
     `avartar` varchar(255) NOT NULL,

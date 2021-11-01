@@ -129,10 +129,24 @@ func (a *Account) Register(ctx context.Context, account *models.RequestRegisterA
 		a.Logger.Error("Cannot send email", zap.Error(err))
 		return err
 	}
-	var inforID int64 = 0
+
+	hashedPassword, _ := bcrypt.GenerateFromPassword([]byte(account.Password), 8)
+	accountModels := &models.Account{
+		Email:     account.Email,
+		Phone:     account.Phone,
+		Password:  string(hashedPassword),
+		Status:    false,
+		TokenHash: utils.GenerateRandomString(15),
+		Type:      account.Type,
+	}
+	accountID, err := a.AccountGorm.Create(ctx, accountModels)
+	if err != nil {
+		return err
+	}
+
 	if account.Type == auth.RecruiterRole {
 		recruiterModel := &models.Recruiter{
-			AccountID:        0,
+			RecruiterID:      accountID,
 			CompanyName:      account.RecruiterInfor.CompanyName,
 			Address:          account.RecruiterInfor.Address,
 			Avartar:          account.RecruiterInfor.Avartar,
@@ -145,25 +159,11 @@ func (a *Account) Register(ctx context.Context, account *models.RequestRegisterA
 			ContacterPhone:   account.RecruiterInfor.ContacterPhone,
 			Media:            account.RecruiterInfor.Media,
 		}
-		inforID, err = a.RecruiterGorm.Create(ctx, recruiterModel)
+		_, err = a.RecruiterGorm.Create(ctx, recruiterModel)
 		if err != nil {
 			a.Logger.Error("Create Recruiter error", zap.Error(err))
 			return err
 		}
-	}
-	hashedPassword, _ := bcrypt.GenerateFromPassword([]byte(account.Password), 8)
-	accountModels := &models.Account{
-		Email:         account.Email,
-		Phone:         account.Phone,
-		Password:      string(hashedPassword),
-		Status:        false,
-		TokenHash:     utils.GenerateRandomString(15),
-		Type:          account.Type,
-		InformationID: inforID,
-	}
-	_, err = a.AccountGorm.Create(ctx, accountModels)
-	if err != nil {
-		return err
 	}
 	return nil
 }
