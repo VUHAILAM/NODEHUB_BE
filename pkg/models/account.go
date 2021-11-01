@@ -3,17 +3,16 @@ package models
 import "time"
 
 type Account struct {
-	Id            int64     `json:"id" gorm:"primaryKey"`
-	Email         string    `json:"email" gorm:"unique,index"`
-	Password      string    `json:"password"`
-	TokenHash     string    `json:"token_hash"`
-	Phone         string    `json:"phone"`
-	Type          int64     `json:"type"`
-	RoleName      string    `json:"role_name,omitempty" gorm:"-"`
-	Status        bool      `json:"status"`
-	InformationID int64     `json:"information_id"`
-	CreatedAt     time.Time `json:"created_at"`
-	UpdatedAt     time.Time `json:"updated_at"`
+	Id        int64     `json:"id" gorm:"primaryKey"`
+	Email     string    `json:"email" gorm:"unique,index"`
+	Password  string    `json:"password"`
+	TokenHash string    `json:"token_hash"`
+	Phone     string    `json:"phone"`
+	Type      int64     `json:"type"`
+	RoleName  string    `json:"role_name,omitempty" gorm:"-"`
+	Status    bool      `json:"status"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
 }
 
 type RequestRegisterAccount struct {
