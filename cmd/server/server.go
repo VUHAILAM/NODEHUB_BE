@@ -3,6 +3,9 @@ package server
 import (
 	"net/http"
 
+	job_apply2 "gitlab.com/hieuxeko19991/job4e_be/endpoints/job_apply"
+	"gitlab.com/hieuxeko19991/job4e_be/services/job_apply"
+
 	job2 "gitlab.com/hieuxeko19991/job4e_be/endpoints/job"
 
 	"gitlab.com/hieuxeko19991/job4e_be/services/job"
@@ -80,6 +83,10 @@ func InitServer() *Server {
 	jobService := job.NewJobService(jobGorm, jobES, conf, logger)
 	jobSerializer := job2.NewJobSerializer(jobService, logger)
 
+	jobApplyGorm := job_apply.NewJobApplyGorm(gormDB, logger)
+	jobApplyService := job_apply.NewJobApplyService(jobApplyGorm, logger)
+	jobApplySerializer := job_apply2.NewJobApplySerializer(jobApplyService, logger)
+
 	ginDepen := transport.GinDependencies{
 		AccountSerializer:  accountSerializer,
 		Auth:               authHandler,
@@ -87,6 +94,7 @@ func InitServer() *Server {
 		SkillSerializer:    skillSerializer,
 		CategorySerializer: categorySerializer,
 		JobSerializer:      jobSerializer,
+		JobApplySerializer: jobApplySerializer,
 	}
 	ginHandler := ginDepen.InitGinEngine(conf)
 	return &Server{

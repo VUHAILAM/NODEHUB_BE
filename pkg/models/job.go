@@ -62,3 +62,21 @@ type CreateJobRequest struct {
 	HireDate    time.Time `json:"hire_date"`
 	Status      bool      `json:"status"`
 }
+
+type RequestGetJobDetail struct {
+	JobID int64 `json:"job_id"`
+}
+
+type RequestUpdateJob struct {
+	JobID       int64     `json:"job_id,omitempty" mapstructure:"job_id,omitempty"`
+	RecruiterID int64     `json:"recruiter_id,omitempty" mapstructure:"recruiter_id,omitempty"`
+	Title       string    `json:"title,omitempty" mapstructure:"title,omitempty"`
+	Description string    `json:"description,omitempty" mapstructure:"description,omitempty"`
+	SalaryRange string    `json:"salary_range,omitempty" mapstructure:"salary_range,omitempty"`
+	Quantity    int64     `json:"quantity,omitempty" mapstructure:"quantity,omitempty"`
+	Role        string    `json:"role,omitempty" mapstructure:"role,omitempty"`
+	Expereience string    `json:"expereience,omitempty" mapstructure:"expereience,omitempty"`
+	Location    string    `json:"location,omitempty" mapstructure:"location,omitempty"`
+	HireDate    time.Time `json:"hire_date,omitempty" mapstructure:"hire_date,omitempty"`
+	Status      bool      `json:"status,omitempty" mapstructure:"status,omitempty"`
+}

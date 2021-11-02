@@ -19,6 +19,8 @@ const (
 type IJobElasticsearch interface {
 	Create(ctx context.Context, documentID string, data map[string]interface{}) error
 	GetJobList(ctx context.Context, queries []*elastic.TermQuery) (*elastic.SearchResult, error)
+	GetJobByID(ctx context.Context, documentID string) (*models.Job, error)
+	Update(ctx context.Context, documentID string, data map[string]interface{}) error
 }
 
 type JobES struct {

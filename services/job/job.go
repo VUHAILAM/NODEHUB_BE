@@ -12,6 +12,8 @@ import (
 
 type IJobService interface {
 	CreateNewJob(ctx context.Context, job *models.CreateJobRequest) error
+	GetDetailJob(ctx context.Context, jobID int64) (*models.Job, error)
+	UpdateJob(ctx context.Context, updateRequest models.RequestUpdateJob) error
 }
 
 type Job struct {
@@ -52,7 +54,7 @@ func (j *Job) CreateNewJob(ctx context.Context, job *models.CreateJobRequest) er
 	jobData.JobID = jobID
 	esJob := models.ToESJobCreate(jobData)
 	jobInput := map[string]interface{}{}
-	err = mapStructureDecodeWithTextUnmarshaler(esJob, jobInput)
+	err = mapStructureDecodeWithTextUnmarshaler(esJob, &jobInput)
 	if err != nil {
 		j.Logger.Error("Cannot convert map to Job log struct", zap.Error(err))
 		return err
@@ -60,6 +62,42 @@ func (j *Job) CreateNewJob(ctx context.Context, job *models.CreateJobRequest) er
 	err = j.JobES.Create(ctx, string(jobID), jobInput)
 	if err != nil {
 		j.Logger.Error("Create job to ES error", zap.Error(err))
+		return err
+	}
+	return nil
+}
+
+func (j *Job) GetDetailJob(ctx context.Context, jobID int64) (*models.Job, error) {
+	job, err := j.JobES.GetJobByID(ctx, string(jobID))
+	if err != nil {
+		j.Logger.Error("Can not get Job from ES", zap.Error(err), zap.Int64("job_id", jobID))
+		job, err = j.JobGorm.Get(ctx, jobID)
+		if err != nil {
+			j.Logger.Error("Can not Get Job", zap.Error(err), zap.Int64("job_id", jobID))
+			return nil, err
+		}
+		return job, nil
+	}
+	return job, nil
+}
+
+func (j *Job) UpdateJob(ctx context.Context, updateRequest models.RequestUpdateJob) error {
+	updateData := map[string]interface{}{}
+	err := mapStructureDecodeWithTextUnmarshaler(updateRequest, &updateData)
+	if err != nil {
+		j.Logger.Error("Can not convert to map", zap.Error(err))
+		return err
+	}
+
+	err = j.JobES.Update(ctx, string(updateRequest.JobID), updateData)
+	if err != nil {
+		j.Logger.Error("Can not Update to ES", zap.Error(err))
+		return err
+	}
+
+	err = j.JobGorm.Update(ctx, updateRequest.JobID, updateData)
+	if err != nil {
+		j.Logger.Error("Can not Update to MySQL", zap.Error(err))
 		return err
 	}
 	return nil
