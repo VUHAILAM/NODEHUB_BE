@@ -9,4 +9,5 @@ CREATE TABLE `blog`
     `created_at`  datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `updated_at`  datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY(`blog_id`)
+    FOREIGN KEY (`category_id`) REFERENCES setting(`setting_id`)
 )

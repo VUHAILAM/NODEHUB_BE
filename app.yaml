@@ -1,7 +1,7 @@
 HTTP:
   HTTP_ADDR: "0.0.0.0:8080"
 MYSQL:
-  MYSQL_DSN: "root:root@tcp(localhost:3306)/nodehub?parseTime=true"
+  MYSQL_DSN: "hieunm27:13091999@tcp(mysqldb:3306)/nodehub?parseTime=true"
 ES:
   ES_CONNECTION_URLS: "http://localhost:9200/"
 ORIGIN: "*"

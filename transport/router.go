@@ -19,19 +19,21 @@ import (
 	"gitlab.com/hieuxeko19991/job4e_be/endpoints/blog"
 	"gitlab.com/hieuxeko19991/job4e_be/endpoints/category"
 	"gitlab.com/hieuxeko19991/job4e_be/endpoints/media"
+	"gitlab.com/hieuxeko19991/job4e_be/endpoints/recruiter"
 	"gitlab.com/hieuxeko19991/job4e_be/endpoints/skill"
 	"gitlab.com/hieuxeko19991/job4e_be/pkg/ginx"
 )
 
 type GinDependencies struct {
-	AccountSerializer  *account.AccountSerializer
-	Auth               *auth.AuthHandler
-	BlogSerializer     *blog.BlogSerializer
-	SkillSerializer    *skill.SkillSerializer
-	CategorySerializer *category.CategorySerializer
-	MediaSerializer    *media.MediaSerializer
-	JobSerializer      *job.JobSerializer
-	JobApplySerializer *job_apply.JobApplySerializer
+	AccountSerializer   *account.AccountSerializer
+	Auth                *auth.AuthHandler
+	BlogSerializer      *blog.BlogSerializer
+	SkillSerializer     *skill.SkillSerializer
+	CategorySerializer  *category.CategorySerializer
+	MediaSerializer     *media.MediaSerializer
+	JobSerializer       *job.JobSerializer
+	JobApplySerializer  *job_apply.JobApplySerializer
+	RecruiterSerializer *recruiter.RecruiterSerializer
 }
 
 func (g *GinDependencies) InitGinEngine(config *config.Config) *gin.Engine {
@@ -53,7 +55,7 @@ func (g *GinDependencies) InitGinEngine(config *config.Config) *gin.Engine {
 	accessToken.Use(middlewares.MiddlewareValidateRefreshToken(g.Auth)).GET("/access-token", g.AccountSerializer.GetAccessToken)
 	// blog
 	blogCtlAdmin := nodehub.Group("/private/blog").Use(middlewares.AuthorizationMiddleware(g.Auth, auth.AdminRole))
-	blogCtlUser := nodehub.Group("/public/blog").Use(middlewares.AuthorizationMiddleware(g.Auth, auth.CommonRole))
+	blogCtlUser := nodehub.Group("/public/blog")
 	blogCtlUser.POST("/getList", g.BlogSerializer.Getlist)
 	blogCtlAdmin.POST("/getList", g.BlogSerializer.Getlist)
 	blogCtlAdmin.POST("/createBlog", g.BlogSerializer.CreateBlog)
@@ -73,7 +75,18 @@ func (g *GinDependencies) InitGinEngine(config *config.Config) *gin.Engine {
 	categoryCtlAdmin.GET("/getAllCategory", g.CategorySerializer.GetAllCategory)
 	// media
 	mediaCtlAdmin := nodehub.Group("/private/media").Use(middlewares.AuthorizationMiddleware(g.Auth, auth.AdminRole))
+	mediaCtlUser := nodehub.Group("/public/media").Use(middlewares.AuthorizationMiddleware(g.Auth, auth.CommonRole))
 	mediaCtlAdmin.POST("/createMedia", g.MediaSerializer.CreateMedia)
+	mediaCtlAdmin.POST("/updateMedia", g.MediaSerializer.UpdateMedia)
+	mediaCtlAdmin.POST("/getListMediaPaging", g.MediaSerializer.GetListMediaPaging)
+	mediaCtlUser.GET("/getSlide", g.MediaSerializer.GetSlide)
+	//recruiter profile
+	recruiterProfile := nodehub.Group("/public/recruiter").Use(middlewares.AuthorizationMiddleware(g.Auth, auth.RecruiterRole))
+	//recruiterAdmin := nodehub.Group("/private/recruiter").Use(middlewares.AuthorizationMiddleware(g.Auth, auth.AdminRole))
+	recruiterProfile.GET("/getProfile", g.RecruiterSerializer.GetProfileRecruiter)
+	recruiterProfile.PUT("/updateProfile", g.RecruiterSerializer.UpdateProfile)
+	recruiterProfile.POST("/addRecruiterSkill", g.RecruiterSerializer.AddRecruiterSkill)
+	recruiterProfile.GET("/getRecruiterSkill", g.RecruiterSerializer.GetRecruiterSkill)
 
 	jobCtl := nodehub.Group("/job")
 	jobCtl.Use(middlewares.AuthorizationMiddleware(g.Auth, auth.CommonRole)).GET("/getJob", g.JobSerializer.GetDetailJob)

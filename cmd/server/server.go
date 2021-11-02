@@ -12,8 +12,6 @@ import (
 
 	"gitlab.com/hieuxeko19991/job4e_be/pkg/elasticsearch"
 
-	"gitlab.com/hieuxeko19991/job4e_be/services/recruiter"
-
 	"gitlab.com/hieuxeko19991/job4e_be/services/email"
 
 	"gitlab.com/hieuxeko19991/job4e_be/pkg/auth"
@@ -30,6 +28,12 @@ import (
 
 	category2 "gitlab.com/hieuxeko19991/job4e_be/endpoints/category"
 	"gitlab.com/hieuxeko19991/job4e_be/services/category"
+
+	media2 "gitlab.com/hieuxeko19991/job4e_be/endpoints/media"
+	"gitlab.com/hieuxeko19991/job4e_be/services/media"
+
+	recruiter2 "gitlab.com/hieuxeko19991/job4e_be/endpoints/recruiter"
+	"gitlab.com/hieuxeko19991/job4e_be/services/recruiter"
 
 	config2 "gitlab.com/hieuxeko19991/job4e_be/pkg/config"
 
@@ -77,6 +81,7 @@ func InitServer() *Server {
 	categoryGorm := category.NewCategoryGorm(gormDB, logger)
 	categoryService := category.NewCategory(categoryGorm, logger)
 	categorySerializer := category2.NewCategorySerializer(categoryService, logger)
+
 	// init job service
 	jobES := job.NewJobES(esClient, logger)
 	jobGorm := job.NewJobGorm(gormDB, logger)
@@ -87,14 +92,24 @@ func InitServer() *Server {
 	jobApplyService := job_apply.NewJobApplyService(jobApplyGorm, logger)
 	jobApplySerializer := job_apply2.NewJobApplySerializer(jobApplyService, logger)
 
+	//int media service
+	mediaGorm := media.NewMediaGorm(gormDB, logger)
+	mediaService := media.NewMediaCategory(mediaGorm, logger)
+	mediaSerializer := media2.NewMediaSerializer(mediaService, logger)
+	//int recruiter service
+	recruiterService := recruiter.NewRecruiterCategory(recruiterGorm, logger)
+	recruiterSerializer := recruiter2.NewRecruiterSerializer(recruiterService, logger)
+
 	ginDepen := transport.GinDependencies{
-		AccountSerializer:  accountSerializer,
-		Auth:               authHandler,
-		BlogSerializer:     blogSerializer,
-		SkillSerializer:    skillSerializer,
-		CategorySerializer: categorySerializer,
-		JobSerializer:      jobSerializer,
-		JobApplySerializer: jobApplySerializer,
+		AccountSerializer:   accountSerializer,
+		Auth:                authHandler,
+		BlogSerializer:      blogSerializer,
+		SkillSerializer:     skillSerializer,
+		CategorySerializer:  categorySerializer,
+		JobSerializer:       jobSerializer,
+		JobApplySerializer:  jobApplySerializer,
+		MediaSerializer:     mediaSerializer,
+		RecruiterSerializer: recruiterSerializer,
 	}
 	ginHandler := ginDepen.InitGinEngine(conf)
 	return &Server{
