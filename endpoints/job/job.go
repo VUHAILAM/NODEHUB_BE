@@ -100,3 +100,26 @@ func (s *JobSerializer) UpdateJob(ginCtx *gin.Context) {
 	}
 	ginx.BuildSuccessResponse(ginCtx, http.StatusAccepted, nil)
 }
+
+func (s *JobSerializer) GetAllJob(ginCtx *gin.Context) {
+	ctx := ginCtx.Request.Context()
+	req := models.RequestGetAllJob{}
+	err := json.NewDecoder(ginCtx.Request.Body).Decode(&req)
+	if err != nil {
+		s.Logger.Error("Parse request Get all Job error", zap.Error(err))
+		ginx.BuildErrorResponse(ginCtx, err, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	resp, err := s.JobService.GetAllJob(ctx, req)
+	if err != nil {
+		s.Logger.Error("Get all Job error", zap.Error(err))
+		ginx.BuildErrorResponse(ginCtx, err, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+	ginx.BuildSuccessResponse(ginCtx, http.StatusAccepted, resp)
+}

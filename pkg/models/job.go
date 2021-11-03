@@ -80,3 +80,13 @@ type RequestUpdateJob struct {
 	HireDate    time.Time `json:"hire_date,omitempty" mapstructure:"hire_date,omitempty"`
 	Status      bool      `json:"status,omitempty" mapstructure:"status,omitempty"`
 }
+
+type RequestGetAllJob struct {
+	Page int64 `json:"page"`
+	Size int64 `json:"size"`
+}
+
+type ResponseGetAllJob struct {
+	Total  int64 `json:"total"`
+	Result []Job `json:"result"`
+}

@@ -77,11 +77,15 @@ func (g *GinDependencies) InitGinEngine(config *config.Config) *gin.Engine {
 
 	jobCtl := nodehub.Group("/job")
 	jobCtl.Use(middlewares.AuthorizationMiddleware(g.Auth, auth.CommonRole)).GET("/getJob", g.JobSerializer.GetDetailJob)
+	jobCtl.Use(middlewares.AuthorizationMiddleware(g.Auth, auth.CommonRole)).GET("", g.JobSerializer.GetAllJob)
 	jobCtl.Use(middlewares.AuthorizationMiddleware(g.Auth, auth.RecruiterRole)).POST("/create", g.JobSerializer.Create)
 	jobCtl.Use(middlewares.AuthorizationMiddleware(g.Auth, auth.RecruiterRole)).PUT("/update", g.JobSerializer.UpdateJob)
 
-	applyCtl := nodehub.Group("/job-candidate").Use(middlewares.AuthorizationMiddleware(g.Auth, auth.CandidateRole))
-	applyCtl.POST("/apply", g.JobApplySerializer.Apply)
+	applyCtl := nodehub.Group("/job-candidate")
+	applyCtl.Use(middlewares.AuthorizationMiddleware(g.Auth, auth.CandidateRole)).POST("/apply", g.JobApplySerializer.Apply)
+	applyCtl.Use(middlewares.AuthorizationMiddleware(g.Auth, auth.RecruiterRole)).GET("/jobs", g.JobApplySerializer.GetJobAppliedByJobID)
+	applyCtl.Use(middlewares.AuthorizationMiddleware(g.Auth, auth.CandidateRole)).GET("/candidate", g.JobApplySerializer.GetJobAppliedByCandidateID)
+
 	return engine
 }
 

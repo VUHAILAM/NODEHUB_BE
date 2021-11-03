@@ -14,6 +14,7 @@ type IJobService interface {
 	CreateNewJob(ctx context.Context, job *models.CreateJobRequest) error
 	GetDetailJob(ctx context.Context, jobID int64) (*models.Job, error)
 	UpdateJob(ctx context.Context, updateRequest models.RequestUpdateJob) error
+	GetAllJob(ctx context.Context, getRequest models.RequestGetAllJob) (*models.ResponseGetAllJob, error)
 }
 
 type Job struct {
@@ -101,6 +102,20 @@ func (j *Job) UpdateJob(ctx context.Context, updateRequest models.RequestUpdateJ
 		return err
 	}
 	return nil
+}
+
+func (j *Job) GetAllJob(ctx context.Context, getRequest models.RequestGetAllJob) (*models.ResponseGetAllJob, error) {
+	offset := (getRequest.Page - 1) * getRequest.Size
+	jobs, total, err := j.JobES.GetAllJob(ctx, offset, getRequest.Size)
+	if err != nil {
+		j.Logger.Error("Can not Get all Job from ES", zap.Error(err))
+		return nil, err
+	}
+	resp := models.ResponseGetAllJob{
+		Total:  total,
+		Result: jobs,
+	}
+	return &resp, nil
 }
 
 func mapStructureDecodeWithTextUnmarshaler(input, output interface{}) error {

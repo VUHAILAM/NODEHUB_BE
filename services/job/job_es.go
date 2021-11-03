@@ -3,6 +3,7 @@ package job
 import (
 	"context"
 	"encoding/json"
+	"reflect"
 
 	"github.com/pkg/errors"
 	"gitlab.com/hieuxeko19991/job4e_be/pkg/models"
@@ -18,8 +19,8 @@ const (
 
 type IJobElasticsearch interface {
 	Create(ctx context.Context, documentID string, data map[string]interface{}) error
-	GetJobList(ctx context.Context, queries []*elastic.TermQuery) (*elastic.SearchResult, error)
 	GetJobByID(ctx context.Context, documentID string) (*models.Job, error)
+	GetAllJob(ctx context.Context, from, size int64) ([]models.Job, int64, error)
 	Update(ctx context.Context, documentID string, data map[string]interface{}) error
 }
 
@@ -44,18 +45,20 @@ func (e *JobES) Create(ctx context.Context, documentID string, data map[string]i
 	return nil
 }
 
-func (e *JobES) GetJobList(ctx context.Context, queries []*elastic.TermQuery) (*elastic.SearchResult, error) {
+func (e *JobES) GetAllJob(ctx context.Context, from, size int64) ([]models.Job, int64, error) {
 	searchService := e.ES.Search().Index(jobIndex)
-	searchQueries := []elastic.Query{}
-	for _, q := range queries {
-		searchQueries = append(searchQueries, q)
-	}
-	searchResult, err := searchService.Query(elastic.NewBoolQuery().Must(searchQueries...)).Do(ctx)
+	searchResult, err := searchService.Sort("create_at", false).From(int(from)).Size(int(size)).Pretty(true).Do(ctx)
 	if err != nil {
 		e.Logger.Error("Job ES: Get Job List error", zap.Error(err))
-		return nil, err
+		return nil, 0, err
 	}
-	return searchResult, nil
+	jobs := make([]models.Job, 0, size)
+	var j models.Job
+	for _, item := range searchResult.Each(reflect.TypeOf(j)) {
+		job := item.(models.Job)
+		jobs = append(jobs, job)
+	}
+	return jobs, searchResult.Hits.TotalHits, nil
 }
 
 func (e *JobES) GetJobByID(ctx context.Context, documentID string) (*models.Job, error) {
