@@ -4,7 +4,6 @@ import "time"
 
 type Recruiter struct {
 	RecruiterID      int64     `json:"recruiter_id" gorm:"primaryKey"`
-	AccountID        int64     `json:"account_id"`
 	CompanyName      string    `json:"company_name"`
 	Address          string    `json:"address"`
 	Avartar          string    `json:"avartar"`

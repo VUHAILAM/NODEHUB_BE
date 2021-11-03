@@ -4,12 +4,12 @@ import (
 	"context"
 	"time"
 
-	"github.com/olivere/elastic"
+	"github.com/olivere/elastic/v7"
 	"github.com/pkg/errors"
 )
 
 type Config struct {
-	URLs string `envconfig:"ES_CONNECTION_URLS" mapstructure:"ES_CONNECTION_URLS" required:"true"`
+	URLs string `envconfig:"ES_CONNECTION_URLS" mapstructure:"es_connection_urls" required:"true"`
 }
 
 func InitElasticSearchClient(conf Config) (*elastic.Client, error) {

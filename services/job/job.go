@@ -41,18 +41,19 @@ func (j *Job) CreateNewJob(ctx context.Context, job *models.CreateJobRequest) er
 		SalaryRange: job.SalaryRange,
 		Quantity:    job.Quantity,
 		Role:        job.Role,
-		Expereience: job.Expereience,
+		Experience:  job.Experience,
 		Location:    job.Location,
 		HireDate:    job.HireDate,
 		Status:      job.Status,
 	}
-	jobID, err := j.JobGorm.Create(ctx, jobData)
+	newJob, err := j.JobGorm.Create(ctx, jobData)
 	if err != nil {
 		j.Logger.Error("Create job to SQL error", zap.Error(err))
 		return err
 	}
 
-	jobData.JobID = jobID
+	jobData.JobID = newJob.JobID
+	jobData.CreatedAt = newJob.CreatedAt
 	esJob := models.ToESJobCreate(jobData)
 	jobInput := map[string]interface{}{}
 	err = mapStructureDecodeWithTextUnmarshaler(esJob, &jobInput)
@@ -60,7 +61,8 @@ func (j *Job) CreateNewJob(ctx context.Context, job *models.CreateJobRequest) er
 		j.Logger.Error("Cannot convert map to Job log struct", zap.Error(err))
 		return err
 	}
-	err = j.JobES.Create(ctx, string(jobID), jobInput)
+	j.Logger.Info("Data input", zap.Reflect("Input", jobInput))
+	err = j.JobES.Create(ctx, string(jobData.JobID), jobInput)
 	if err != nil {
 		j.Logger.Error("Create job to ES error", zap.Error(err))
 		return err
@@ -83,13 +85,14 @@ func (j *Job) GetDetailJob(ctx context.Context, jobID int64) (*models.Job, error
 }
 
 func (j *Job) UpdateJob(ctx context.Context, updateRequest models.RequestUpdateJob) error {
+	j.Logger.Info("updateReq", zap.Reflect("Req", updateRequest))
 	updateData := map[string]interface{}{}
 	err := mapStructureDecodeWithTextUnmarshaler(updateRequest, &updateData)
 	if err != nil {
 		j.Logger.Error("Can not convert to map", zap.Error(err))
 		return err
 	}
-
+	j.Logger.Info("updateData", zap.Reflect("DATA", updateData))
 	err = j.JobES.Update(ctx, string(updateRequest.JobID), updateData)
 	if err != nil {
 		j.Logger.Error("Can not Update to ES", zap.Error(err))

@@ -13,7 +13,7 @@ const (
 )
 
 type IJobDatabase interface {
-	Create(ctx context.Context, job *models.Job) (int64, error)
+	Create(ctx context.Context, job *models.Job) (*models.Job, error)
 	Get(ctx context.Context, jobID int64) (*models.Job, error)
 	Update(ctx context.Context, jobID int64, data map[string]interface{}) error
 }
@@ -30,14 +30,14 @@ func NewJobGorm(db *gorm.DB, logger *zap.Logger) *JobGorm {
 	}
 }
 
-func (g *JobGorm) Create(ctx context.Context, job *models.Job) (int64, error) {
+func (g *JobGorm) Create(ctx context.Context, job *models.Job) (*models.Job, error) {
 	db := g.DB.WithContext(ctx)
 	err := db.Table(jobTable).Create(job).Error
 	if err != nil {
 		g.Logger.Error("JobGorm: Create job error", zap.Error(err))
-		return 0, err
+		return nil, err
 	}
-	return job.JobID, nil
+	return job, nil
 }
 
 func (g *JobGorm) Get(ctx context.Context, jobID int64) (*models.Job, error) {

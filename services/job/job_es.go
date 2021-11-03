@@ -10,11 +10,11 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/olivere/elastic"
+	"github.com/olivere/elastic/v7"
 )
 
 const (
-	jobIndex = ""
+	jobIndex = "test-nodehub-job"
 )
 
 type IJobElasticsearch interface {
@@ -37,7 +37,7 @@ func NewJobES(es *elastic.Client, logger *zap.Logger) *JobES {
 }
 
 func (e *JobES) Create(ctx context.Context, documentID string, data map[string]interface{}) error {
-	_, err := e.ES.Index().Index(jobIndex).Type("job").Id(documentID).BodyJson(data).Do(ctx)
+	_, err := e.ES.Index().Index(jobIndex).Type("_doc").BodyJson(data).Id(documentID).Do(ctx)
 	if err != nil {
 		e.Logger.Error("Job ES: Create Job error", zap.Error(err))
 		return err
@@ -46,19 +46,20 @@ func (e *JobES) Create(ctx context.Context, documentID string, data map[string]i
 }
 
 func (e *JobES) GetAllJob(ctx context.Context, from, size int64) ([]models.Job, int64, error) {
-	searchService := e.ES.Search().Index(jobIndex)
+	searchService := e.ES.Search().Index(jobIndex).Query(elastic.NewExistsQuery("job_id"))
 	searchResult, err := searchService.Sort("create_at", false).From(int(from)).Size(int(size)).Pretty(true).Do(ctx)
 	if err != nil {
 		e.Logger.Error("Job ES: Get Job List error", zap.Error(err))
 		return nil, 0, err
 	}
+
 	jobs := make([]models.Job, 0, size)
 	var j models.Job
 	for _, item := range searchResult.Each(reflect.TypeOf(j)) {
 		job := item.(models.Job)
 		jobs = append(jobs, job)
 	}
-	return jobs, searchResult.Hits.TotalHits, nil
+	return jobs, searchResult.TotalHits(), nil
 }
 
 func (e *JobES) GetJobByID(ctx context.Context, documentID string) (*models.Job, error) {
@@ -72,7 +73,7 @@ func (e *JobES) GetJobByID(ctx context.Context, documentID string) (*models.Job,
 		return nil, errors.New("Job with ID not found")
 	}
 	job := models.Job{}
-	err = json.Unmarshal(*res.Source, &job)
+	err = json.Unmarshal(res.Source, &job)
 	if err != nil {
 		e.Logger.Error("Unmarshal Job error", zap.Error(err))
 		return nil, err
@@ -81,7 +82,7 @@ func (e *JobES) GetJobByID(ctx context.Context, documentID string) (*models.Job,
 }
 
 func (e *JobES) Update(ctx context.Context, documentID string, data map[string]interface{}) error {
-	_, err := e.ES.Update().Index(jobIndex).Id(documentID).Doc(data).DetectNoop(true).Do(ctx)
+	_, err := e.ES.Update().Index(jobIndex).Type("_doc").Id(documentID).Doc(data).DetectNoop(true).Do(ctx)
 	if err != nil {
 		e.Logger.Error("Job ES: Update Job error", zap.Error(err))
 		return err

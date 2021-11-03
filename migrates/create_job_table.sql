@@ -7,7 +7,7 @@ CREATE TABLE `job`
     `salary_range` varchar(255) CHARSET utf8 NOT NULL,
     `quantity` int NOT NULL ,
     `role` varchar(255) CHARSET utf8 NOT NULL,
-    `expereience` varchar(255) CHARSET utf8 NOT NULL,
+    `experience` varchar(255) CHARSET utf8 NOT NULL,
     `location` varchar(255) CHARSET utf8 NOT NULL,
     `hire_date` datetime,
     `status` tinyint(1),
