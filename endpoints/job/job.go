@@ -90,7 +90,7 @@ func (s *JobSerializer) UpdateJob(ginCtx *gin.Context) {
 		})
 		return
 	}
-	err = s.JobService.UpdateJob(ctx, req)
+	err = s.JobService.UpdateJob(ctx, &req)
 	if err != nil {
 		s.Logger.Error("Update Job error", zap.Error(err))
 		ginx.BuildErrorResponse(ginCtx, err, gin.H{
@@ -113,7 +113,7 @@ func (s *JobSerializer) GetAllJob(ginCtx *gin.Context) {
 		return
 	}
 
-	resp, err := s.JobService.GetAllJob(ctx, req)
+	resp, err := s.JobService.GetAllJob(ctx, &req)
 	if err != nil {
 		s.Logger.Error("Get all Job error", zap.Error(err))
 		ginx.BuildErrorResponse(ginCtx, err, gin.H{

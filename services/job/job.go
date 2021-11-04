@@ -13,8 +13,8 @@ import (
 type IJobService interface {
 	CreateNewJob(ctx context.Context, job *models.CreateJobRequest) error
 	GetDetailJob(ctx context.Context, jobID int64) (*models.Job, error)
-	UpdateJob(ctx context.Context, updateRequest models.RequestUpdateJob) error
-	GetAllJob(ctx context.Context, getRequest models.RequestGetAllJob) (*models.ResponseGetAllJob, error)
+	UpdateJob(ctx context.Context, updateRequest *models.RequestUpdateJob) error
+	GetAllJob(ctx context.Context, getRequest *models.RequestGetAllJob) (*models.ResponseGetAllJob, error)
 }
 
 type Job struct {
@@ -84,7 +84,7 @@ func (j *Job) GetDetailJob(ctx context.Context, jobID int64) (*models.Job, error
 	return job, nil
 }
 
-func (j *Job) UpdateJob(ctx context.Context, updateRequest models.RequestUpdateJob) error {
+func (j *Job) UpdateJob(ctx context.Context, updateRequest *models.RequestUpdateJob) error {
 	j.Logger.Info("updateReq", zap.Reflect("Req", updateRequest))
 	updateData := map[string]interface{}{}
 	err := mapStructureDecodeWithTextUnmarshaler(updateRequest, &updateData)
@@ -107,7 +107,7 @@ func (j *Job) UpdateJob(ctx context.Context, updateRequest models.RequestUpdateJ
 	return nil
 }
 
-func (j *Job) GetAllJob(ctx context.Context, getRequest models.RequestGetAllJob) (*models.ResponseGetAllJob, error) {
+func (j *Job) GetAllJob(ctx context.Context, getRequest *models.RequestGetAllJob) (*models.ResponseGetAllJob, error) {
 	offset := (getRequest.Page - 1) * getRequest.Size
 	jobs, total, err := j.JobES.GetAllJob(ctx, offset, getRequest.Size)
 	if err != nil {

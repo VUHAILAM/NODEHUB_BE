@@ -37,7 +37,7 @@ func NewJobES(es *elastic.Client, logger *zap.Logger) *JobES {
 }
 
 func (e *JobES) Create(ctx context.Context, documentID string, data map[string]interface{}) error {
-	_, err := e.ES.Index().Index(jobIndex).Type("_doc").BodyJson(data).Id(documentID).Do(ctx)
+	_, err := e.ES.Index().Index(jobIndex).BodyJson(data).Id(documentID).Do(ctx)
 	if err != nil {
 		e.Logger.Error("Job ES: Create Job error", zap.Error(err))
 		return err
@@ -46,8 +46,8 @@ func (e *JobES) Create(ctx context.Context, documentID string, data map[string]i
 }
 
 func (e *JobES) GetAllJob(ctx context.Context, from, size int64) ([]models.Job, int64, error) {
-	searchService := e.ES.Search().Index(jobIndex).Query(elastic.NewExistsQuery("job_id"))
-	searchResult, err := searchService.Sort("create_at", false).From(int(from)).Size(int(size)).Pretty(true).Do(ctx)
+	searchService := e.ES.Search().Index(jobIndex)
+	searchResult, err := searchService.Sort("hire_date", false).From(int(from)).Size(int(size)).Pretty(true).Do(ctx)
 	if err != nil {
 		e.Logger.Error("Job ES: Get Job List error", zap.Error(err))
 		return nil, 0, err
@@ -82,7 +82,7 @@ func (e *JobES) GetJobByID(ctx context.Context, documentID string) (*models.Job,
 }
 
 func (e *JobES) Update(ctx context.Context, documentID string, data map[string]interface{}) error {
-	_, err := e.ES.Update().Index(jobIndex).Type("_doc").Id(documentID).Doc(data).DetectNoop(true).Do(ctx)
+	_, err := e.ES.Update().Index(jobIndex).Id(documentID).Doc(data).DetectNoop(true).Do(ctx)
 	if err != nil {
 		e.Logger.Error("Job ES: Update Job error", zap.Error(err))
 		return err

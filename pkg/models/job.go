@@ -12,25 +12,24 @@ type Job struct {
 	Role        string    `json:"role"`
 	Experience  string    `json:"experience"`
 	Location    string    `json:"location"`
-	HireDate    time.Time `json:"hire_date"`
-	Status      bool      `json:"status"`
+	HireDate    int64     `json:"hire_date"`
+	Status      int       `json:"status"`
 	CreatedAt   time.Time `json:"created_at"`
 	UpdatedAt   time.Time `json:"updated_at"`
 }
 
 type ESJobCreate struct {
-	JobID       int64     `json:"job_id" mapstructure:"job_id"`
-	RecruiterID int64     `json:"recruiter_id" mapstructure:"recruiter_id"`
-	Title       string    `json:"title" mapstructure:"title"`
-	Description string    `json:"description" mapstructure:"description"`
-	SalaryRange string    `json:"salary_range" mapstructure:"salary_range"`
-	Quantity    int64     `json:"quantity" mapstructure:"quantity"`
-	Role        string    `json:"role" mapstructure:"role"`
-	Experience  string    `json:"experience" mapstructure:"experience"`
-	Location    string    `json:"location" mapstructure:"location"`
-	HireDate    time.Time `json:"hire_date" mapstructure:"hire_date"`
-	Status      bool      `json:"status" mapstructure:"status"`
-	CreateAt    time.Time `json:"create_at" mapstructure:"create_at"`
+	JobID       int64  `json:"job_id" mapstructure:"job_id"`
+	RecruiterID int64  `json:"recruiter_id" mapstructure:"recruiter_id"`
+	Title       string `json:"title" mapstructure:"title"`
+	Description string `json:"description" mapstructure:"description"`
+	SalaryRange string `json:"salary_range" mapstructure:"salary_range"`
+	Quantity    int64  `json:"quantity" mapstructure:"quantity"`
+	Role        string `json:"role" mapstructure:"role"`
+	Experience  string `json:"experience" mapstructure:"experience"`
+	Location    string `json:"location" mapstructure:"location"`
+	HireDate    int64  `json:"hire_date" mapstructure:"hire_date"`
+	Status      int    `json:"status" mapstructure:"status"`
 }
 
 func ToESJobCreate(job *Job) *ESJobCreate {
@@ -46,21 +45,20 @@ func ToESJobCreate(job *Job) *ESJobCreate {
 		Location:    job.Location,
 		HireDate:    job.HireDate,
 		Status:      job.Status,
-		CreateAt:    job.CreatedAt,
 	}
 }
 
 type CreateJobRequest struct {
-	RecruiterID int64     `json:"recruiter_id"`
-	Title       string    `json:"title"`
-	Description string    `json:"description"`
-	SalaryRange string    `json:"salary_range"`
-	Quantity    int64     `json:"quantity"`
-	Role        string    `json:"role"`
-	Experience  string    `json:"experience"`
-	Location    string    `json:"location"`
-	HireDate    time.Time `json:"hire_date"`
-	Status      bool      `json:"status"`
+	RecruiterID int64  `json:"recruiter_id"`
+	Title       string `json:"title"`
+	Description string `json:"description"`
+	SalaryRange string `json:"salary_range"`
+	Quantity    int64  `json:"quantity"`
+	Role        string `json:"role"`
+	Experience  string `json:"experience"`
+	Location    string `json:"location"`
+	HireDate    int64  `json:"hire_date"`
+	Status      int    `json:"status"`
 }
 
 type RequestGetJobDetail struct {
@@ -77,7 +75,8 @@ type RequestUpdateJob struct {
 	Role        string `json:"role,omitempty" mapstructure:"role,omitempty"`
 	Experience  string `json:"experience,omitempty" mapstructure:"experience,omitempty"`
 	Location    string `json:"location,omitempty" mapstructure:"location,omitempty"`
-	Status      bool   `json:"status,omitempty" mapstructure:"status,omitempty"`
+	Status      int    `json:"status,omitempty" mapstructure:"status,omitempty"`
+	HireDate    int64  `json:"hire_date,omitempty" mapstructure:"hire_date,omitempty"`
 }
 
 type RequestGetAllJob struct {
