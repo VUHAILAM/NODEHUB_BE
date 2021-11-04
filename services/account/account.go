@@ -107,29 +107,6 @@ type VerifyAccountClaims struct {
 }
 
 func (a *Account) Register(ctx context.Context, account *models.RequestRegisterAccount) error {
-	token, err := a.generateVerifyToken(ctx, account.Email)
-	if err != nil {
-		a.Logger.Error("Cannot gen Verify Email token", zap.Error(err))
-		return err
-	}
-	linkReset := a.Conf.Origin + "verify-email?token=" + token
-	a.Logger.Info("Link verify email", zap.String("url", linkReset))
-
-	from := "lamvhhe130764@fpt.edu.vn"
-	to := []string{account.Email}
-	subject := "Verify Email for NodeHub"
-	mailType := email2.MailConfirmation
-	mailData := models.MailData{
-		Link: linkReset,
-	}
-
-	mailReq := a.MailService.NewMail(from, to, subject, mailType, &mailData)
-	err = a.MailService.SendMail(mailReq)
-	if err != nil {
-		a.Logger.Error("Cannot send email", zap.Error(err))
-		return err
-	}
-
 	hashedPassword, _ := bcrypt.GenerateFromPassword([]byte(account.Password), 8)
 	accountModels := &models.Account{
 		Email:     account.Email,
@@ -165,6 +142,30 @@ func (a *Account) Register(ctx context.Context, account *models.RequestRegisterA
 			return err
 		}
 	}
+
+	token, err := a.generateVerifyToken(ctx, account.Email)
+	if err != nil {
+		a.Logger.Error("Cannot gen Verify Email token", zap.Error(err))
+		return err
+	}
+	linkReset := a.Conf.Origin + "verify-email?token=" + token
+	a.Logger.Info("Link verify email", zap.String("url", linkReset))
+
+	from := "lamvhhe130764@fpt.edu.vn"
+	to := []string{account.Email}
+	subject := "Verify Email for NodeHub"
+	mailType := email2.MailConfirmation
+	mailData := models.MailData{
+		Link: linkReset,
+	}
+
+	mailReq := a.MailService.NewMail(from, to, subject, mailType, &mailData)
+	err = a.MailService.SendMail(mailReq)
+	if err != nil {
+		a.Logger.Error("Cannot send email", zap.Error(err))
+		return err
+	}
+
 	return nil
 }
 

@@ -4,6 +4,10 @@ import (
 	"fmt"
 	"net/http"
 
+	"gitlab.com/hieuxeko19991/job4e_be/endpoints/job_apply"
+
+	"gitlab.com/hieuxeko19991/job4e_be/endpoints/job"
+
 	"gitlab.com/hieuxeko19991/job4e_be/middlewares"
 
 	"gitlab.com/hieuxeko19991/job4e_be/pkg/auth"
@@ -26,6 +30,8 @@ type GinDependencies struct {
 	SkillSerializer    *skill.SkillSerializer
 	CategorySerializer *category.CategorySerializer
 	MediaSerializer    *media.MediaSerializer
+	JobSerializer      *job.JobSerializer
+	JobApplySerializer *job_apply.JobApplySerializer
 }
 
 func (g *GinDependencies) InitGinEngine(config *config.Config) *gin.Engine {
@@ -68,6 +74,17 @@ func (g *GinDependencies) InitGinEngine(config *config.Config) *gin.Engine {
 	// media
 	mediaCtlAdmin := nodehub.Group("/private/media").Use(middlewares.AuthorizationMiddleware(g.Auth, auth.AdminRole))
 	mediaCtlAdmin.POST("/createMedia", g.MediaSerializer.CreateMedia)
+
+	jobCtl := nodehub.Group("/job")
+	jobCtl.Use(middlewares.AuthorizationMiddleware(g.Auth, auth.CommonRole)).GET("/getJob", g.JobSerializer.GetDetailJob)
+	jobCtl.Use(middlewares.AuthorizationMiddleware(g.Auth, auth.CommonRole)).GET("", g.JobSerializer.GetAllJob)
+	jobCtl.Use(middlewares.AuthorizationMiddleware(g.Auth, auth.RecruiterRole)).POST("/create", g.JobSerializer.Create)
+	jobCtl.Use(middlewares.AuthorizationMiddleware(g.Auth, auth.RecruiterRole)).PUT("/update", g.JobSerializer.UpdateJob)
+
+	applyCtl := nodehub.Group("/job-candidate")
+	applyCtl.Use(middlewares.AuthorizationMiddleware(g.Auth, auth.CandidateRole)).POST("/apply", g.JobApplySerializer.Apply)
+	applyCtl.Use(middlewares.AuthorizationMiddleware(g.Auth, auth.RecruiterRole)).GET("/jobs", g.JobApplySerializer.GetJobAppliedByJobID)
+	applyCtl.Use(middlewares.AuthorizationMiddleware(g.Auth, auth.CandidateRole)).GET("/candidate", g.JobApplySerializer.GetJobAppliedByCandidateID)
 
 	return engine
 }
