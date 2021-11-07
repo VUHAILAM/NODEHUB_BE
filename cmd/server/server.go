@@ -1,6 +1,7 @@
 package server
 
 import (
+	"context"
 	"net/http"
 
 	job_apply2 "gitlab.com/hieuxeko19991/job4e_be/endpoints/job_apply"
@@ -42,6 +43,47 @@ type Server struct {
 	HttpServer *http.Server
 }
 
+const mappingJobNodeHub = `
+{
+ "mappings" : {
+      "properties" : {
+        "description" : {
+          "type" : "keyword"
+        },
+        "experience" : {
+          "type" : "keyword"
+        },
+        "hire_date" : {
+          "type" : "long"
+        },
+        "job_id" : {
+          "type" : "long"
+        },
+        "location" : {
+          "type" : "keyword"
+        },
+        "quantity" : {
+          "type" : "long"
+        },
+        "recruiter_id" : {
+          "type" : "long"
+        },
+        "role" : {
+          "type" : "keyword"
+        },
+        "salary_range" : {
+          "type" : "keyword"
+        },
+        "status" : {
+          "type" : "long"
+        },
+        "title" : {
+          "type" : "keyword"
+        }
+      }
+    }
+}`
+
 func InitServer() *Server {
 	logger, _ := zap.NewProduction()
 	defer logger.Sync()
@@ -50,6 +92,7 @@ func InitServer() *Server {
 	conf, err := config.NewConfig()
 	if err != nil {
 		logger.Panic("Load config error", zap.Error(err))
+		return nil
 	}
 
 	gormDB := config2.InitGormDB(conf.MySQL)
@@ -57,6 +100,19 @@ func InitServer() *Server {
 	if err != nil {
 		logger.Panic("Init Elacticsearch error", zap.Error(err))
 		return nil
+	}
+
+	exist, err := esClient.IndexExists(conf.JobESIndex).Do(context.Background())
+	if err != nil {
+		logger.Panic("Check index exist error", zap.Error(err))
+		return nil
+	}
+	if !exist {
+		_, err := esClient.CreateIndex(conf.JobESIndex).BodyString(mappingJobNodeHub).Do(context.Background())
+		if err != nil {
+			logger.Panic("Create index error", zap.Error(err), zap.String("index", conf.JobESIndex))
+			return nil
+		}
 	}
 	authHandler := auth.NewAuthHandler(logger, conf)
 	mailService := email.NewSGMailService(logger, conf)
@@ -78,7 +134,7 @@ func InitServer() *Server {
 	categoryService := category.NewCategory(categoryGorm, logger)
 	categorySerializer := category2.NewCategorySerializer(categoryService, logger)
 	// init job service
-	jobES := job.NewJobES(esClient, logger)
+	jobES := job.NewJobES(esClient, conf.JobESIndex, logger)
 	jobGorm := job.NewJobGorm(gormDB, logger)
 	jobService := job.NewJobService(jobGorm, jobES, conf, logger)
 	jobSerializer := job2.NewJobSerializer(jobService, logger)

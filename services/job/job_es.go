@@ -5,12 +5,10 @@ import (
 	"encoding/json"
 	"reflect"
 
+	"github.com/olivere/elastic/v7"
 	"github.com/pkg/errors"
 	"gitlab.com/hieuxeko19991/job4e_be/pkg/models"
-
 	"go.uber.org/zap"
-
-	"github.com/olivere/elastic/v7"
 )
 
 const (
@@ -25,14 +23,16 @@ type IJobElasticsearch interface {
 }
 
 type JobES struct {
-	ES     *elastic.Client
-	Logger *zap.Logger
+	ES       *elastic.Client
+	JobIndex string
+	Logger   *zap.Logger
 }
 
-func NewJobES(es *elastic.Client, logger *zap.Logger) *JobES {
+func NewJobES(es *elastic.Client, jobindex string, logger *zap.Logger) *JobES {
 	return &JobES{
-		ES:     es,
-		Logger: logger,
+		ES:       es,
+		JobIndex: jobindex,
+		Logger:   logger,
 	}
 }
 
