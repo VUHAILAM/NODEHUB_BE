@@ -1,9 +1,9 @@
 HTTP:
   HTTP_ADDR: "0.0.0.0:8080"
 MYSQL:
-  MYSQL_DSN: "hieunm27:13091999@tcp(mysqldb:3306)/nodehub?parseTime=true"
+  MYSQL_DSN: "admin:13091999@tcp(nodehubdb.coghck9xckk7.ap-southeast-1.rds.amazonaws.com:3306)/nodehub?parseTime=true"
 ES:
-  ES_CONNECTION_URLS: "http://localhost:9200/"
+  ES_CONNECTION_URLS: "https://vpc-esnodehub01-x7xucmtnlmmnfzgfgufdvwluyy.ap-southeast-1.es.amazonaws.com/"
 ORIGIN: "*"
 SENDGRID_API_KEY: "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"
 ACCESS_TOKEN_PRIVATE_KEY: "-----BEGIN RSA PRIVATE KEY-----\nMIIBPAIBAAJBAMoGNvvGqeocZ0io4OMbJ+W9D0WCOy8LwmP5MlEL2mcgHKd0T75t\n1l/n4k+eNOjNETKDdPPVZjeqvWMlOGVSbqECAwEAAQJAAvTKUy7aB6n4vPBzsf8Q\nu2Tj11GLiimy44GfAd6ZiI7CEy6bvuLMkYjMrrhl4CmmpGBUfpNn9uDnLHayk9tc\nbQIhAO1XQh9gvbLrZwr8IBnxaHd+vuClVrt5R+3xaQgyDQYbAiEA2egsEYkN+1MJ\ndXxQTHfrdahL9G6OAWy8fWT0xQHnGfMCIQCCyTzEsbiXKaUkpn7CDQd2Ib/pZvL+\nZ/y9H/Sy8XG/1QIhAJ6A4mVS80eoDA5YgbRN2ok4BR/ktwjURntTzzPqgWb/AiEA\nk1ZpTKvc65BJgHroNDIjbTxKVOxPU0zwnOdwRASonks=\n-----END RSA PRIVATE KEY-----\n"

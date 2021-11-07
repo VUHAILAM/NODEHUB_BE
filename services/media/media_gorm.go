@@ -59,7 +59,7 @@ func (m *MediaGorm) Get(ctx context.Context, name string, page int64, size int64
 	limit := size
 	var total int64
 	//search query
-	data, err := db.Raw(`select media_id, type, name, status, created_at, updated_at FROM nodehub.media where  name like ? ORDER BY media_id desc LIMIT 0, 10`, "%"+name+"%", offset, limit).Rows()
+	data, err := db.Raw(`select media_id, type, name, status, created_at, updated_at FROM nodehub.media where  name like ? ORDER BY media_id desc LIMIT ?, ?`, "%"+name+"%", offset, limit).Rows()
 	// count query
 	db.Raw(`SELECT count(*) FROM nodehub.media where name like ?`, "%"+name+"%").Scan(&total)
 	if err != nil {
