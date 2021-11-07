@@ -8,35 +8,33 @@ import (
 )
 
 type IMediaService interface {
-	CreateMedia(ctx context.Context, category *models.RequestCreateMedia) error
-	// UpdateCategory(ctx context.Context, category *models.RequestCreateSetting, setting_id int64) error
-	// GetListCategoryPaging(ctx context.Context, name string, page int64, size int64) (*models.ResponsetListSetting, error)
-	// GetAllCategory(ctx context.Context) ([]models.Setting, error)
+	CreateMedia(ctx context.Context, media *models.RequestCreateMedia) error
+	UpdateMedia(ctx context.Context, media *models.RequestUpdateMedia, media_id int64) error
+	GetListMediaPaging(ctx context.Context, name string, page int64, size int64) (*models.ResponsetListMedia, error)
+	GetSlide(ctx context.Context) ([]models.Media, error)
 }
 
 type IMediaDatabase interface {
-	Create(ctx context.Context, category *models.Media) error
-	// Update(ctx context.Context, category *models.RequestUpdateSetting, setting_id int64) error
-	// Get(ctx context.Context, name string, page int64, size int64) (*models.ResponsetListSetting, error)
-	// GetAll(ctx context.Context) ([]models.Setting, error)
+	Create(ctx context.Context, media *models.Media) error
+	Update(ctx context.Context, media *models.RequestUpdateMedia, media_id int64) error
+	Get(ctx context.Context, name string, page int64, size int64) (*models.ResponsetListMedia, error)
+	GetSlide(ctx context.Context) ([]models.Media, error)
 }
 
 type Media struct {
 	MediaGorm *MediaGorm
-	SecretKey string
 	Logger    *zap.Logger
 }
 
-func NewMediaCategory(mediaGorm *MediaGorm, secretKey string, logger *zap.Logger) *Media {
+func NewMediaCategory(mediaGorm *MediaGorm, logger *zap.Logger) *Media {
 	return &Media{
 		MediaGorm: mediaGorm,
-		SecretKey: secretKey,
 		Logger:    logger,
 	}
 }
 
 /*Create Media*/
-func (m *Media) CreateMedia(ctx context.Context, media *models.Media) error {
+func (m *Media) CreateMedia(ctx context.Context, media *models.RequestCreateMedia) error {
 	MediaModels := &models.Media{
 		Name:   media.Name,
 		Type:   media.Type,
@@ -48,30 +46,31 @@ func (m *Media) CreateMedia(ctx context.Context, media *models.Media) error {
 	return nil
 }
 
-// /*Update Category*/
-// func (c *Category) UpdateCategory(ctx context.Context, category *models.RequestCreateSetting, setting_id int64) error {
-// 	categoryModels := &models.RequestUpdateSetting{
-// 		Name: category.Name,
-// 		Type: category.Type}
-// 	err := c.CategoryGorm.Update(ctx, categoryModels, setting_id)
-// 	if err != nil {
-// 		return err
-// 	}
-// 	return nil
-// }
+/*Update Media*/
+func (m *Media) UpdateMedia(ctx context.Context, media *models.RequestUpdateMedia, media_id int64) error {
+	mediaModels := &models.RequestUpdateMedia{
+		Name:   media.Name,
+		Type:   media.Type,
+		Status: media.Status}
+	err := m.MediaGorm.Update(ctx, mediaModels, media_id)
+	if err != nil {
+		return err
+	}
+	return nil
+}
 
-// func (c *Category) GetListCategoryPaging(ctx context.Context, name string, page int64, size int64) (*models.ResponsetListSetting, error) {
-// 	acc, err := c.CategoryGorm.Get(ctx, name, page, size)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	return acc, nil
-// }
+func (m *Media) GetListMediaPaging(ctx context.Context, name string, page int64, size int64) (*models.ResponsetListMedia, error) {
+	acc, err := m.MediaGorm.Get(ctx, name, page, size)
+	if err != nil {
+		return nil, err
+	}
+	return acc, nil
+}
 
-// func (c *Category) GetAllCategory(ctx context.Context) ([]models.Setting, error) {
-// 	acc, err := c.CategoryGorm.GetAll(ctx)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	return acc, nil
-// }
+func (m *Media) GetSlide(ctx context.Context) ([]models.Media, error) {
+	acc, err := m.MediaGorm.GetSlide(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return acc, nil
+}

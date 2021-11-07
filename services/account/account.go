@@ -124,7 +124,7 @@ func (a *Account) Register(ctx context.Context, account *models.RequestRegisterA
 	if account.Type == auth.RecruiterRole {
 		recruiterModel := &models.Recruiter{
 			RecruiterID:      accountID,
-			CompanyName:      account.RecruiterInfor.CompanyName,
+			Name:             account.RecruiterInfor.Name,
 			Address:          account.RecruiterInfor.Address,
 			Avartar:          account.RecruiterInfor.Avartar,
 			Banner:           account.RecruiterInfor.Banner,

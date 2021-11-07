@@ -18,6 +18,7 @@ func InitElasticSearchClient(conf Config) (*elastic.Client, error) {
 	client, err := elastic.NewClient(
 		elastic.SetURL(conf.URLs),
 		elastic.SetTraceLog(log.New(os.Stderr, "[[TRACE LOG]] ", 0)),
+		elastic.SetSniff(false),
 	)
 	if err != nil {
 		return nil, errors.Wrap(err, "Failed to create elasticsearch client")

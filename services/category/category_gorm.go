@@ -58,7 +58,7 @@ func (c *CategoryGorm) Get(ctx context.Context, name string, page int64, size in
 	limit := size
 	var total int64
 	//search query
-	data, err := db.Raw(`select * FROM nodehub.setting where  name like ? and type = "blog" ORDER BY setting_id desc LIMIT 0, 10`, "%"+name+"%", offset, limit).Rows()
+	data, err := db.Raw(`select * FROM nodehub.setting where  name like ? and type = "blog" ORDER BY setting_id desc LIMIT ?, ?`, "%"+name+"%", offset, limit).Rows()
 	// count query
 	db.Raw(`SELECT count(*) FROM nodehub.setting where name like ? and type = "blog"`, "%"+name+"%").Scan(&total)
 	if err != nil {
