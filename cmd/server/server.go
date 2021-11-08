@@ -4,6 +4,10 @@ import (
 	"context"
 	"net/http"
 
+	job_skill2 "gitlab.com/hieuxeko19991/job4e_be/endpoints/job_skill"
+
+	"gitlab.com/hieuxeko19991/job4e_be/services/job_skill"
+
 	job_apply2 "gitlab.com/hieuxeko19991/job4e_be/endpoints/job_apply"
 	"gitlab.com/hieuxeko19991/job4e_be/services/job_apply"
 
@@ -58,7 +62,7 @@ const mappingJobNodeHub = `
           "type" : "keyword"
         },
         "hire_date" : {
-          "type" : "long"
+          "type" : "date"
         },
         "job_id" : {
           "type" : "long"
@@ -138,10 +142,14 @@ func InitServer() *Server {
 	categoryService := category.NewCategory(categoryGorm, logger)
 	categorySerializer := category2.NewCategorySerializer(categoryService, logger)
 
+	//init job skill
+	jobSkillGorm := job_skill.NewJobSkillGorm(gormDB, logger)
+	jobSkillService := job_skill.NewJobSkill(jobSkillGorm, logger)
+	jobSkillSerializer := job_skill2.NewJobSkillSerializer(jobSkillService, logger)
 	// init job service
 	jobES := job.NewJobES(esClient, conf.JobESIndex, logger)
 	jobGorm := job.NewJobGorm(gormDB, logger)
-	jobService := job.NewJobService(jobGorm, jobES, conf, logger)
+	jobService := job.NewJobService(jobGorm, jobES, jobSkillGorm, conf, logger)
 	jobSerializer := job2.NewJobSerializer(jobService, logger)
 
 	jobApplyGorm := job_apply.NewJobApplyGorm(gormDB, logger)
@@ -166,6 +174,7 @@ func InitServer() *Server {
 		JobApplySerializer:  jobApplySerializer,
 		MediaSerializer:     mediaSerializer,
 		RecruiterSerializer: recruiterSerializer,
+		JobSkillSerializer:  jobSkillSerializer,
 	}
 	ginHandler := ginDepen.InitGinEngine(conf)
 	return &Server{
