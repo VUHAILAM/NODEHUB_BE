@@ -18,3 +18,6 @@ CREATE TABLE `recruiter`
     PRIMARY KEY(`recruiter_id`),
     FOREIGN KEY (`recruiter_id`) REFERENCES account(`id`)
 )
+
+ALTER TABLE `recruiter`
+ADD COLUMN nodehub_review varchar(255) CHARSET utf8 AFTER activeVIP;

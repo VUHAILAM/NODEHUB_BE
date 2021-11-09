@@ -125,3 +125,96 @@ func (r *RecruiterSerializer) GetRecruiterSkill(ginCtx *gin.Context) {
 		"data": data,
 	})
 }
+
+func (r *RecruiterSerializer) GetListRecruiterForAdmin(ginCtx *gin.Context) {
+	ctx := ginCtx.Request.Context()
+	req := models.RequestGetListRecruiter{}
+	err := json.NewDecoder(ginCtx.Request.Body).Decode(&req)
+	if err != nil {
+		r.Logger.Error("Parse request get list error", zap.Error(err))
+		ginx.BuildErrorResponse(ginCtx, err, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+	data, err := r.recruiterService.GetAllRecruiterForAdmin(ctx, req.Name, req.Page, req.Size)
+	if err != nil {
+		r.Logger.Error("GetListRecruiterForAdmin error", zap.Error(err))
+		ginx.BuildErrorResponse(ginCtx, err, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	ginx.BuildSuccessResponse(ginCtx, http.StatusAccepted, gin.H{
+		"data": data,
+	})
+}
+
+func (r *RecruiterSerializer) UpdateReciuterByAdmin(ginCtx *gin.Context) {
+	ctx := ginCtx.Request.Context()
+	req := models.RequestUpdateRecruiterAdmin{}
+	err := json.NewDecoder(ginCtx.Request.Body).Decode(&req)
+	if err != nil {
+		r.Logger.Error("Parse request Update Recruiter error", zap.Error(err))
+		ginx.BuildErrorResponse(ginCtx, err, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+	err = r.recruiterService.UpdateReciuterByAdmin(ctx, &req)
+	if err != nil {
+		r.Logger.Error("Update Recruiter error", zap.Error(err))
+		ginx.BuildErrorResponse(ginCtx, err, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+	ginx.BuildSuccessResponse(ginCtx, http.StatusAccepted, nil)
+}
+func (r *RecruiterSerializer) UpdateStatusReciuter(ginCtx *gin.Context) {
+	ctx := ginCtx.Request.Context()
+	req := models.RequestUpdateStatusRecruiter{}
+	err := json.NewDecoder(ginCtx.Request.Body).Decode(&req)
+	if err != nil {
+		r.Logger.Error("Parse request Update status Recruiter error", zap.Error(err))
+		ginx.BuildErrorResponse(ginCtx, err, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+	err = r.recruiterService.UpdateStatusReciuter(ctx, &req, req.ID)
+	if err != nil {
+		r.Logger.Error("Update status Recruiter error", zap.Error(err))
+		ginx.BuildErrorResponse(ginCtx, err, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+	ginx.BuildSuccessResponse(ginCtx, http.StatusAccepted, nil)
+}
+
+func (r *RecruiterSerializer) GetAllRecruiterForCandidate(ginCtx *gin.Context) {
+	ctx := ginCtx.Request.Context()
+	req := models.RequestGetListRecruiterForCandidate{}
+	err := json.NewDecoder(ginCtx.Request.Body).Decode(&req)
+	if err != nil {
+		r.Logger.Error("Parse request get list error", zap.Error(err))
+		ginx.BuildErrorResponse(ginCtx, err, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+	data, err := r.recruiterService.GetAllRecruiterForCandidate(ctx, req.RecruiterName, req.SkillName, req.Address, req.Page, req.Size)
+	if err != nil {
+		r.Logger.Error("GetListRecruiterForAdmin error", zap.Error(err))
+		ginx.BuildErrorResponse(ginCtx, err, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	ginx.BuildSuccessResponse(ginCtx, http.StatusAccepted, gin.H{
+		"data": data,
+	})
+}

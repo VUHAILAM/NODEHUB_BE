@@ -3,6 +3,7 @@ package recruiter
 import (
 	"context"
 
+	"github.com/mitchellh/mapstructure"
 	"gitlab.com/hieuxeko19991/job4e_be/pkg/models"
 	"go.uber.org/zap"
 )
@@ -12,6 +13,10 @@ type IRecruiterService interface {
 	UpdateProfile(ctx context.Context, recruiter *models.RequestUpdateRecruiter, recruiter_id int64) error
 	GetRecruiterSkill(ctx context.Context, recruiter_id int64) ([]models.ResponseRecruiterSkill, error)
 	GetProfileRecruiter(ctx context.Context, id int64) (*models.Recruiter, error)
+	GetAllRecruiterForAdmin(ctx context.Context, name string, page int64, size int64) (*models.ResponsetListRecruiter, error)
+	UpdateReciuterByAdmin(ctx context.Context, updateRequest *models.RequestUpdateRecruiterAdmin) error
+	UpdateStatusReciuter(ctx context.Context, updateRequest *models.RequestUpdateStatusRecruiter, recruiter_id int64) error
+	GetAllRecruiterForCandidate(ctx context.Context, recruiterName string, skillName string, address string, page int64, size int64) (*models.ResponsetListRecruiterForCandidate, error)
 }
 
 type IRecruiterDatabase interface {
@@ -20,6 +25,10 @@ type IRecruiterDatabase interface {
 	UpdateProfile(ctx context.Context, recruiter *models.RequestUpdateRecruiter, recruiter_id int64) error
 	GetRecruiterSkill(ctx context.Context, recruiter_id int64) ([]models.ResponseRecruiterSkill, error)
 	GetProfile(ctx context.Context, id int64) (*models.Recruiter, error)
+	GetAllRecruiterForAdmin(ctx context.Context, name string, page int64, size int64) (*models.ResponsetListRecruiter, error)
+	UpdateReciuterByAdmin(ctx context.Context, updateRequest *models.RequestUpdateRecruiterAdmin) error
+	UpdateStatusReciuter(ctx context.Context, updateRequest *models.RequestUpdateStatusRecruiter, recruiter_id int64) error
+	GetAllRecruiterForCandidate(ctx context.Context, recruiterName string, skillName string, address string, page int64, size int64) (*models.ResponsetListRecruiterForCandidate, error)
 }
 
 type Recruiter struct {
@@ -77,6 +86,61 @@ func (r *Recruiter) AddRecruiterSkill(ctx context.Context, recruiterSkill *model
 
 func (r *Recruiter) GetRecruiterSkill(ctx context.Context, recruiter_id int64) ([]models.ResponseRecruiterSkill, error) {
 	acc, err := r.RecruiterGorm.GetRecruiterSkill(ctx, recruiter_id)
+	if err != nil {
+		return nil, err
+	}
+	return acc, nil
+}
+
+//recruiter admin
+func (r *Recruiter) GetAllRecruiterForAdmin(ctx context.Context, name string, page int64, size int64) (*models.ResponsetListRecruiter, error) {
+	acc, err := r.RecruiterGorm.GetAllRecruiterForAdmin(ctx, name, page, size)
+	if err != nil {
+		return nil, err
+	}
+	return acc, nil
+}
+
+func (r *Recruiter) UpdateReciuterByAdmin(ctx context.Context, updateRequest *models.RequestUpdateRecruiterAdmin) error {
+	updateData := map[string]interface{}{}
+	err1 := mapStructureDecodeWithTextUnmarshaler(updateRequest, &updateData)
+	if err1 != nil {
+		r.Logger.Error("Can not convert to map", zap.Error(err1))
+		return err1
+	}
+
+	err := r.RecruiterGorm.UpdateReciuterByAdmin(ctx, updateRequest.RecruiterID, updateData)
+	if err != nil {
+		r.Logger.Error("Can not Update to MySQL", zap.Error(err))
+		return err
+	}
+	return nil
+}
+
+func (r *Recruiter) UpdateStatusReciuter(ctx context.Context, updateRequest *models.RequestUpdateStatusRecruiter, recruiter_id int64) error {
+	recruiterModels := &models.RequestUpdateStatusRecruiter{
+		Status: updateRequest.Status}
+	err := r.RecruiterGorm.UpdateStatusReciuter(ctx, recruiterModels, recruiter_id)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func mapStructureDecodeWithTextUnmarshaler(input, output interface{}) error {
+	decoder, err := mapstructure.NewDecoder(&mapstructure.DecoderConfig{
+		Result:     output,
+		DecodeHook: mapstructure.TextUnmarshallerHookFunc(),
+	})
+	if err != nil {
+		return err
+	}
+	return decoder.Decode(input)
+}
+
+//recruiter for candidate
+func (r *Recruiter) GetAllRecruiterForCandidate(ctx context.Context, recruiterName string, skillName string, address string, page int64, size int64) (*models.ResponsetListRecruiterForCandidate, error) {
+	acc, err := r.RecruiterGorm.GetAllRecruiterForCandidate(ctx, recruiterName, skillName, address, page, size)
 	if err != nil {
 		return nil, err
 	}

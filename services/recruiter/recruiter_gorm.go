@@ -2,6 +2,8 @@ package recruiter
 
 import (
 	"context"
+	"fmt"
+	"math"
 
 	"go.uber.org/zap"
 	"gorm.io/gorm"
@@ -11,6 +13,9 @@ import (
 
 const (
 	tableRecruiter = "recruiter"
+)
+const (
+	tableAccount = "account"
 )
 
 const (
@@ -99,4 +104,127 @@ func (r *RecruiterGorm) GetRecruiterSkill(ctx context.Context, recruiter_id int6
 		db.ScanRows(data, &arr)
 	}
 	return arr, nil
+}
+
+/*Get list recruiter for admin*/
+func (r *RecruiterGorm) GetAllRecruiterForAdmin(ctx context.Context, name string, page int64, size int64) (*models.ResponsetListRecruiter, error) {
+	db := r.db.WithContext(ctx)
+	arr := []models.Recruiter{}
+	resutl := models.ResponsetListRecruiter{}
+	offset := (page - 1) * size
+	limit := size
+	var total int64
+	//search query
+	data, err := db.Raw(`select r.recruiter_id, r.name, r.address, r.avartar, r.banner, 
+	r.phone, r.website, r.description, r.employee_quantity, r.contacter_name, r.contacter_phone, 
+	r.media, a.status, r.created_at, r.updated_at
+	FROM nodehub.recruiter r
+	left join nodehub.account a on r.recruiter_id = a.id
+	where r.name like ? ORDER BY r.created_at desc LIMIT ?, ?`, "%"+name+"%", offset, limit).Rows()
+	// count query
+	db.Raw(`SELECT count(*) FROM nodehub.recruiter where name like ?`, "%"+name+"%").Scan(&total)
+	if err != nil {
+		r.logger.Error("RecruiterGorm: Get List Recruiter error", zap.Error(err))
+		return nil, err
+	}
+	defer data.Close()
+	for data.Next() {
+		// ScanRows scan a row into user
+		db.ScanRows(data, &arr)
+	}
+	var temp float64 = math.Ceil(float64(total) / float64(size))
+	resutl.Total = total
+	resutl.TotalPage = temp
+	resutl.CurrentPage = page
+	resutl.Data = arr
+
+	return &resutl, nil
+}
+
+func (r *RecruiterGorm) UpdateReciuterByAdmin(ctx context.Context, recruiter_id int64, data map[string]interface{}) error {
+	db := r.db.WithContext(ctx)
+	err := db.Table(tableRecruiter).Where("recruiter_id=?", recruiter_id).Updates(data).Error
+	if err != nil {
+		r.logger.Error("RecruiterGorm: Update recruiter error", zap.Error(err), zap.Int64("recruiter_id", recruiter_id))
+		return err
+	}
+	return nil
+}
+
+func (r *RecruiterGorm) UpdateStatusReciuter(ctx context.Context, recruiter *models.RequestUpdateStatusRecruiter, recruiter_id int64) error {
+	db := r.db.WithContext(ctx)
+	err := db.Table(tableAccount).Where("id = ?", recruiter_id).Updates(map[string]interface{}{
+		"status": recruiter.Status}).Error
+	if err != nil {
+		r.logger.Error("RecruiterGorm: Update status recruiter error", zap.Error(err))
+		return err
+	}
+	return nil
+}
+
+/*Get list recruiter for candidate*/
+func (r *RecruiterGorm) GetAllRecruiterForCandidate(ctx context.Context, recruiterName string, skillName string, address string, page int64, size int64) (*models.ResponsetListRecruiterForCandidate, error) {
+	db := r.db.WithContext(ctx)
+	arr := []models.RecruiterForCandidateCheck{}
+	resutl := models.ResponsetListRecruiterForCandidate{}
+	offset := (page - 1) * size
+	limit := size
+
+	query := `select distinct r.recruiter_id, r.name, r.address, r.avartar, r.banner, 
+	r.description, r.employee_quantity, s.name as skill_name, s.icon as skill_icon
+	FROM nodehub.recruiter r
+	left JOIN nodehub.recruiter_skill rs on rs.recruiter_id = r.recruiter_id 
+	left join nodehub.skill s on rs.skill_id  = s.skill_id
+	where r.name like @RName`
+
+	querysum := `select count(*) FROM nodehub.recruiter r
+	left JOIN nodehub.recruiter_skill rs on rs.recruiter_id = r.recruiter_id 
+	left join nodehub.skill s on rs.skill_id  = s.skill_id
+	where r.name like @RName`
+
+	if skillName != "" {
+		query += `and s.name like @SName`
+		querysum += `and s.name like @SName`
+	}
+
+	if address != "" {
+		query += `and r.address like @ADD`
+		querysum += `and r.address like @ADD`
+	}
+
+	type NamedArgument struct {
+		RName string
+		SName string
+		ADD   string
+		OFF   int64
+		LI    int64
+	}
+
+	var total int64
+	//search query
+	data, err := db.Raw(query+` ORDER BY r.name LIMIT @OFF, @LI`, NamedArgument{RName: "%" + recruiterName + "%", SName: "%" + skillName + "%", ADD: "%" + address + "%", OFF: offset, LI: limit}).Rows()
+	// count query
+	db.Raw(querysum, NamedArgument{RName: "%" + recruiterName + "%", SName: "%" + skillName + "%", ADD: "%" + address + "%", OFF: offset, LI: limit}).Scan(&total)
+	if err != nil {
+		r.logger.Error("RecruiterGorm: Get List Recruiter error", zap.Error(err))
+		return nil, err
+	}
+	defer data.Close()
+	for data.Next() {
+		// ScanRows scan a row into user
+		db.ScanRows(data, &arr)
+	}
+	fmt.Println("checkk data: ", arr)
+	for i := 0; i < len(arr); i++ {
+		fmt.Println("checkk data 1: ", arr[i].Skill_name)
+		//TODO
+	}
+
+	var temp float64 = math.Ceil(float64(total) / float64(size))
+	resutl.Total = total
+	resutl.TotalPage = temp
+	resutl.CurrentPage = page
+	resutl.Data = arr
+
+	return &resutl, nil
 }
