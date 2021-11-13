@@ -4,47 +4,33 @@ import (
 	"context"
 	"net/http"
 
-	job_skill2 "gitlab.com/hieuxeko19991/job4e_be/endpoints/job_skill"
-
-	"gitlab.com/hieuxeko19991/job4e_be/services/job_skill"
-
-	job_apply2 "gitlab.com/hieuxeko19991/job4e_be/endpoints/job_apply"
-	"gitlab.com/hieuxeko19991/job4e_be/services/job_apply"
-
-	job2 "gitlab.com/hieuxeko19991/job4e_be/endpoints/job"
-
-	"gitlab.com/hieuxeko19991/job4e_be/services/job"
-
-	"gitlab.com/hieuxeko19991/job4e_be/pkg/elasticsearch"
-
-	"gitlab.com/hieuxeko19991/job4e_be/services/email"
-
-	"gitlab.com/hieuxeko19991/job4e_be/pkg/auth"
-
-	account2 "gitlab.com/hieuxeko19991/job4e_be/endpoints/account"
-	"gitlab.com/hieuxeko19991/job4e_be/services/account"
-	"gitlab.com/hieuxeko19991/job4e_be/transport"
-
-	blog2 "gitlab.com/hieuxeko19991/job4e_be/endpoints/blog"
-	"gitlab.com/hieuxeko19991/job4e_be/services/blog"
-
-	skill2 "gitlab.com/hieuxeko19991/job4e_be/endpoints/skill"
-	"gitlab.com/hieuxeko19991/job4e_be/services/skill"
-
-	category2 "gitlab.com/hieuxeko19991/job4e_be/endpoints/category"
-	"gitlab.com/hieuxeko19991/job4e_be/services/category"
-
-	media2 "gitlab.com/hieuxeko19991/job4e_be/endpoints/media"
-	"gitlab.com/hieuxeko19991/job4e_be/services/media"
-
-	recruiter2 "gitlab.com/hieuxeko19991/job4e_be/endpoints/recruiter"
-	"gitlab.com/hieuxeko19991/job4e_be/services/recruiter"
-
-	config2 "gitlab.com/hieuxeko19991/job4e_be/pkg/config"
-
-	"go.uber.org/zap"
-
 	"gitlab.com/hieuxeko19991/job4e_be/cmd/config"
+	account2 "gitlab.com/hieuxeko19991/job4e_be/endpoints/account"
+	blog2 "gitlab.com/hieuxeko19991/job4e_be/endpoints/blog"
+	candidate2 "gitlab.com/hieuxeko19991/job4e_be/endpoints/candidate"
+	category2 "gitlab.com/hieuxeko19991/job4e_be/endpoints/category"
+	job2 "gitlab.com/hieuxeko19991/job4e_be/endpoints/job"
+	job_apply2 "gitlab.com/hieuxeko19991/job4e_be/endpoints/job_apply"
+	job_skill2 "gitlab.com/hieuxeko19991/job4e_be/endpoints/job_skill"
+	media2 "gitlab.com/hieuxeko19991/job4e_be/endpoints/media"
+	recruiter2 "gitlab.com/hieuxeko19991/job4e_be/endpoints/recruiter"
+	skill2 "gitlab.com/hieuxeko19991/job4e_be/endpoints/skill"
+	"gitlab.com/hieuxeko19991/job4e_be/pkg/auth"
+	config2 "gitlab.com/hieuxeko19991/job4e_be/pkg/config"
+	"gitlab.com/hieuxeko19991/job4e_be/pkg/elasticsearch"
+	"gitlab.com/hieuxeko19991/job4e_be/services/account"
+	"gitlab.com/hieuxeko19991/job4e_be/services/blog"
+	"gitlab.com/hieuxeko19991/job4e_be/services/candidate"
+	"gitlab.com/hieuxeko19991/job4e_be/services/category"
+	"gitlab.com/hieuxeko19991/job4e_be/services/email"
+	"gitlab.com/hieuxeko19991/job4e_be/services/job"
+	"gitlab.com/hieuxeko19991/job4e_be/services/job_apply"
+	"gitlab.com/hieuxeko19991/job4e_be/services/job_skill"
+	"gitlab.com/hieuxeko19991/job4e_be/services/media"
+	"gitlab.com/hieuxeko19991/job4e_be/services/recruiter"
+	"gitlab.com/hieuxeko19991/job4e_be/services/skill"
+	"gitlab.com/hieuxeko19991/job4e_be/transport"
+	"go.uber.org/zap"
 )
 
 type Server struct {
@@ -102,7 +88,7 @@ func InitServer() *Server {
 		logger.Panic("Load config error", zap.Error(err))
 		return nil
 	}
-
+	logger.Info("Config", zap.Reflect("config", conf))
 	gormDB := config2.InitGormDB(conf.MySQL)
 	esClient, err := elasticsearch.InitElasticSearchClient(conf.ESConfig)
 	if err != nil {
@@ -156,13 +142,18 @@ func InitServer() *Server {
 	jobApplyService := job_apply.NewJobApplyService(jobApplyGorm, logger)
 	jobApplySerializer := job_apply2.NewJobApplySerializer(jobApplyService, logger)
 
-	//int media service
+	//init media service
 	mediaGorm := media.NewMediaGorm(gormDB, logger)
 	mediaService := media.NewMediaCategory(mediaGorm, logger)
 	mediaSerializer := media2.NewMediaSerializer(mediaService, logger)
-	//int recruiter service
+	//init recruiter service
 	recruiterService := recruiter.NewRecruiterCategory(recruiterGorm, logger)
 	recruiterSerializer := recruiter2.NewRecruiterSerializer(recruiterService, logger)
+
+	//init candidate profile
+	candidateGorm := candidate.NewCandidateGorm(gormDB, logger)
+	canService := candidate.NewCandidateService(candidateGorm, logger)
+	canSerializer := candidate2.NewCandidateSerializer(canService, logger)
 
 	ginDepen := transport.GinDependencies{
 		AccountSerializer:   accountSerializer,
@@ -174,6 +165,7 @@ func InitServer() *Server {
 		JobApplySerializer:  jobApplySerializer,
 		MediaSerializer:     mediaSerializer,
 		RecruiterSerializer: recruiterSerializer,
+		CandidateSerializer: canSerializer,
 		JobSkillSerializer:  jobSkillSerializer,
 	}
 	ginHandler := ginDepen.InitGinEngine(conf)
