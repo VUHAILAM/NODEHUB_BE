@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"net/http"
 
+	"gitlab.com/hieuxeko19991/job4e_be/endpoints/job_skill"
+
 	"gitlab.com/hieuxeko19991/job4e_be/endpoints/job_apply"
 
 	"gitlab.com/hieuxeko19991/job4e_be/endpoints/job"
@@ -34,6 +36,7 @@ type GinDependencies struct {
 	JobSerializer       *job.JobSerializer
 	JobApplySerializer  *job_apply.JobApplySerializer
 	RecruiterSerializer *recruiter.RecruiterSerializer
+	JobSkillSerializer  *job_skill.JobSkillSerializer
 }
 
 func (g *GinDependencies) InitGinEngine(config *config.Config) *gin.Engine {
@@ -98,6 +101,10 @@ func (g *GinDependencies) InitGinEngine(config *config.Config) *gin.Engine {
 	applyCtl.Use(middlewares.AuthorizationMiddleware(g.Auth, auth.CandidateRole)).POST("/apply", g.JobApplySerializer.Apply)
 	applyCtl.Use(middlewares.AuthorizationMiddleware(g.Auth, auth.RecruiterRole)).GET("/jobs", g.JobApplySerializer.GetJobAppliedByJobID)
 	applyCtl.Use(middlewares.AuthorizationMiddleware(g.Auth, auth.CandidateRole)).GET("/candidate", g.JobApplySerializer.GetJobAppliedByCandidateID)
+
+	jobSkill := nodehub.Group("/job-skill").Use(middlewares.AuthorizationMiddleware(g.Auth, auth.CommonRole))
+	jobSkill.GET("jobs", g.JobSkillSerializer.GetJobsBySkill)
+	jobSkill.GET("skills", g.JobSkillSerializer.GetSkillsByJob)
 
 	return engine
 }

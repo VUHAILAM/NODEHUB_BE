@@ -17,7 +17,8 @@ type Config struct {
 	HTTP  HTTPConf           `mapstructure:"http"`
 	MySQL config.MySQLConfig `mapstructure:"mysql"`
 
-	ESConfig elasticsearch.Config `mapstructure:"es"`
+	ESConfig   elasticsearch.Config `mapstructure:"es"`
+	JobESIndex string               `envconfig:"JOB_ES_INDEX" mapstructure:"job_es_index"`
 
 	Origin string `envconfig:"ORIGIN" mapstructure:"origin" default:"*"`
 
