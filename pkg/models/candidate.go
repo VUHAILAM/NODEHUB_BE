@@ -37,7 +37,7 @@ type Candidate struct {
 	Phone             string    `json:"phone,omitempty"`
 	FindJob           bool      `json:"find_job,omitempty"`
 	NodehubReview     string    `json:"nodehub_review,omitempty"`
-	CVManage          string    `json:"cv_manage,omitempty"`
+	CvManage          string    `json:"cv_manage,omitempty"`
 	ExperienceManage  string    `json:"experience_manage,omitempty"`
 	SocialManage      string    `json:"social_manage,omitempty"`
 	ProjectManage     string    `json:"project_manage,omitempty"`
@@ -122,6 +122,7 @@ func (req *CandidateRequest) ToCandidate() (Candidate, error) {
 		return Candidate{}, err
 	}
 	candidate := Candidate{
+		CandidateID:       req.CandidateID,
 		FirstName:         req.FirstName,
 		LastName:          req.LastName,
 		BirthDay:          req.BirthDay,
@@ -131,7 +132,7 @@ func (req *CandidateRequest) ToCandidate() (Candidate, error) {
 		Phone:             req.Phone,
 		FindJob:           req.FindJob,
 		NodehubReview:     req.NodehubReview,
-		CVManage:          string(cvJson),
+		CvManage:          string(cvJson),
 		ExperienceManage:  string(exJson),
 		SocialManage:      string(socialJson),
 		ProjectManage:     string(prjJson),
@@ -143,7 +144,7 @@ func (req *CandidateRequest) ToCandidate() (Candidate, error) {
 
 func (c *Candidate) ToCandidateRequest() (CandidateRequest, error) {
 	var cvManage []CV
-	err := json.Unmarshal([]byte(c.CVManage), &cvManage)
+	err := json.Unmarshal([]byte(c.CvManage), &cvManage)
 	if err != nil {
 		return CandidateRequest{}, err
 	}

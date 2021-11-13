@@ -103,8 +103,8 @@ func (g *GinDependencies) InitGinEngine(config *config.Config) *gin.Engine {
 	applyCtl.Use(middlewares.AuthorizationMiddleware(g.Auth, auth.CandidateRole)).GET("/candidate", g.JobApplySerializer.GetJobAppliedByCandidateID)
 	canCtl := nodehub.Group("/candidate")
 	canCtl.Use(middlewares.AuthorizationMiddleware(g.Auth, auth.CommonRole)).GET("/profile", g.CandidateSerializer.GetProfile)
-	canCtl.Use(middlewares.AuthorizationMiddleware(g.Auth, auth.CandidateRole)).POST("create", g.CandidateSerializer.CreateProfile)
-	canCtl.Use(middlewares.AuthorizationMiddleware(g.Auth, auth.CandidateRole)).PUT("update", g.CandidateSerializer.UpdateProfile)
+	canCtl.Use(middlewares.AuthorizationMiddleware(g.Auth, auth.CandidateRole)).POST("/create", g.CandidateSerializer.CreateProfile)
+	canCtl.Use(middlewares.AuthorizationMiddleware(g.Auth, auth.CandidateRole)).PUT("/update", g.CandidateSerializer.UpdateProfile)
 	return engine
 }
 

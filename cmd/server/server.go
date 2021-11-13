@@ -58,7 +58,7 @@ func InitServer() *Server {
 	if err != nil {
 		logger.Panic("Load config error", zap.Error(err))
 	}
-
+	logger.Info("Config", zap.Reflect("config", conf))
 	gormDB := config2.InitGormDB(conf.MySQL)
 	esClient, err := elasticsearch.InitElasticSearchClient(conf.ESConfig)
 	if err != nil {

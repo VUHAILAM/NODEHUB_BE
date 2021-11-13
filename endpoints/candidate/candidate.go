@@ -108,7 +108,10 @@ func (cs *CandidateSerializer) GetProfile(ginCtx *gin.Context) {
 		})
 		return
 	}
-	req.CandidateID = acc.(models.Account).Id
+	cs.Logger.Info("", zap.Reflect("canReq", req))
+	if req.CandidateID == 0 {
+		req.CandidateID = acc.(models.Account).Id
+	}
 	candidate, err := cs.CandidateService.GetCandidateProfile(ctx, req.CandidateID)
 	if err != nil {
 		cs.Logger.Error(err.Error())
