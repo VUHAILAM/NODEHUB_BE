@@ -3,6 +3,9 @@ package server
 import (
 	"net/http"
 
+	candidate2 "gitlab.com/hieuxeko19991/job4e_be/endpoints/candidate"
+	"gitlab.com/hieuxeko19991/job4e_be/services/candidate"
+
 	job_apply2 "gitlab.com/hieuxeko19991/job4e_be/endpoints/job_apply"
 	"gitlab.com/hieuxeko19991/job4e_be/services/job_apply"
 
@@ -92,13 +95,18 @@ func InitServer() *Server {
 	jobApplyService := job_apply.NewJobApplyService(jobApplyGorm, logger)
 	jobApplySerializer := job_apply2.NewJobApplySerializer(jobApplyService, logger)
 
-	//int media service
+	//init media service
 	mediaGorm := media.NewMediaGorm(gormDB, logger)
 	mediaService := media.NewMediaCategory(mediaGorm, logger)
 	mediaSerializer := media2.NewMediaSerializer(mediaService, logger)
-	//int recruiter service
+	//init recruiter service
 	recruiterService := recruiter.NewRecruiterCategory(recruiterGorm, logger)
 	recruiterSerializer := recruiter2.NewRecruiterSerializer(recruiterService, logger)
+
+	//init candidate profile
+	candidateGorm := candidate.NewCandidateGorm(gormDB, logger)
+	canService := candidate.NewCandidateService(candidateGorm, logger)
+	canSerializer := candidate2.NewCandidateSerializer(canService, logger)
 
 	ginDepen := transport.GinDependencies{
 		AccountSerializer:   accountSerializer,
@@ -110,6 +118,7 @@ func InitServer() *Server {
 		JobApplySerializer:  jobApplySerializer,
 		MediaSerializer:     mediaSerializer,
 		RecruiterSerializer: recruiterSerializer,
+		CandidateSerializer: canSerializer,
 	}
 	ginHandler := ginDepen.InitGinEngine(conf)
 	return &Server{
