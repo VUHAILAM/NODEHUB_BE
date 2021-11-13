@@ -16,6 +16,8 @@ const (
 
 type IJobApplyDatabase interface {
 	Create(ctx context.Context, jobApply *models.JobApply) (int64, error)
+	GetAppliedJobByJobID(ctx context.Context, jobID int64, offset, size int64) ([]*models.Job, int64, error)
+	GetAppliedJobByCandidateID(ctx context.Context, candidateID int64, offset, size int64) ([]*models.Job, int64, error)
 }
 
 type JobApplyGorm struct {

@@ -9,7 +9,7 @@ CREATE TABLE `job`
     `role` varchar(255) CHARSET utf8 NOT NULL,
     `experience` varchar(255) CHARSET utf8 NOT NULL,
     `location` varchar(255) CHARSET utf8 NOT NULL,
-    `hire_date` bigint,
+    `hire_date` datetime,
     `status` tinyint(1),
     `created_at`  datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `updated_at`  datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,

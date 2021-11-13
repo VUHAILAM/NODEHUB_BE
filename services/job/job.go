@@ -3,6 +3,8 @@ package job
 import (
 	"context"
 
+	"gitlab.com/hieuxeko19991/job4e_be/services/job_skill"
+
 	"github.com/mitchellh/mapstructure"
 
 	"gitlab.com/hieuxeko19991/job4e_be/cmd/config"
@@ -18,18 +20,21 @@ type IJobService interface {
 }
 
 type Job struct {
-	JobGorm *JobGorm
-	JobES   *JobES
-	Conf    *config.Config
-	Logger  *zap.Logger
+	JobGorm      *JobGorm
+	JobES        *JobES
+	JobSkillGorm job_skill.IJobSkillDatabase
+
+	Conf   *config.Config
+	Logger *zap.Logger
 }
 
-func NewJobService(jobGorm *JobGorm, jobES *JobES, conf *config.Config, logger *zap.Logger) *Job {
+func NewJobService(jobGorm *JobGorm, jobES *JobES, js *job_skill.JobSkillGorm, conf *config.Config, logger *zap.Logger) *Job {
 	return &Job{
-		JobGorm: jobGorm,
-		JobES:   jobES,
-		Conf:    conf,
-		Logger:  logger,
+		JobGorm:      jobGorm,
+		JobES:        jobES,
+		JobSkillGorm: js,
+		Conf:         conf,
+		Logger:       logger,
 	}
 }
 
@@ -55,6 +60,7 @@ func (j *Job) CreateNewJob(ctx context.Context, job *models.CreateJobRequest) er
 	jobData.JobID = newJob.JobID
 	jobData.CreatedAt = newJob.CreatedAt
 	esJob := models.ToESJobCreate(jobData)
+	esJob.SkillIDs = job.SkillIDs
 	jobInput := map[string]interface{}{}
 	err = mapStructureDecodeWithTextUnmarshaler(esJob, &jobInput)
 	if err != nil {
@@ -66,6 +72,18 @@ func (j *Job) CreateNewJob(ctx context.Context, job *models.CreateJobRequest) er
 	if err != nil {
 		j.Logger.Error("Create job to ES error", zap.Error(err))
 		return err
+	}
+
+	for _, sid := range job.SkillIDs {
+		jsModel := &models.JobSkill{
+			SkillID: sid,
+			JobID:   newJob.JobID,
+		}
+		_, err = j.JobSkillGorm.Create(ctx, jsModel)
+		if err != nil {
+			j.Logger.Error("Create job skill error", zap.Error(err), zap.Int64("job_id", newJob.JobID), zap.Int64("skill_id", sid))
+			continue
+		}
 	}
 	return nil
 }
