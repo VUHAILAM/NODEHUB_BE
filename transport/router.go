@@ -14,6 +14,7 @@ import (
 	"gitlab.com/hieuxeko19991/job4e_be/endpoints/job_apply"
 	"gitlab.com/hieuxeko19991/job4e_be/endpoints/job_skill"
 	"gitlab.com/hieuxeko19991/job4e_be/endpoints/media"
+	"gitlab.com/hieuxeko19991/job4e_be/endpoints/notification"
 	"gitlab.com/hieuxeko19991/job4e_be/endpoints/recruiter"
 	"gitlab.com/hieuxeko19991/job4e_be/endpoints/skill"
 	"gitlab.com/hieuxeko19991/job4e_be/middlewares"
@@ -22,17 +23,18 @@ import (
 )
 
 type GinDependencies struct {
-	AccountSerializer   *account.AccountSerializer
-	Auth                *auth.AuthHandler
-	BlogSerializer      *blog.BlogSerializer
-	SkillSerializer     *skill.SkillSerializer
-	CategorySerializer  *category.CategorySerializer
-	MediaSerializer     *media.MediaSerializer
-	JobSerializer       *job.JobSerializer
-	JobApplySerializer  *job_apply.JobApplySerializer
-	RecruiterSerializer *recruiter.RecruiterSerializer
-	CandidateSerializer *candidate.CandidateSerializer
-	JobSkillSerializer  *job_skill.JobSkillSerializer
+	AccountSerializer      *account.AccountSerializer
+	Auth                   *auth.AuthHandler
+	BlogSerializer         *blog.BlogSerializer
+	SkillSerializer        *skill.SkillSerializer
+	CategorySerializer     *category.CategorySerializer
+	MediaSerializer        *media.MediaSerializer
+	JobSerializer          *job.JobSerializer
+	JobApplySerializer     *job_apply.JobApplySerializer
+	RecruiterSerializer    *recruiter.RecruiterSerializer
+	CandidateSerializer    *candidate.CandidateSerializer
+	JobSkillSerializer     *job_skill.JobSkillSerializer
+	NotificationSerializer *notification.NotificationSerializer
 }
 
 func (g *GinDependencies) InitGinEngine(config *config.Config) *gin.Engine {
@@ -55,7 +57,7 @@ func (g *GinDependencies) InitGinEngine(config *config.Config) *gin.Engine {
 	// blog
 	blogCtlAdmin := nodehub.Group("/private/blog").Use(middlewares.AuthorizationMiddleware(g.Auth, auth.AdminRole))
 	blogCtlUser := nodehub.Group("/public/blog")
-	blogCtlUser.POST("/getList", g.BlogSerializer.Getlist)
+	blogCtlUser.POST("/getList", g.BlogSerializer.GetListBlogUser)
 	blogCtlAdmin.POST("/getList", g.BlogSerializer.Getlist)
 	blogCtlAdmin.POST("/createBlog", g.BlogSerializer.CreateBlog)
 	blogCtlAdmin.POST("/updateBlog", g.BlogSerializer.UpdateBlog)
@@ -87,6 +89,7 @@ func (g *GinDependencies) InitGinEngine(config *config.Config) *gin.Engine {
 	recruiterProfile.PUT("/updateProfile", g.RecruiterSerializer.UpdateProfile)
 	recruiterProfile.POST("/addRecruiterSkill", g.RecruiterSerializer.AddRecruiterSkill)
 	recruiterProfile.GET("/getRecruiterSkill", g.RecruiterSerializer.GetRecruiterSkill)
+	recruiterProfile.DELETE("/deleteRecruiterSkill", g.RecruiterSerializer.DeleteRecruiterSkill)
 	recruiterAdmin.POST("/getListRecruiterForAdmin", g.RecruiterSerializer.GetListRecruiterForAdmin)
 	recruiterAdmin.PUT("/updateReciuterByAdmin", g.RecruiterSerializer.UpdateReciuterByAdmin)
 	recruiterAdmin.PUT("/updateStatusRecuiter", g.RecruiterSerializer.UpdateStatusReciuter)
@@ -115,6 +118,9 @@ func (g *GinDependencies) InitGinEngine(config *config.Config) *gin.Engine {
 	jobSkill := nodehub.Group("/job-skill").Use(middlewares.AuthorizationMiddleware(g.Auth, auth.CommonRole))
 	jobSkill.GET("jobs", g.JobSkillSerializer.GetJobsBySkill)
 	jobSkill.GET("skills", g.JobSkillSerializer.GetSkillsByJob)
+	//notification
+	notificationUser := nodehub.Group("/public/notification").Use(middlewares.AuthorizationMiddleware(g.Auth, auth.CommonRole))
+	notificationUser.POST("/getListNotificationByAccount", g.NotificationSerializer.GetListNotificationByAccount)
 	return engine
 }
 

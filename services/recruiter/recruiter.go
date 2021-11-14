@@ -17,6 +17,7 @@ type IRecruiterService interface {
 	UpdateReciuterByAdmin(ctx context.Context, updateRequest *models.RequestUpdateRecruiterAdmin) error
 	UpdateStatusReciuter(ctx context.Context, updateRequest *models.RequestUpdateStatusRecruiter, recruiter_id int64) error
 	GetAllRecruiterForCandidate(ctx context.Context, recruiterName string, skillName string, address string, page int64, size int64) (*models.ResponsetListRecruiterForCandidate, error)
+	DeleteRecruiterSkill(ctx context.Context, recruiter_skill_id int64) error
 }
 
 type IRecruiterDatabase interface {
@@ -29,6 +30,7 @@ type IRecruiterDatabase interface {
 	UpdateReciuterByAdmin(ctx context.Context, updateRequest *models.RequestUpdateRecruiterAdmin) error
 	UpdateStatusReciuter(ctx context.Context, updateRequest *models.RequestUpdateStatusRecruiter, recruiter_id int64) error
 	GetAllRecruiterForCandidate(ctx context.Context, recruiterName string, skillName string, address string, page int64, size int64) (*models.ResponsetListRecruiterForCandidate, error)
+	DeleteRecruiterSkill(ctx context.Context, recruiter_skill_id int64) error
 }
 
 type Recruiter struct {
@@ -90,6 +92,16 @@ func (r *Recruiter) GetRecruiterSkill(ctx context.Context, recruiter_id int64) (
 		return nil, err
 	}
 	return acc, nil
+}
+
+func (r *Recruiter) DeleteRecruiterSkill(ctx context.Context, recruiter_skill_id int64) error {
+
+	err := r.RecruiterGorm.DeleteRecruiterSkill(ctx, recruiter_skill_id)
+	if err != nil {
+		r.Logger.Error("Can not delete to MySQL", zap.Error(err))
+		return err
+	}
+	return nil
 }
 
 //recruiter admin

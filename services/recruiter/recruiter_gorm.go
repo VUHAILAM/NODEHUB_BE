@@ -87,6 +87,17 @@ func (r *RecruiterGorm) AddRecruiterSkill(ctx context.Context, recruiterSkill *m
 	return nil
 }
 
+func (r *RecruiterGorm) DeleteRecruiterSkill(ctx context.Context, recruiter_skill_id int64) error {
+	db := r.db.WithContext(ctx)
+	recruiter_skill := models.RecruiterSkill{}
+	err := db.Table(tableRecruiterSkill).Delete(&recruiter_skill, recruiter_skill_id).Error
+	if err != nil {
+		r.logger.Error("RecruiterGorm: Delete skill error", zap.Error(err), zap.Int64("recruiter_skill_id", recruiter_skill_id))
+		return err
+	}
+	return nil
+}
+
 func (r *RecruiterGorm) GetRecruiterSkill(ctx context.Context, recruiter_id int64) ([]models.ResponseRecruiterSkill, error) {
 	db := r.db.WithContext(ctx)
 	arr := []models.ResponseRecruiterSkill{}
@@ -109,7 +120,7 @@ func (r *RecruiterGorm) GetRecruiterSkill(ctx context.Context, recruiter_id int6
 /*Get list recruiter for admin*/
 func (r *RecruiterGorm) GetAllRecruiterForAdmin(ctx context.Context, name string, page int64, size int64) (*models.ResponsetListRecruiter, error) {
 	db := r.db.WithContext(ctx)
-	arr := []models.Recruiter{}
+	arr := []models.RecruiterForAdmin{}
 	resutl := models.ResponsetListRecruiter{}
 	offset := (page - 1) * size
 	limit := size
@@ -117,7 +128,7 @@ func (r *RecruiterGorm) GetAllRecruiterForAdmin(ctx context.Context, name string
 	//search query
 	data, err := db.Raw(`select r.recruiter_id, r.name, r.address, r.avartar, r.banner, 
 	r.phone, r.website, r.description, r.employee_quantity, r.contacter_name, r.contacter_phone, 
-	r.media, a.status, r.created_at, r.updated_at
+	r.media, r.premium, r.nodehub_review, a.status, r.created_at, r.updated_at
 	FROM nodehub.recruiter r
 	left join nodehub.account a on r.recruiter_id = a.id
 	where r.name like ? ORDER BY r.created_at desc LIMIT ?, ?`, "%"+name+"%", offset, limit).Rows()

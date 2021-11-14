@@ -126,6 +126,29 @@ func (r *RecruiterSerializer) GetRecruiterSkill(ginCtx *gin.Context) {
 	})
 }
 
+func (r *RecruiterSerializer) DeleteRecruiterSkill(ginCtx *gin.Context) {
+	ctx := ginCtx.Request.Context()
+	req := ginCtx.Query("recruiter_skill_id")
+	n, err1 := strconv.ParseInt(req, 10, 64)
+	err := r.recruiterService.DeleteRecruiterSkill(ctx, n)
+	if err1 != nil {
+		r.Logger.Error(" DeleteRecruiterSkill error", zap.Error(err))
+		ginx.BuildErrorResponse(ginCtx, err, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+	if err != nil {
+		r.Logger.Error(" DeleteRecruiterSkill error", zap.Error(err))
+		ginx.BuildErrorResponse(ginCtx, err, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+	ginx.BuildSuccessResponse(ginCtx, http.StatusAccepted, nil)
+}
+
+//recruiter admin
 func (r *RecruiterSerializer) GetListRecruiterForAdmin(ginCtx *gin.Context) {
 	ctx := ginCtx.Request.Context()
 	req := models.RequestGetListRecruiter{}

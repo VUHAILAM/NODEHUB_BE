@@ -12,12 +12,10 @@ CREATE TABLE `recruiter`
     `contacter_name` varchar(255) CHARSET utf8 NOT NULL,
     `contacter_phone` varchar(50) NOT NULL,
     `media` varchar(255) NOT NULL,
-    `activeVIP` bool NOT NULL, 
+    `premium` bool NOT NULL DEFAULT false,
+    `nodehub_review` varchar(255) CHARSET utf8,
     `created_at`  datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `updated_at`  datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY(`recruiter_id`),
     FOREIGN KEY (`recruiter_id`) REFERENCES account(`id`)
 )
-
-ALTER TABLE `recruiter`
-ADD COLUMN nodehub_review varchar(255) CHARSET utf8 AFTER activeVIP;

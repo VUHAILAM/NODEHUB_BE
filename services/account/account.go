@@ -148,6 +148,8 @@ func (a *Account) Register(ctx context.Context, account *models.RequestRegisterA
 			ContacterName:    account.RecruiterInfor.ContacterName,
 			ContacterPhone:   account.RecruiterInfor.ContacterPhone,
 			Media:            account.RecruiterInfor.Media,
+			Premium:          account.RecruiterInfor.Premium,
+			Nodehub_review:   account.RecruiterInfor.Nodehub_review,
 		}
 		_, err = a.RecruiterGorm.Create(ctx, recruiterModel)
 		if err != nil {

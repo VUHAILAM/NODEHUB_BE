@@ -15,7 +15,7 @@ type Recruiter struct {
 	ContacterName    string    `json:"contacter_name"`
 	ContacterPhone   string    `json:"contacter_phone"`
 	Media            string    `json:"media"`
-	ActiveVIP        bool      `json:"activeVIP"`
+	Premium          bool      `json:"premium"`
 	Nodehub_review   string    `json:"nodehub_review"`
 	CreatedAt        time.Time `json:"created_at"`
 	UpdatedAt        time.Time `json:"updated_at"`
@@ -33,6 +33,8 @@ type RequestRecruiter struct {
 	ContacterName    string `json:"contacter_name"`
 	ContacterPhone   string `json:"contacter_phone"`
 	Media            string `json:"media"`
+	Premium          bool   `json:"premium"`
+	Nodehub_review   string `json:"nodehub_review"`
 }
 
 type RequestUpdateRecruiter struct {
@@ -81,16 +83,36 @@ type RequestGetListRecruiter struct {
 	Size int64  `json:"size"`
 }
 
+type RecruiterForAdmin struct {
+	RecruiterID      int64     `json:"recruiter_id" gorm:"primaryKey"`
+	Name             string    `json:"name"`
+	Address          string    `json:"address"`
+	Avartar          string    `json:"avartar"`
+	Banner           string    `json:"banner"`
+	Phone            string    `json:"phone"`
+	Website          string    `json:"website"`
+	Description      string    `json:"description"`
+	EmployeeQuantity string    `json:"employee_quantity"`
+	ContacterName    string    `json:"contacter_name"`
+	ContacterPhone   string    `json:"contacter_phone"`
+	Media            string    `json:"media"`
+	Premium          bool      `json:"premium"`
+	Nodehub_review   string    `json:"nodehub_review"`
+	Status           bool      `json:"status"`
+	CreatedAt        time.Time `json:"created_at"`
+	UpdatedAt        time.Time `json:"updated_at"`
+}
+
 type ResponsetListRecruiter struct {
-	Total       int64       `json:"total"`
-	TotalPage   float64     `json:"totalPage"`
-	CurrentPage int64       `json:"currentPage"`
-	Data        []Recruiter `json:"data"`
+	Total       int64               `json:"total"`
+	TotalPage   float64             `json:"totalPage"`
+	CurrentPage int64               `json:"currentPage"`
+	Data        []RecruiterForAdmin `json:"data"`
 }
 
 type RequestUpdateRecruiterAdmin struct {
 	RecruiterID    int64  `json:"recruiter_id,omitempty" mapstructure:"recruiter_id,omitempty"`
-	ActiveVIP      bool   `json:"activeVIP,omitempty" mapstructure:"activeVIP,omitempty"`
+	Premium        bool   `json:"premium" mapstructure:"premium"`
 	Nodehub_review string `json:"nodehub_review,omitempty" mapstructure:"nodehub_review,omitempty"`
 }
 

@@ -84,7 +84,7 @@ func (m *MediaGorm) Get(ctx context.Context, name string, page int64, size int64
 func (m *MediaGorm) GetSlide(ctx context.Context) ([]models.Media, error) {
 	db := m.db.WithContext(ctx)
 	arr := []models.Media{}
-	data, err := db.Raw(`select * FROM nodehub.media where type = "slide"`).Rows()
+	data, err := db.Raw(`select * FROM nodehub.media where type = "slide" and status = 1`).Rows()
 	if err != nil {
 		m.logger.Error("MediaGorm: Get slide error", zap.Error(err))
 		return nil, err
