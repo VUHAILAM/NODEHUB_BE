@@ -3,6 +3,7 @@ package job
 import (
 	"encoding/json"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/pkg/errors"
@@ -122,4 +123,71 @@ func (s *JobSerializer) GetAllJob(ginCtx *gin.Context) {
 		return
 	}
 	ginx.BuildSuccessResponse(ginCtx, http.StatusAccepted, resp)
+}
+
+func (s *JobSerializer) GetAllJobForAdmin(ginCtx *gin.Context) {
+	ctx := ginCtx.Request.Context()
+	req := models.RequestGetListJobAdmin{}
+	err := json.NewDecoder(ginCtx.Request.Body).Decode(&req)
+	if err != nil {
+		s.Logger.Error("Parse request Get all Job error", zap.Error(err))
+		ginx.BuildErrorResponse(ginCtx, err, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	resp, err := s.JobService.GetAllJobForAdmin(ctx, req.Name, req.Page, req.Size)
+	if err != nil {
+		s.Logger.Error("Get all Job error", zap.Error(err))
+		ginx.BuildErrorResponse(ginCtx, err, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+	ginx.BuildSuccessResponse(ginCtx, http.StatusAccepted, resp)
+}
+
+func (s *JobSerializer) UpdateStatusJob(ginCtx *gin.Context) {
+	ctx := ginCtx.Request.Context()
+	req := models.RequestUpdateStatusJob{}
+	err := json.NewDecoder(ginCtx.Request.Body).Decode(&req)
+	if err != nil {
+		s.Logger.Error("Parse request Update status job error", zap.Error(err))
+		ginx.BuildErrorResponse(ginCtx, err, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+	err = s.JobService.UpdateStatusJob(ctx, &req)
+	if err != nil {
+		s.Logger.Error("Update status job error", zap.Error(err))
+		ginx.BuildErrorResponse(ginCtx, err, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+	ginx.BuildSuccessResponse(ginCtx, http.StatusAccepted, nil)
+}
+
+func (s *JobSerializer) DeleteJob(ginCtx *gin.Context) {
+	ctx := ginCtx.Request.Context()
+	req := ginCtx.Query("job_id")
+	n, err1 := strconv.ParseInt(req, 10, 64)
+	err := s.JobService.DeleteJob(ctx, n)
+	if err1 != nil {
+		s.Logger.Error("Delete Job error", zap.Error(err))
+		ginx.BuildErrorResponse(ginCtx, err, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+	if err != nil {
+		s.Logger.Error("Delete Job error", zap.Error(err))
+		ginx.BuildErrorResponse(ginCtx, err, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+	ginx.BuildSuccessResponse(ginCtx, http.StatusAccepted, nil)
 }

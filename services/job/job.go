@@ -17,6 +17,9 @@ type IJobService interface {
 	GetDetailJob(ctx context.Context, jobID int64) (*models.Job, error)
 	UpdateJob(ctx context.Context, updateRequest *models.RequestUpdateJob) error
 	GetAllJob(ctx context.Context, getRequest *models.RequestGetAllJob) (*models.ResponseGetAllJob, error)
+	GetAllJobForAdmin(ctx context.Context, name string, page int64, size int64) (*models.ResponsetListJobAdmin, error)
+	UpdateStatusJob(ctx context.Context, updateRequest *models.RequestUpdateStatusJob) error
+	DeleteJob(ctx context.Context, job_id int64) error
 }
 
 type Job struct {
@@ -148,4 +151,31 @@ func mapStructureDecodeWithTextUnmarshaler(input, output interface{}) error {
 		return err
 	}
 	return decoder.Decode(input)
+}
+
+//job admin
+func (j *Job) GetAllJobForAdmin(ctx context.Context, name string, page int64, size int64) (*models.ResponsetListJobAdmin, error) {
+	acc, err := j.JobGorm.GetAllJobForAdmin(ctx, name, page, size)
+	if err != nil {
+		return nil, err
+	}
+	return acc, nil
+}
+
+func (j *Job) UpdateStatusJob(ctx context.Context, updateRequest *models.RequestUpdateStatusJob) error {
+	jobModels := &models.RequestUpdateStatusJob{
+		Status: updateRequest.Status}
+	err := j.JobGorm.UpdateStatusJob(ctx, jobModels, updateRequest.JobID)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+func (j *Job) DeleteJob(ctx context.Context, job_id int64) error {
+	err := j.JobGorm.DeleteJob(ctx, job_id)
+	if err != nil {
+		j.Logger.Error("Can not delete to MySQL", zap.Error(err))
+		return err
+	}
+	return nil
 }

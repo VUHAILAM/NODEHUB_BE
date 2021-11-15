@@ -123,3 +123,73 @@ func (cs *CandidateSerializer) GetProfile(ginCtx *gin.Context) {
 
 	ginx.BuildSuccessResponse(ginCtx, http.StatusAccepted, candidate)
 }
+
+//recruiter admin
+func (cs *CandidateSerializer) GetAllCandidateForAdmin(ginCtx *gin.Context) {
+	ctx := ginCtx.Request.Context()
+	req := models.RequestGetListCandidateAdmin{}
+	err := json.NewDecoder(ginCtx.Request.Body).Decode(&req)
+	if err != nil {
+		cs.Logger.Error("Parse request get list error", zap.Error(err))
+		ginx.BuildErrorResponse(ginCtx, err, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+	data, err := cs.CandidateService.GetAllCandidateForAdmin(ctx, req.Name, req.Page, req.Size)
+	if err != nil {
+		cs.Logger.Error("GetAllCandidateForAdmin error", zap.Error(err))
+		ginx.BuildErrorResponse(ginCtx, err, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	ginx.BuildSuccessResponse(ginCtx, http.StatusAccepted, gin.H{
+		"data": data,
+	})
+}
+
+func (cs *CandidateSerializer) UpdateReviewCandidateByAdmin(ginCtx *gin.Context) {
+	ctx := ginCtx.Request.Context()
+	req := models.RequestUpdateReviewCandidateAdmin{}
+	err := json.NewDecoder(ginCtx.Request.Body).Decode(&req)
+	if err != nil {
+		cs.Logger.Error("Parse request Update review candidate error", zap.Error(err))
+		ginx.BuildErrorResponse(ginCtx, err, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+	err = cs.CandidateService.UpdateReviewCandidateByAdmin(ctx, &req)
+	if err != nil {
+		cs.Logger.Error("Update Recruiter error", zap.Error(err))
+		ginx.BuildErrorResponse(ginCtx, err, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+	ginx.BuildSuccessResponse(ginCtx, http.StatusAccepted, nil)
+}
+
+func (cs *CandidateSerializer) UpdateStatusCandidate(ginCtx *gin.Context) {
+	ctx := ginCtx.Request.Context()
+	req := models.RequestUpdateStatusCandidate{}
+	err := json.NewDecoder(ginCtx.Request.Body).Decode(&req)
+	if err != nil {
+		cs.Logger.Error("Parse request Update status candidate error", zap.Error(err))
+		ginx.BuildErrorResponse(ginCtx, err, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+	err = cs.CandidateService.UpdateStatusCandidate(ctx, &req, req.ID)
+	if err != nil {
+		cs.Logger.Error("Update status candidate error", zap.Error(err))
+		ginx.BuildErrorResponse(ginCtx, err, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+	ginx.BuildSuccessResponse(ginCtx, http.StatusAccepted, nil)
+}

@@ -9,12 +9,14 @@ import (
 
 type IBlogService interface {
 	GetListBlog(ctx context.Context, title string, page int64, size int64) (*models.ResponsetListBlog, error)
+	GetListBlogUser(ctx context.Context, title string, page int64, size int64) (*models.ResponsetListBlog, error)
 	CreateBlog(ctx context.Context, blog *models.RequestCreateBlog) error
 	UpdateBlog(ctx context.Context, blog *models.RequestCreateBlog, Blog_id int64) error
 }
 
 type IBlogDatabase interface {
 	GetListBlog(ctx context.Context, title string, page int64, size int64) (*models.ResponsetListBlog, error)
+	GetListBlogUser(ctx context.Context, title string, page int64, size int64) (*models.ResponsetListBlog, error)
 	Create(ctx context.Context, blog *models.Blog) error
 	Update(ctx context.Context, blog *models.RequestUpdateBlog, Blog_id int64) error
 }
@@ -33,6 +35,14 @@ func NewBlog(blogGorm *BlogGorm, logger *zap.Logger) *Blog {
 
 func (b *Blog) GetListBlog(ctx context.Context, title string, page int64, size int64) (*models.ResponsetListBlog, error) {
 	acc, err := b.BlogGorm.GetListBlog(ctx, title, page, size)
+	if err != nil {
+		return nil, err
+	}
+	return acc, nil
+}
+
+func (b *Blog) GetListBlogUser(ctx context.Context, title string, page int64, size int64) (*models.ResponsetListBlog, error) {
+	acc, err := b.BlogGorm.GetListBlogUser(ctx, title, page, size)
 	if err != nil {
 		return nil, err
 	}

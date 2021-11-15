@@ -90,3 +90,38 @@ type ResponseGetAllJob struct {
 	Total  int64 `json:"total"`
 	Result []Job `json:"result"`
 }
+
+type JobForAdmin struct {
+	JobID         int64     `json:"job_id" gorm:"primaryKey"`
+	RecruiterID   int64     `json:"recruiter_id"`
+	RecruiterName string    `json:"recruiter_name"`
+	Title         string    `json:"title"`
+	Description   string    `json:"description"`
+	SalaryRange   string    `json:"salary_range"`
+	Quantity      int64     `json:"quantity"`
+	Role          string    `json:"role"`
+	Experience    string    `json:"experience"`
+	Location      string    `json:"location"`
+	HireDate      int64     `json:"hire_date"`
+	Status        int       `json:"status"`
+	CreatedAt     time.Time `json:"created_at"`
+	UpdatedAt     time.Time `json:"updated_at"`
+}
+
+type RequestGetListJobAdmin struct {
+	Name string `json:"name"`
+	Page int64  `json:"page"`
+	Size int64  `json:"size"`
+}
+
+type ResponsetListJobAdmin struct {
+	Total       int64         `json:"total"`
+	TotalPage   float64       `json:"totalPage"`
+	CurrentPage int64         `json:"currentPage"`
+	Data        []JobForAdmin `json:"data"`
+}
+
+type RequestUpdateStatusJob struct {
+	JobID  int64 `json:"job_id"`
+	Status bool  `json:"status"`
+}
