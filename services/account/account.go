@@ -4,6 +4,8 @@ import (
 	"context"
 	"time"
 
+	"gitlab.com/hieuxeko19991/job4e_be/services/candidate"
+
 	"gitlab.com/hieuxeko19991/job4e_be/services/recruiter"
 
 	email2 "gitlab.com/hieuxeko19991/job4e_be/services/email"
@@ -34,18 +36,20 @@ type IAccountService interface {
 }
 
 type Account struct {
-	AccountGorm   *AccountGorm
-	RecruiterGorm *recruiter.RecruiterGorm
+	AccountGorm   IAccountDatabase
+	RecruiterGorm recruiter.IRecruiterDatabase
+	CandidateGorm candidate.ICandidateDatabase
 	Auth          *auth.AuthHandler
 	MailService   *email2.SGMailService
 	Conf          *config.Config
 	Logger        *zap.Logger
 }
 
-func NewAccount(accountGorm *AccountGorm, recruiterGorm *recruiter.RecruiterGorm, auth *auth.AuthHandler, conf *config.Config, mailSV *email2.SGMailService, logger *zap.Logger) *Account {
+func NewAccount(accountGorm *AccountGorm, recruiterGorm *recruiter.RecruiterGorm, auth *auth.AuthHandler, conf *config.Config, mailSV *email2.SGMailService, logger *zap.Logger, candidateGorm *candidate.CandidateGorm) *Account {
 	return &Account{
 		AccountGorm:   accountGorm,
 		RecruiterGorm: recruiterGorm,
+		CandidateGorm: candidateGorm,
 		Auth:          auth,
 		Conf:          conf,
 		MailService:   mailSV,
@@ -82,7 +86,16 @@ func (a *Account) Login(ctx context.Context, email string, password string, logi
 		a.Logger.Error("Wrong password!!")
 		return "", "", errors.New("Wrong password")
 	}
-
+	if acc.Type == auth.RecruiterRole {
+		recruiterInfor, _ := a.RecruiterGorm.GetProfile(ctx, acc.Id)
+		acc.FullName = recruiterInfor.Name
+	}
+	if acc.Type == auth.CandidateRole {
+		candidateInfor, _ := a.CandidateGorm.GetByCandidateID(ctx, acc.Id)
+		acc.FullName = candidateInfor.LastName + " " + candidateInfor.FirstName
+	}
+	acc.Password = ""
+	acc.TokenHash = ""
 	accessToken, err := a.Auth.GenerateAccessToken(acc)
 	if err != nil {
 		a.Logger.Error("Can not generate Access Token", zap.Error(err))
@@ -139,6 +152,20 @@ func (a *Account) Register(ctx context.Context, account *models.RequestRegisterA
 		_, err = a.RecruiterGorm.Create(ctx, recruiterModel)
 		if err != nil {
 			a.Logger.Error("Create Recruiter error", zap.Error(err))
+			return err
+		}
+	}
+	if account.Type == auth.CandidateRole {
+		candidateModel := &models.Candidate{
+			CandidateID: accountID,
+			FirstName:   account.CandidateInfor.FirstName,
+			LastName:    account.CandidateInfor.LastName,
+			BirthDay:    account.CandidateInfor.BirthDay,
+			Address:     account.CandidateInfor.Address,
+		}
+		_, err = a.CandidateGorm.Create(ctx, candidateModel)
+		if err != nil {
+			a.Logger.Error("Create Candidate error", zap.Error(err))
 			return err
 		}
 	}

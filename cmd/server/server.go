@@ -110,10 +110,14 @@ func InitServer() *Server {
 	}
 	authHandler := auth.NewAuthHandler(logger, conf)
 	mailService := email.NewSGMailService(logger, conf)
+	//init candidate profile
+	candidateGorm := candidate.NewCandidateGorm(gormDB, logger)
+	canService := candidate.NewCandidateService(candidateGorm, logger)
+	canSerializer := candidate2.NewCandidateSerializer(canService, logger)
 	// init account service
 	recruiterGorm := recruiter.NewRecruiterGorm(gormDB, logger)
 	accountGorm := account.NewAccountGorm(gormDB, logger)
-	accountService := account.NewAccount(accountGorm, recruiterGorm, authHandler, conf, mailService, logger)
+	accountService := account.NewAccount(accountGorm, recruiterGorm, authHandler, conf, mailService, logger, candidateGorm)
 	accountSerializer := account2.NewAccountSerializer(accountService, logger)
 	//init blog service
 	blogGorm := blog.NewBlogGorm(gormDB, logger)
@@ -149,11 +153,6 @@ func InitServer() *Server {
 	//init recruiter service
 	recruiterService := recruiter.NewRecruiterCategory(recruiterGorm, logger)
 	recruiterSerializer := recruiter2.NewRecruiterSerializer(recruiterService, logger)
-
-	//init candidate profile
-	candidateGorm := candidate.NewCandidateGorm(gormDB, logger)
-	canService := candidate.NewCandidateService(candidateGorm, logger)
-	canSerializer := candidate2.NewCandidateSerializer(canService, logger)
 
 	ginDepen := transport.GinDependencies{
 		AccountSerializer:   accountSerializer,
