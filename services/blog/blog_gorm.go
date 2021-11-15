@@ -32,7 +32,8 @@ func (g *BlogGorm) GetListBlog(ctx context.Context, title string, page int64, si
 	limit := size
 	var total int64
 	//search query
-	data, err := db.Raw(`SELECT b.blog_id, s.name as 'category_name', b.title, b.icon, b.excerpts, b.description, b.status, b.created_at, b.updated_at FROM nodehub.blog b INNER join setting s on b.category_id = s.setting_id  where  b.title like ? ORDER BY b.blog_id desc LIMIT ?, ?`, "%"+title+"%", offset, limit).Rows()
+	data, err := db.Raw(`SELECT b.blog_id, s.setting_id as 'category_id', s.name as 'category_name', b.title, b.icon, b.excerpts, b.description, b.status, b.created_at, b.updated_at 
+	FROM nodehub.blog b INNER join setting s on b.category_id = s.setting_id  where  b.title like ? ORDER BY b.blog_id desc LIMIT ?, ?`, "%"+title+"%", offset, limit).Rows()
 	// count query
 	db.Raw(`SELECT count(*) FROM nodehub.blog where  title like ?`, "%"+title+"%").Scan(&total)
 	if err != nil {

@@ -19,4 +19,5 @@ CREATE TABLE `candidate`
     `created_at`  datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `updated_at`  datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY(`candidate_id`)
+    FOREIGN KEY (`candidate_id`) REFERENCES account(`id`)
 )
