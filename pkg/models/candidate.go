@@ -48,52 +48,52 @@ type Candidate struct {
 }
 
 type CV struct {
-	OriginCV string `json:"origin_cv"`
-	MediaCV  string `json:"media_cv"`
+	OriginCV string `json:"origin_cv,omitempty"`
+	MediaCV  string `json:"media_cv,omitempty"`
 }
 
 type Experience struct {
-	CompanyName string `json:"company_name"`
-	WorkingRole string `json:"working_role"`
-	StartDate   string `json:"start_date"`
-	EndDate     string `json:"end_date"`
-	Description string `json:"description"`
-	Media       string `json:"media"`
-	Link        string `json:"link"`
+	CompanyName string `json:"company_name,omitempty"`
+	WorkingRole string `json:"working_role,omitempty"`
+	StartDate   string `json:"start_date,omitempty"`
+	EndDate     string `json:"end_date,omitempty"`
+	Description string `json:"description,omitempty"`
+	Media       string `json:"media,omitempty"`
+	Link        string `json:"link,omitempty"`
 }
 
 type Social struct {
-	Name        string `json:"name"`
-	Role        string `json:"role"`
-	Description string `json:"description"`
-	Media       string `json:"media"`
-	Link        string `json:"link"`
+	Name        string `json:"name,omitempty"`
+	Role        string `json:"role,omitempty"`
+	Description string `json:"description,omitempty"`
+	Media       string `json:"media,omitempty"`
+	Link        string `json:"link,omitempty"`
 }
 
 type Project struct {
-	Name        string `json:"name"`
-	Role        string `json:"role"`
-	StartTime   string `json:"start_time"`
-	EndTime     string `json:"end_time"`
-	Description string `json:"description"`
-	Media       string `json:"media"`
-	Link        string `json:"link"`
+	Name        string `json:"name,omitempty"`
+	Role        string `json:"role,omitempty"`
+	StartTime   string `json:"start_time,omitempty"`
+	EndTime     string `json:"end_time,omitempty"`
+	Description string `json:"description,omitempty"`
+	Media       string `json:"media,omitempty"`
+	Link        string `json:"link,omitempty"`
 }
 
 type Certificate struct {
-	Name            string `json:"name"`
-	Host            string `json:"host"`
-	CertificateTime string `json:"certificate_time"`
-	Media           string `json:"media"`
-	Link            string `json:"link"`
+	Name            string `json:"name,omitempty"`
+	Host            string `json:"host,omitempty"`
+	CertificateTime string `json:"certificate_time,omitempty"`
+	Media           string `json:"media,omitempty"`
+	Link            string `json:"link,omitempty"`
 }
 
 type Prize struct {
-	Name      string `json:"name"`
-	Host      string `json:"host"`
-	PrizeTime string `json:"prize_time"`
-	Media     string `json:"media"`
-	Link      string `json:"link"`
+	Name      string `json:"name,omitempty"`
+	Host      string `json:"host,omitempty"`
+	PrizeTime string `json:"prize_time,omitempty"`
+	Media     string `json:"media,omitempty"`
+	Link      string `json:"link,omitempty"`
 }
 
 func (req *CandidateRequest) ToCandidate() (Candidate, error) {
@@ -122,22 +122,34 @@ func (req *CandidateRequest) ToCandidate() (Candidate, error) {
 		return Candidate{}, err
 	}
 	candidate := Candidate{
-		CandidateID:       req.CandidateID,
-		FirstName:         req.FirstName,
-		LastName:          req.LastName,
-		BirthDay:          req.BirthDay,
-		Address:           req.Address,
-		Avatar:            req.Avatar,
-		Banner:            req.Banner,
-		Phone:             req.Phone,
-		FindJob:           req.FindJob,
-		NodehubReview:     req.NodehubReview,
-		CvManage:          string(cvJson),
-		ExperienceManage:  string(exJson),
-		SocialManage:      string(socialJson),
-		ProjectManage:     string(prjJson),
-		CertificateManage: string(certJson),
-		PrizeManage:       string(prizeJson),
+		CandidateID:   req.CandidateID,
+		FirstName:     req.FirstName,
+		LastName:      req.LastName,
+		BirthDay:      req.BirthDay,
+		Address:       req.Address,
+		Avatar:        req.Avatar,
+		Banner:        req.Banner,
+		Phone:         req.Phone,
+		FindJob:       req.FindJob,
+		NodehubReview: req.NodehubReview,
+	}
+	if req.CVManage != nil {
+		candidate.CvManage = string(cvJson)
+	}
+	if req.ExperienceManage != nil {
+		candidate.ExperienceManage = string(exJson)
+	}
+	if req.SocialManage != nil {
+		candidate.SocialManage = string(socialJson)
+	}
+	if req.ProjectManage != nil {
+		candidate.ProjectManage = string(prjJson)
+	}
+	if req.CertificateManage != nil {
+		candidate.CertificateManage = string(certJson)
+	}
+	if req.PrizeManage != nil {
+		candidate.PrizeManage = string(prizeJson)
 	}
 	return candidate, nil
 }

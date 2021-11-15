@@ -15,6 +15,7 @@ type IRecruiterService interface {
 }
 
 type IRecruiterDatabase interface {
+	Create(ctx context.Context, recruiter *models.Recruiter) (int64, error)
 	AddRecruiterSkill(ctx context.Context, recruiterSkill *models.RecruiterSkill) error
 	UpdateProfile(ctx context.Context, recruiter *models.RequestUpdateRecruiter, recruiter_id int64) error
 	GetRecruiterSkill(ctx context.Context, recruiter_id int64) ([]models.ResponseRecruiterSkill, error)
