@@ -30,7 +30,7 @@ type ESJobCreate struct {
 	Location    string    `json:"location" mapstructure:"location"`
 	HireDate    time.Time `json:"hire_date" mapstructure:"hire_date"`
 	Status      int       `json:"status" mapstructure:"status"`
-	SkillIDs    []Skill   `json:"skill_ids" mapstructure:"skill_ids"`
+	Skills      []ESSkill `json:"skills" mapstructure:"skills"`
 }
 
 func ToESJobCreate(job *Job) *ESJobCreate {

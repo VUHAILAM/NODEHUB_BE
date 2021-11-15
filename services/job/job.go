@@ -3,6 +3,8 @@ package job
 import (
 	"context"
 
+	"gitlab.com/hieuxeko19991/job4e_be/services/skill"
+
 	"gitlab.com/hieuxeko19991/job4e_be/services/job_skill"
 
 	"github.com/mitchellh/mapstructure"
@@ -26,15 +28,17 @@ type Job struct {
 	JobGorm      *JobGorm
 	JobES        *JobES
 	JobSkillGorm job_skill.IJobSkillDatabase
+	SkillGorm    *skill.SkillGorm
 
 	Conf   *config.Config
 	Logger *zap.Logger
 }
 
-func NewJobService(jobGorm *JobGorm, jobES *JobES, js *job_skill.JobSkillGorm, conf *config.Config, logger *zap.Logger) *Job {
+func NewJobService(jobGorm *JobGorm, jobES *JobES, js *job_skill.JobSkillGorm, skillgorm *skill.SkillGorm, conf *config.Config, logger *zap.Logger) *Job {
 	return &Job{
 		JobGorm:      jobGorm,
 		JobES:        jobES,
+		SkillGorm:    skillgorm,
 		JobSkillGorm: js,
 		Conf:         conf,
 		Logger:       logger,
@@ -60,10 +64,35 @@ func (j *Job) CreateNewJob(ctx context.Context, job *models.CreateJobRequest) er
 		return err
 	}
 
+	var jobSkill []*models.JobSkill
+	for _, skillID := range job.SkillIDs {
+		jsk := &models.JobSkill{
+			SkillID: skillID,
+			JobID:   newJob.JobID,
+		}
+		jobSkill = append(jobSkill, jsk)
+	}
+
+	err = j.JobSkillGorm.Create(ctx, jobSkill)
+	if err != nil {
+		j.Logger.Error("Create job skill error", zap.Error(err), zap.Int64("job_id", newJob.JobID))
+		return err
+	}
+
 	jobData.JobID = newJob.JobID
 	jobData.CreatedAt = newJob.CreatedAt
 	esJob := models.ToESJobCreate(jobData)
-	esJob.SkillIDs = job.SkillIDs
+	skillList, err := j.SkillGorm.GetSkillByIDs(ctx, job.SkillIDs)
+	if err != nil {
+		j.Logger.Error(err.Error())
+		return err
+	}
+	var esSkill []models.ESSkill
+	for _, skill := range skillList {
+		esSk := models.ToESSkill(&skill)
+		esSkill = append(esSkill, esSk)
+	}
+	esJob.Skills = esSkill
 	jobInput := map[string]interface{}{}
 	err = mapStructureDecodeWithTextUnmarshaler(esJob, &jobInput)
 	if err != nil {
@@ -77,17 +106,6 @@ func (j *Job) CreateNewJob(ctx context.Context, job *models.CreateJobRequest) er
 		return err
 	}
 
-	for _, sid := range job.SkillIDs {
-		jsModel := &models.JobSkill{
-			SkillID: sid,
-			JobID:   newJob.JobID,
-		}
-		_, err = j.JobSkillGorm.Create(ctx, jsModel)
-		if err != nil {
-			j.Logger.Error("Create job skill error", zap.Error(err), zap.Int64("job_id", newJob.JobID), zap.Int64("skill_id", sid))
-			continue
-		}
-	}
 	return nil
 }
 

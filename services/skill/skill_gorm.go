@@ -10,7 +10,7 @@ import (
 	"gorm.io/gorm"
 )
 
-const tableAccount = "skill"
+const tableSkill = "skill"
 
 type SkillGorm struct {
 	db     *gorm.DB
@@ -28,7 +28,7 @@ func NewSkillGorm(db *gorm.DB, logger *zap.Logger) *SkillGorm {
 
 func (s *SkillGorm) Create(ctx context.Context, skill *models.Skill) error {
 	db := s.db.WithContext(ctx)
-	err := db.Table(tableAccount).Create(skill).Error
+	err := db.Table(tableSkill).Create(skill).Error
 	if err != nil {
 		s.logger.Error("SkillGorm: Create skill error", zap.Error(err))
 		return err
@@ -39,7 +39,7 @@ func (s *SkillGorm) Create(ctx context.Context, skill *models.Skill) error {
 /*Update Skill*/
 func (s *SkillGorm) Update(ctx context.Context, skill *models.RequestUpdateSkill, skill_id int64) error {
 	db := s.db.WithContext(ctx)
-	err := db.Table(tableAccount).Where("skill_id = ?", skill_id).Updates(map[string]interface{}{
+	err := db.Table(tableSkill).Where("skill_id = ?", skill_id).Updates(map[string]interface{}{
 		"name":        skill.Name,
 		"description": skill.Description,
 		"questions":   skill.Questions,
@@ -94,4 +94,15 @@ func (s *SkillGorm) GetAll(ctx context.Context, name string) ([]models.Skill, er
 		db.ScanRows(data, &arr)
 	}
 	return arr, nil
+}
+
+func (s *SkillGorm) GetSkillByIDs(ctx context.Context, skillIDs []int64) ([]models.Skill, error) {
+	db := s.db.WithContext(ctx)
+	var res []models.Skill
+	err := db.Table(tableSkill).Where(skillIDs).Find(&res).Error
+	if err != nil {
+		s.logger.Error("SkillGorm: Get Skill error", zap.Error(err))
+		return nil, err
+	}
+	return res, nil
 }

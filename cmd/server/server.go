@@ -143,7 +143,7 @@ func InitServer() *Server {
 	// init job service
 	jobES := job.NewJobES(esClient, conf.JobESIndex, logger)
 	jobGorm := job.NewJobGorm(gormDB, logger)
-	jobService := job.NewJobService(jobGorm, jobES, jobSkillGorm, conf, logger)
+	jobService := job.NewJobService(jobGorm, jobES, jobSkillGorm, skillGorm, conf, logger)
 	jobSerializer := job2.NewJobSerializer(jobService, logger)
 
 	jobApplyGorm := job_apply.NewJobApplyGorm(gormDB, logger)
