@@ -12,7 +12,7 @@ import (
 type ICandidateService interface {
 	CreateCandidateProfile(ctx context.Context, req models.CandidateRequest) (int64, error)
 	UpdateCandidateProfile(ctx context.Context, req models.CandidateRequest) error
-	GetCandidateProfile(ctx context.Context, candidateID int64) (*models.CandidateRequest, error)
+	GetCandidateProfile(ctx context.Context, candidateID int64) (*models.CandidateResponse, error)
 	GetAllCandidateForAdmin(ctx context.Context, name string, page int64, size int64) (*models.ResponsetListCandidateAdmin, error)
 	UpdateReviewCandidateByAdmin(ctx context.Context, updateRequest *models.RequestUpdateReviewCandidateAdmin) error
 	UpdateStatusCandidate(ctx context.Context, candidate *models.RequestUpdateStatusCandidate, candidate_id int64) error
@@ -60,18 +60,18 @@ func (s *CandidateService) UpdateCandidateProfile(ctx context.Context, req model
 	return nil
 }
 
-func (s *CandidateService) GetCandidateProfile(ctx context.Context, candidateID int64) (*models.CandidateRequest, error) {
+func (s *CandidateService) GetCandidateProfile(ctx context.Context, candidateID int64) (*models.CandidateResponse, error) {
 	candidate, err := s.CanGorm.GetByCandidateID(ctx, candidateID)
 	if err != nil {
 		s.Logger.Error(err.Error())
 		return nil, err
 	}
-	req, err := candidate.ToCandidateRequest()
+	resp, err := candidate.ToCandidateResponse()
 	if err != nil {
 		s.Logger.Error(err.Error())
 		return nil, err
 	}
-	return &req, nil
+	return &resp, nil
 }
 
 //candidate admin
