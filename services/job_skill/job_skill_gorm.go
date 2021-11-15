@@ -15,7 +15,7 @@ const (
 )
 
 type IJobSkillDatabase interface {
-	Create(ctx context.Context, jobSkill *models.JobSkill) (int64, error)
+	Create(ctx context.Context, jobSkill []*models.JobSkill) error
 	GetAllSkillByJob(ctx context.Context, jobID int64) ([]*models.Skill, error)
 	GetAllJobBySkill(ctx context.Context, skillID, offset, size int64) ([]*models.Job, int64, error)
 }
@@ -32,14 +32,14 @@ func NewJobSkillGorm(db *gorm.DB, logger *zap.Logger) *JobSkillGorm {
 	}
 }
 
-func (g *JobSkillGorm) Create(ctx context.Context, jobSkill *models.JobSkill) (int64, error) {
+func (g *JobSkillGorm) Create(ctx context.Context, jobSkill []*models.JobSkill) error {
 	db := g.DB.WithContext(ctx)
-	err := db.Table(jobSkillTable).Create(jobSkill).Error
+	err := db.Table(jobSkillTable).Create(&jobSkill).Error
 	if err != nil {
 		g.Logger.Error("JobSkillGorm: Create job skill error", zap.Error(err))
-		return 0, err
+		return err
 	}
-	return jobSkill.ID, nil
+	return nil
 }
 
 func (g *JobSkillGorm) GetAllSkillByJob(ctx context.Context, jobID int64) ([]*models.Skill, error) {
