@@ -157,11 +157,17 @@ func (a *Account) Register(ctx context.Context, account *models.RequestRegisterA
 	}
 	if account.Type == auth.CandidateRole {
 		candidateModel := &models.Candidate{
-			CandidateID: accountID,
-			FirstName:   account.CandidateInfor.FirstName,
-			LastName:    account.CandidateInfor.LastName,
-			BirthDay:    account.CandidateInfor.BirthDay,
-			Address:     account.CandidateInfor.Address,
+			CandidateID:       accountID,
+			FirstName:         account.CandidateInfor.FirstName,
+			LastName:          account.CandidateInfor.LastName,
+			BirthDay:          account.CandidateInfor.BirthDay,
+			Address:           account.CandidateInfor.Address,
+			CvManage:          "[]",
+			ExperienceManage:  "[]",
+			SocialManage:      "[]",
+			ProjectManage:     "[]",
+			CertificateManage: "[]",
+			PrizeManage:       "[]",
 		}
 		_, err = a.CandidateGorm.Create(ctx, candidateModel)
 		if err != nil {
