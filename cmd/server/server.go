@@ -30,6 +30,10 @@ import (
 	"gitlab.com/hieuxeko19991/job4e_be/services/recruiter"
 	"gitlab.com/hieuxeko19991/job4e_be/services/skill"
 	"gitlab.com/hieuxeko19991/job4e_be/transport"
+
+	notification2 "gitlab.com/hieuxeko19991/job4e_be/endpoints/notification"
+	"gitlab.com/hieuxeko19991/job4e_be/services/notification"
+
 	"go.uber.org/zap"
 )
 
@@ -154,19 +158,24 @@ func InitServer() *Server {
 	recruiterService := recruiter.NewRecruiterCategory(recruiterGorm, logger)
 	recruiterSerializer := recruiter2.NewRecruiterSerializer(recruiterService, logger)
 
+	//init notification service
+	notificationGorm := notification.NewNotificationGorm(gormDB, logger)
+	notificationService := notification.NewNotification(notificationGorm, logger)
+	notificationSerializer := notification2.NewNotificationSerializer(notificationService, logger)
+
 	ginDepen := transport.GinDependencies{
-		AccountSerializer:   accountSerializer,
-		Auth:                authHandler,
-		BlogSerializer:      blogSerializer,
-		SkillSerializer:     skillSerializer,
-		CategorySerializer:  categorySerializer,
-		JobSerializer:       jobSerializer,
-		JobApplySerializer:  jobApplySerializer,
-		MediaSerializer:     mediaSerializer,
-		RecruiterSerializer: recruiterSerializer,
-		CandidateSerializer: canSerializer,
-		JobSkillSerializer:  jobSkillSerializer,
-	}
+		AccountSerializer:      accountSerializer,
+		Auth:                   authHandler,
+		BlogSerializer:         blogSerializer,
+		SkillSerializer:        skillSerializer,
+		CategorySerializer:     categorySerializer,
+		JobSerializer:          jobSerializer,
+		JobApplySerializer:     jobApplySerializer,
+		MediaSerializer:        mediaSerializer,
+		RecruiterSerializer:    recruiterSerializer,
+		CandidateSerializer:    canSerializer,
+		JobSkillSerializer:     jobSkillSerializer,
+		NotificationSerializer: notificationSerializer}
 	ginHandler := ginDepen.InitGinEngine(conf)
 	return &Server{
 		HttpServer: &http.Server{

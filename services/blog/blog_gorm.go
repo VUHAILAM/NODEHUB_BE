@@ -32,9 +32,10 @@ func (g *BlogGorm) GetListBlog(ctx context.Context, title string, page int64, si
 	limit := size
 	var total int64
 	//search query
-	data, err := db.Raw(`SELECT b.blog_id, s.name as 'category_name', b.title, b.icon, b.excerpts, b.description, b.status, b.created_at, b.updated_at FROM nodehub.blog b INNER join setting s on b.category_id = s.setting_id  where  b.title like ? and b.status = 1 ORDER BY b.blog_id desc LIMIT ?, ?`, "%"+title+"%", offset, limit).Rows()
+	data, err := db.Raw(`SELECT b.blog_id, s.setting_id as 'category_id', s.name as 'category_name', b.title, b.icon, b.excerpts, b.description, b.status, b.created_at, b.updated_at 
+	FROM nodehub.blog b INNER join setting s on b.category_id = s.setting_id  where  b.title like ? ORDER BY b.blog_id desc LIMIT ?, ?`, "%"+title+"%", offset, limit).Rows()
 	// count query
-	db.Raw(`SELECT count(*) FROM nodehub.blog where  title like ? and status = 1`, "%"+title+"%").Scan(&total)
+	db.Raw(`SELECT count(*) FROM nodehub.blog where  title like ?`, "%"+title+"%").Scan(&total)
 	if err != nil {
 		g.logger.Error("BlogGorm: Get blog error", zap.Error(err))
 		return nil, err
@@ -76,4 +77,33 @@ func (g *BlogGorm) Update(ctx context.Context, blog *models.RequestUpdateBlog, B
 		return err
 	}
 	return nil
+}
+
+func (g *BlogGorm) GetListBlogUser(ctx context.Context, title string, page int64, size int64) (*models.ResponsetListBlog, error) {
+	db := g.db.WithContext(ctx)
+	arr := []models.ResponseBlog{}
+	resutl := models.ResponsetListBlog{}
+	offset := (page - 1) * size
+	limit := size
+	var total int64
+	//search query
+	data, err := db.Raw(`SELECT b.blog_id, s.name as 'category_name', b.title, b.icon, b.excerpts, b.description, b.status, b.created_at, b.updated_at FROM nodehub.blog b INNER join setting s on b.category_id = s.setting_id  where  b.title like ? and b.status = 1 ORDER BY b.blog_id desc LIMIT ?, ?`, "%"+title+"%", offset, limit).Rows()
+	// count query
+	db.Raw(`SELECT count(*) FROM nodehub.blog where  title like ? and status = 1`, "%"+title+"%").Scan(&total)
+	if err != nil {
+		g.logger.Error("BlogGorm: Get blog error", zap.Error(err))
+		return nil, err
+	}
+	defer data.Close()
+	for data.Next() {
+		// ScanRows scan a row into user
+		db.ScanRows(data, &arr)
+	}
+	var temp float64 = math.Ceil(float64(total) / float64(size))
+	resutl.TotalBlog = total
+	resutl.TotalPage = temp
+	resutl.CurrentPage = page
+	resutl.Data = arr
+
+	return &resutl, nil
 }

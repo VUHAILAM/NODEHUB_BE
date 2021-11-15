@@ -60,9 +60,9 @@ func (s *SkillGorm) Get(ctx context.Context, name string, page int64, size int64
 	limit := size
 	var total int64
 	//search query
-	data, err := db.Raw(`select skill_id, name, description, questions, icon, status, created_at, updated_at FROM nodehub.skill where name like ? and status = 1 ORDER BY skill_id desc LIMIT ?, ?`, "%"+name+"%", offset, limit).Rows()
+	data, err := db.Raw(`select skill_id, name, description, questions, icon, status, created_at, updated_at FROM nodehub.skill where name like ? ORDER BY skill_id desc LIMIT ?, ?`, "%"+name+"%", offset, limit).Rows()
 	// count query
-	db.Raw(`SELECT count(*) FROM nodehub.skill where name like ? and status = 1`, "%"+name+"%").Scan(&total)
+	db.Raw(`SELECT count(*) FROM nodehub.skill where name like ?`, "%"+name+"%").Scan(&total)
 	if err != nil {
 		s.logger.Error("BlogGorm: Get blog error", zap.Error(err))
 		return nil, err
@@ -84,7 +84,7 @@ func (s *SkillGorm) Get(ctx context.Context, name string, page int64, size int64
 func (s *SkillGorm) GetAll(ctx context.Context, name string) ([]models.Skill, error) {
 	db := s.db.WithContext(ctx)
 	arr := []models.Skill{}
-	data, err := db.Raw(`select skill_id, name, description, questions, icon, status, created_at, updated_at FROM nodehub.skill where name like ?`, "%"+name+"%").Rows()
+	data, err := db.Raw(`select skill_id, name, description, questions, icon, status, created_at, updated_at FROM nodehub.skill where name like ? and status = 1`, "%"+name+"%").Rows()
 	if err != nil {
 		s.logger.Error("SkillGorm: Get Skill error", zap.Error(err))
 		return nil, err
