@@ -27,7 +27,7 @@ type IRecruiterDatabase interface {
 	GetRecruiterSkill(ctx context.Context, recruiter_id int64) ([]models.ResponseRecruiterSkill, error)
 	GetProfile(ctx context.Context, id int64) (*models.Recruiter, error)
 	GetAllRecruiterForAdmin(ctx context.Context, name string, page int64, size int64) (*models.ResponsetListRecruiter, error)
-	UpdateReciuterByAdmin(ctx context.Context, updateRequest *models.RequestUpdateRecruiterAdmin) error
+	UpdateReciuterByAdmin(ctx context.Context, recruiter_id int64, data map[string]interface{}) error
 	UpdateStatusReciuter(ctx context.Context, updateRequest *models.RequestUpdateStatusRecruiter, recruiter_id int64) error
 	GetAllRecruiterForCandidate(ctx context.Context, recruiterName string, skillName string, address string, page int64, size int64) (*models.ResponsetListRecruiterForCandidate, error)
 	DeleteRecruiterSkill(ctx context.Context, recruiter_skill_id int64) error

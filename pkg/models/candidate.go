@@ -113,7 +113,6 @@ type Candidate struct {
 	ProjectManage     string    `json:"project_manage,omitempty"`
 	CertificateManage string    `json:"certificate_manage,omitempty"`
 	PrizeManage       string    `json:"prize_manage,omitempty"`
-	Status            bool      `json:"status"`
 	CreatedAt         time.Time `json:"created_at,omitempty"`
 	UpdatedAt         time.Time `json:"updated_at,omitempty"`
 }
