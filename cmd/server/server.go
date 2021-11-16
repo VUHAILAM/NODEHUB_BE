@@ -54,6 +54,9 @@ const mappingJobNodeHub = `
         "hire_date" : {
           "type" : "date"
         },
+		"created_at" : {
+          "type" : "date"
+        },
         "job_id" : {
           "type" : "long"
         },
@@ -77,7 +80,18 @@ const mappingJobNodeHub = `
         },
         "title" : {
           "type" : "keyword"
-        }
+        },
+		"skills" : {
+			"type": "nested",
+			"properties": {
+				"skill_id":{"type":"keyword"},
+				"name":{"type":"keyword"},
+				"description":{"type":"keyword"},
+				"questions":{"type":"keyword"},
+				"icon":{"type":"keyword"},
+				"status":{"type":"boolean"}
+			}
+		}
       }
     }
 }`

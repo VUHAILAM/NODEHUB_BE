@@ -124,7 +124,6 @@ func (auth *AuthHandler) Authenticate(reqAccount *models.Account, account *model
 
 // GenerateRefreshToken generate a new refresh token for the given user
 func (auth *AuthHandler) GenerateRefreshToken(account *models.Account) (string, error) {
-
 	cusKey := auth.GenerateCustomKey(string(account.Id), account.TokenHash)
 	tokenType := "refresh"
 	jsonAccount, err := json.Marshal(account)
@@ -185,7 +184,7 @@ func (auth *AuthHandler) GenerateAccessToken(account *models.Account) (string, e
 // GenerateCustomKey creates a new key for our jwt payload
 // the key is a hashed combination of the userID and user tokenhash
 func (auth *AuthHandler) GenerateCustomKey(userID string, tokenHash string) string {
-
+	auth.Logger.Info("Info gen token", zap.String("ID", userID), zap.String("Tokenhash", tokenHash))
 	// data := userID + tokenHash
 	h := hmac.New(sha256.New, []byte(tokenHash))
 	h.Write([]byte(userID))

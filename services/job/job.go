@@ -2,6 +2,7 @@ package job
 
 import (
 	"context"
+	"time"
 
 	"gitlab.com/hieuxeko19991/job4e_be/services/skill"
 
@@ -16,7 +17,7 @@ import (
 
 type IJobService interface {
 	CreateNewJob(ctx context.Context, job *models.CreateJobRequest) error
-	GetDetailJob(ctx context.Context, jobID int64) (*models.Job, error)
+	GetDetailJob(ctx context.Context, jobID int64) (*models.ESJob, error)
 	UpdateJob(ctx context.Context, updateRequest *models.RequestUpdateJob) error
 	GetAllJob(ctx context.Context, getRequest *models.RequestGetAllJob) (*models.ResponseGetAllJob, error)
 	GetAllJobForAdmin(ctx context.Context, name string, page int64, size int64) (*models.ResponsetListJobAdmin, error)
@@ -55,7 +56,7 @@ func (j *Job) CreateNewJob(ctx context.Context, job *models.CreateJobRequest) er
 		Role:        job.Role,
 		Experience:  job.Experience,
 		Location:    job.Location,
-		HireDate:    job.HireDate,
+		HireDate:    time.Time(job.HireDate),
 		Status:      job.Status,
 	}
 	newJob, err := j.JobGorm.Create(ctx, jobData)
@@ -93,6 +94,7 @@ func (j *Job) CreateNewJob(ctx context.Context, job *models.CreateJobRequest) er
 		esSkill = append(esSkill, esSk)
 	}
 	esJob.Skills = esSkill
+	j.Logger.Info("EsJob", zap.Reflect("es_job", esJob))
 	jobInput := map[string]interface{}{}
 	err = mapStructureDecodeWithTextUnmarshaler(esJob, &jobInput)
 	if err != nil {
@@ -109,16 +111,11 @@ func (j *Job) CreateNewJob(ctx context.Context, job *models.CreateJobRequest) er
 	return nil
 }
 
-func (j *Job) GetDetailJob(ctx context.Context, jobID int64) (*models.Job, error) {
+func (j *Job) GetDetailJob(ctx context.Context, jobID int64) (*models.ESJob, error) {
 	job, err := j.JobES.GetJobByID(ctx, string(jobID))
 	if err != nil {
 		j.Logger.Error("Can not get Job from ES", zap.Error(err), zap.Int64("job_id", jobID))
-		job, err = j.JobGorm.Get(ctx, jobID)
-		if err != nil {
-			j.Logger.Error("Can not Get Job", zap.Error(err), zap.Int64("job_id", jobID))
-			return nil, err
-		}
-		return job, nil
+		return nil, err
 	}
 	return job, nil
 }
