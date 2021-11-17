@@ -95,6 +95,11 @@ func (a *Account) Login(ctx context.Context, email string, password string, logi
 		acc.FullName = candidateInfor.LastName + " " + candidateInfor.FirstName
 	}
 	acc.Password = ""
+	refreshToken, err := a.Auth.GenerateRefreshToken(acc)
+	if err != nil {
+		a.Logger.Error("Can not generate Refresh Token", zap.Error(err))
+		return "", "", err
+	}
 	acc.TokenHash = ""
 	accessToken, err := a.Auth.GenerateAccessToken(acc)
 	if err != nil {
@@ -102,11 +107,6 @@ func (a *Account) Login(ctx context.Context, email string, password string, logi
 		return "", "", err
 	}
 
-	refreshToken, err := a.Auth.GenerateRefreshToken(acc)
-	if err != nil {
-		a.Logger.Error("Can not generate Refresh Token", zap.Error(err))
-		return "", "", err
-	}
 	return accessToken, refreshToken, nil
 }
 
@@ -352,7 +352,7 @@ func (a *Account) GetAccessToken(ctx context.Context, accountID int64, customKey
 	}
 	actualCustomKey := a.Auth.GenerateCustomKey(string(account.Id), account.TokenHash)
 	if customKey != actualCustomKey {
-		a.Logger.Error("Wrong token: Authentication failed")
+		a.Logger.Error("Wrong token: Authentication failed", zap.String("customKey", customKey), zap.String("actual", actualCustomKey))
 		return "", errors.New("Authentication failed. Invalid token")
 	}
 

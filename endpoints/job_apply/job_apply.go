@@ -113,3 +113,51 @@ func (s *JobApplySerializer) GetJobAppliedByCandidateID(ginCtx *gin.Context) {
 	}
 	ginx.BuildSuccessResponse(ginCtx, http.StatusAccepted, resp)
 }
+
+func (s *JobApplySerializer) GetCandidatesAppyJob(ginCtx *gin.Context) {
+	ctx := ginCtx.Request.Context()
+	req := models.RequestGetJobApplyByJobID{}
+	err := json.NewDecoder(ginCtx.Request.Body).Decode(&req)
+	if err != nil {
+		s.Logger.Error("Parse request Candidate get error", zap.Error(err))
+		ginx.BuildErrorResponse(ginCtx, err, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	resp, err := s.JobApplyService.GetCandidatesApplyJob(ctx, req)
+	if err != nil {
+		s.Logger.Error("GetCandidatesApplyJob error", zap.Error(err))
+		ginx.BuildErrorResponse(ginCtx, err, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+	ginx.BuildSuccessResponse(ginCtx, http.StatusAccepted, resp)
+
+}
+
+func (s *JobApplySerializer) UpdateStatus(ginCtx *gin.Context) {
+	ctx := ginCtx.Request.Context()
+	req := models.RequestUpdateStatusJobApplied{}
+	err := json.NewDecoder(ginCtx.Request.Body).Decode(&req)
+	if err != nil {
+		s.Logger.Error("Parse request Job Create error", zap.Error(err))
+		ginx.BuildErrorResponse(ginCtx, err, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	err = s.JobApplyService.UpdateStatusJobApplied(ctx, req)
+	if err != nil {
+		s.Logger.Error("Update status error", zap.Error(err))
+		ginx.BuildErrorResponse(ginCtx, err, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	ginx.BuildSuccessResponse(ginCtx, http.StatusAccepted, nil)
+}

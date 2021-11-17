@@ -12,6 +12,8 @@ type IJobApplyService interface {
 	CreateJobApply(ctx context.Context, req models.RequestApply) error
 	GetJobsByJobID(ctx context.Context, req models.RequestGetJobApplyByJobID) (*models.ResponseGetJobApply, error)
 	GetJobByCandidateID(ctx context.Context, req models.RequestGetJobApplyByCandidateID) (*models.ResponseGetJobApply, error)
+	GetCandidatesApplyJob(ctx context.Context, req models.RequestGetJobApplyByJobID) (*models.ResponseGetCandidateApply, error)
+	UpdateStatusJobApplied(ctx context.Context, req models.RequestUpdateStatusJobApplied) error
 }
 
 type JobApply struct {
@@ -66,4 +68,27 @@ func (ja *JobApply) GetJobByCandidateID(ctx context.Context, req models.RequestG
 		Result: jobs,
 	}
 	return &resp, nil
+}
+
+func (ja *JobApply) GetCandidatesApplyJob(ctx context.Context, req models.RequestGetJobApplyByJobID) (*models.ResponseGetCandidateApply, error) {
+	offset := (req.Page - 1) * req.Size
+	candidates, total, err := ja.JobApplyGorm.GetCandidateApplyJob(ctx, req.JobID, offset, req.Size)
+	if err != nil {
+		ja.Logger.Error("Can not get candidates", zap.Error(err), zap.Int64("job_id", req.JobID))
+		return nil, err
+	}
+	resp := models.ResponseGetCandidateApply{
+		Total:  total,
+		Result: candidates,
+	}
+	return &resp, nil
+}
+
+func (ja *JobApply) UpdateStatusJobApplied(ctx context.Context, req models.RequestUpdateStatusJobApplied) error {
+	err := ja.JobApplyGorm.UpdateStatus(ctx, req.Status, req.JobID, req.CandidateID)
+	if err != nil {
+		ja.Logger.Error(err.Error())
+		return err
+	}
+	return nil
 }

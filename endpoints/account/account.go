@@ -219,4 +219,5 @@ func (as *AccountSerializer) VerifyEmail(ginCtx *gin.Context) {
 		})
 		return
 	}
+	ginx.BuildSuccessResponse(ginCtx, http.StatusAccepted, nil)
 }

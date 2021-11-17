@@ -3,7 +3,6 @@ package job
 import (
 	"context"
 	"encoding/json"
-	"reflect"
 
 	"github.com/olivere/elastic/v7"
 	"github.com/pkg/errors"
@@ -17,9 +16,10 @@ const (
 
 type IJobElasticsearch interface {
 	Create(ctx context.Context, documentID string, data map[string]interface{}) error
-	GetJobByID(ctx context.Context, documentID string) (*models.Job, error)
-	GetAllJob(ctx context.Context, from, size int64) ([]models.Job, int64, error)
+	GetJobByID(ctx context.Context, documentID string) (*models.ESJob, error)
+	GetAllJob(ctx context.Context, from, size int64) ([]models.ESJob, int64, error)
 	Update(ctx context.Context, documentID string, data map[string]interface{}) error
+	GetJobsByRecruiterID(ctx context.Context, recruiterID, from, size int64) ([]models.ESJob, int64, error)
 }
 
 type JobES struct {
@@ -37,7 +37,7 @@ func NewJobES(es *elastic.Client, jobindex string, logger *zap.Logger) *JobES {
 }
 
 func (e *JobES) Create(ctx context.Context, documentID string, data map[string]interface{}) error {
-	_, err := e.ES.Index().Index(jobIndex).BodyJson(data).Id(documentID).Do(ctx)
+	_, err := e.ES.Index().Index(e.JobIndex).BodyJson(data).Id(documentID).Do(ctx)
 	if err != nil {
 		e.Logger.Error("Job ES: Create Job error", zap.Error(err))
 		return err
@@ -45,25 +45,31 @@ func (e *JobES) Create(ctx context.Context, documentID string, data map[string]i
 	return nil
 }
 
-func (e *JobES) GetAllJob(ctx context.Context, from, size int64) ([]models.Job, int64, error) {
-	searchService := e.ES.Search().Index(jobIndex)
-	searchResult, err := searchService.Sort("hire_date", false).From(int(from)).Size(int(size)).Pretty(true).Do(ctx)
+func (e *JobES) GetAllJob(ctx context.Context, from, size int64) ([]models.ESJob, int64, error) {
+	searchService := e.ES.Search().Index(e.JobIndex)
+	searchResult, err := searchService.Sort("created_at", false).From(int(from)).Size(int(size)).Pretty(true).Do(ctx)
 	if err != nil {
 		e.Logger.Error("Job ES: Get Job List error", zap.Error(err))
 		return nil, 0, err
 	}
 
-	jobs := make([]models.Job, 0, size)
-	var j models.Job
-	for _, item := range searchResult.Each(reflect.TypeOf(j)) {
-		job := item.(models.Job)
-		jobs = append(jobs, job)
+	jobs := make([]models.ESJob, 0, size)
+
+	for _, hit := range searchResult.Hits.Hits {
+		var j models.ESJob
+		err := json.Unmarshal(hit.Source, &j)
+		if err != nil {
+			e.Logger.Error(err.Error())
+			continue
+		}
+		e.Logger.Info("job es", zap.Reflect("job es", j))
+		jobs = append(jobs, j)
 	}
 	return jobs, searchResult.TotalHits(), nil
 }
 
-func (e *JobES) GetJobByID(ctx context.Context, documentID string) (*models.Job, error) {
-	res, err := e.ES.Get().Index(jobIndex).Id(documentID).Do(ctx)
+func (e *JobES) GetJobByID(ctx context.Context, documentID string) (*models.ESJob, error) {
+	res, err := e.ES.Get().Index(e.JobIndex).Id(documentID).Do(ctx)
 	if err != nil {
 		e.Logger.Error("Job ES: Get Job error", zap.Error(err))
 		return nil, err
@@ -72,7 +78,7 @@ func (e *JobES) GetJobByID(ctx context.Context, documentID string) (*models.Job,
 		e.Logger.Error("Job with ID not found", zap.String("ID", documentID))
 		return nil, errors.New("Job with ID not found")
 	}
-	job := models.Job{}
+	job := models.ESJob{}
 	err = json.Unmarshal(res.Source, &job)
 	if err != nil {
 		e.Logger.Error("Unmarshal Job error", zap.Error(err))
@@ -81,8 +87,30 @@ func (e *JobES) GetJobByID(ctx context.Context, documentID string) (*models.Job,
 	return &job, nil
 }
 
+func (e *JobES) GetJobsByRecruiterID(ctx context.Context, recruiterID, from, size int64) ([]models.ESJob, int64, error) {
+	searchService := e.ES.Search().Index(e.JobIndex).Query(elastic.NewTermQuery("recruiter_id", recruiterID))
+	searchResult, err := searchService.Sort("created_at", false).From(int(from)).Size(int(size)).Pretty(true).Do(ctx)
+	if err != nil {
+		e.Logger.Error("Job ES: Get Job List error", zap.Error(err))
+		return nil, 0, err
+	}
+	jobs := make([]models.ESJob, 0, size)
+
+	for _, hit := range searchResult.Hits.Hits {
+		var j models.ESJob
+		err := json.Unmarshal(hit.Source, &j)
+		if err != nil {
+			e.Logger.Error(err.Error())
+			continue
+		}
+		e.Logger.Info("job es", zap.Reflect("job es", j))
+		jobs = append(jobs, j)
+	}
+	return jobs, searchResult.TotalHits(), nil
+}
+
 func (e *JobES) Update(ctx context.Context, documentID string, data map[string]interface{}) error {
-	_, err := e.ES.Update().Index(jobIndex).Id(documentID).Doc(data).DetectNoop(true).Do(ctx)
+	_, err := e.ES.Update().Index(e.JobIndex).Id(documentID).Doc(data).DetectNoop(true).Do(ctx)
 	if err != nil {
 		e.Logger.Error("Job ES: Update Job error", zap.Error(err))
 		return err
