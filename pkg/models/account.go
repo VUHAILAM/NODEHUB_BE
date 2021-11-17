@@ -49,3 +49,8 @@ type RequestResetPassword struct {
 type RequestVerifyEmail struct {
 	Email string `json:"email"`
 }
+
+type RequestPublicProfile struct {
+	ID           int64 `json:"id"`
+	Account_type int64 `json:"account_type"`
+}

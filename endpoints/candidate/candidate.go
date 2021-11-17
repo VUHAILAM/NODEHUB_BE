@@ -3,6 +3,7 @@ package candidate
 import (
 	"encoding/json"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/pkg/errors"
@@ -192,4 +193,99 @@ func (cs *CandidateSerializer) UpdateStatusCandidate(ginCtx *gin.Context) {
 		return
 	}
 	ginx.BuildSuccessResponse(ginCtx, http.StatusAccepted, nil)
+}
+
+// CandidateSkill
+func (cs *CandidateSerializer) AddCandidateSkill(ginCtx *gin.Context) {
+	ctx := ginCtx.Request.Context()
+	req := models.CandidateSkill{}
+	err := json.NewDecoder(ginCtx.Request.Body).Decode(&req)
+
+	if err != nil {
+		cs.Logger.Error("Parse request AddCandidateSkill error", zap.Error(err))
+		ginx.BuildErrorResponse(ginCtx, err, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	err = cs.CandidateService.AddCandidateSkill(ctx, &req)
+	if err != nil {
+		cs.Logger.Error("AddRecruiterSkill error", zap.Error(err))
+		ginx.BuildErrorResponse(ginCtx, err, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	ginx.BuildSuccessResponse(ginCtx, http.StatusAccepted, nil)
+}
+
+func (cs *CandidateSerializer) DeleteCandidateSkill(ginCtx *gin.Context) {
+	ctx := ginCtx.Request.Context()
+	req := ginCtx.Query("candidate_skill_id")
+	n, err1 := strconv.ParseInt(req, 10, 64)
+	err := cs.CandidateService.DeleteCandidateSkill(ctx, n)
+	if err1 != nil {
+		cs.Logger.Error(" DeleteCandidateSkill error", zap.Error(err))
+		ginx.BuildErrorResponse(ginCtx, err, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+	if err != nil {
+		cs.Logger.Error(" DeleteCandidateSkill error", zap.Error(err))
+		ginx.BuildErrorResponse(ginCtx, err, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+	ginx.BuildSuccessResponse(ginCtx, http.StatusAccepted, nil)
+}
+
+func (cs *CandidateSerializer) UpdateCandidateSkill(ginCtx *gin.Context) {
+	ctx := ginCtx.Request.Context()
+	req := models.RequestUpdateCandidateSkill{}
+	err := json.NewDecoder(ginCtx.Request.Body).Decode(&req)
+	if err != nil {
+		cs.Logger.Error("Parse request Update Candidate Skill error", zap.Error(err))
+		ginx.BuildErrorResponse(ginCtx, err, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+	err = cs.CandidateService.UpdateCandidateSkill(ctx, &req)
+	if err != nil {
+		cs.Logger.Error("Update Recruiter error", zap.Error(err))
+		ginx.BuildErrorResponse(ginCtx, err, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+	ginx.BuildSuccessResponse(ginCtx, http.StatusAccepted, nil)
+}
+
+func (cs *CandidateSerializer) GetCandidateSkill(ginCtx *gin.Context) {
+	ctx := ginCtx.Request.Context()
+	req := ginCtx.Query("candidate_id")
+	n, err1 := strconv.ParseInt(req, 10, 64)
+	data, err := cs.CandidateService.GetCandidateSkill(ctx, n)
+	if err1 != nil {
+		cs.Logger.Error("GetCandidateSkill error", zap.Error(err))
+		ginx.BuildErrorResponse(ginCtx, err, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+	if err != nil {
+		cs.Logger.Error("GetCandidateSkill error", zap.Error(err))
+		ginx.BuildErrorResponse(ginCtx, err, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	ginx.BuildSuccessResponse(ginCtx, http.StatusAccepted, gin.H{
+		"data": data,
+	})
 }

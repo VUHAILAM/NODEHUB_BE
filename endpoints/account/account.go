@@ -8,6 +8,8 @@ import (
 
 	"gitlab.com/hieuxeko19991/job4e_be/pkg/auth"
 	"gitlab.com/hieuxeko19991/job4e_be/services/account"
+	"gitlab.com/hieuxeko19991/job4e_be/services/candidate"
+	"gitlab.com/hieuxeko19991/job4e_be/services/recruiter"
 
 	"github.com/gin-gonic/gin"
 	"gitlab.com/hieuxeko19991/job4e_be/pkg/ginx"
@@ -18,14 +20,18 @@ import (
 const cookieName = "account"
 
 type AccountSerializer struct {
-	accountService account.IAccountService
-	Logger         *zap.Logger
+	accountService   account.IAccountService
+	candidateService candidate.ICandidateService
+	recruiterService recruiter.IRecruiterService
+	Logger           *zap.Logger
 }
 
-func NewAccountSerializer(accountService account.IAccountService, logger *zap.Logger) *AccountSerializer {
+func NewAccountSerializer(accountService account.IAccountService, candidateService candidate.ICandidateService, recruiterService recruiter.IRecruiterService, logger *zap.Logger) *AccountSerializer {
 	return &AccountSerializer{
-		accountService: accountService,
-		Logger:         logger,
+		accountService:   accountService,
+		candidateService: candidateService,
+		recruiterService: recruiterService,
+		Logger:           logger,
 	}
 }
 
@@ -220,4 +226,47 @@ func (as *AccountSerializer) VerifyEmail(ginCtx *gin.Context) {
 		return
 	}
 	ginx.BuildSuccessResponse(ginCtx, http.StatusAccepted, nil)
+}
+
+func (as *AccountSerializer) PublicProfile(ginCtx *gin.Context) {
+	ctx := ginCtx.Request.Context()
+	req := models.RequestPublicProfile{}
+	err := json.NewDecoder(ginCtx.Request.Body).Decode(&req)
+	if err != nil {
+		as.Logger.Error("Parse request PublicProfile error", zap.Error(err))
+		ginx.BuildErrorResponse(ginCtx, err, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	account_type := req.Account_type
+	candidateID := req.ID
+
+	if account_type == 1 {
+		data, err := as.candidateService.GetCandidateProfile(ctx, candidateID)
+		if err != nil {
+			as.Logger.Error("GetCandidateProfile error", zap.Error(err))
+			ginx.BuildErrorResponse(ginCtx, err, gin.H{
+				"message": err.Error(),
+			})
+			return
+		}
+		ginx.BuildSuccessResponse(ginCtx, http.StatusAccepted, gin.H{
+			"data": data,
+		})
+	} else if account_type == 3 {
+		data, err := as.recruiterService.GetProfileRecruiter(ctx, req.ID)
+		if err != nil {
+			as.Logger.Error("GetProfileRecruiter error", zap.Error(err))
+			ginx.BuildErrorResponse(ginCtx, err, gin.H{
+				"message": err.Error(),
+			})
+			return
+		}
+		ginx.BuildSuccessResponse(ginCtx, http.StatusAccepted, gin.H{
+			"data": data,
+		})
+	}
+
 }

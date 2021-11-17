@@ -134,9 +134,12 @@ func InitServer() *Server {
 	canSerializer := candidate2.NewCandidateSerializer(canService, logger)
 	// init account service
 	recruiterGorm := recruiter.NewRecruiterGorm(gormDB, logger)
+	//init recruiter service
+	recruiterService := recruiter.NewRecruiterCategory(recruiterGorm, logger)
+	recruiterSerializer := recruiter2.NewRecruiterSerializer(recruiterService, logger)
 	accountGorm := account.NewAccountGorm(gormDB, logger)
 	accountService := account.NewAccount(accountGorm, recruiterGorm, authHandler, conf, mailService, logger, candidateGorm)
-	accountSerializer := account2.NewAccountSerializer(accountService, logger)
+	accountSerializer := account2.NewAccountSerializer(accountService, canService, recruiterService, logger)
 	//init blog service
 	blogGorm := blog.NewBlogGorm(gormDB, logger)
 	blogService := blog.NewBlog(blogGorm, logger)
@@ -168,9 +171,6 @@ func InitServer() *Server {
 	mediaGorm := media.NewMediaGorm(gormDB, logger)
 	mediaService := media.NewMediaCategory(mediaGorm, logger)
 	mediaSerializer := media2.NewMediaSerializer(mediaService, logger)
-	//init recruiter service
-	recruiterService := recruiter.NewRecruiterCategory(recruiterGorm, logger)
-	recruiterSerializer := recruiter2.NewRecruiterSerializer(recruiterService, logger)
 
 	//init notification service
 	notificationGorm := notification.NewNotificationGorm(gormDB, logger)
