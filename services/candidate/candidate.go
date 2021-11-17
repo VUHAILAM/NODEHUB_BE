@@ -2,6 +2,7 @@ package candidate
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/mitchellh/mapstructure"
 	"gitlab.com/hieuxeko19991/job4e_be/pkg/models"
@@ -16,6 +17,10 @@ type ICandidateService interface {
 	GetAllCandidateForAdmin(ctx context.Context, name string, page int64, size int64) (*models.ResponsetListCandidateAdmin, error)
 	UpdateReviewCandidateByAdmin(ctx context.Context, updateRequest *models.RequestUpdateReviewCandidateAdmin) error
 	UpdateStatusCandidate(ctx context.Context, candidate *models.RequestUpdateStatusCandidate, candidate_id int64) error
+	AddCandidateSkill(ctx context.Context, candidateSkill *models.CandidateSkill) error
+	DeleteCandidateSkill(ctx context.Context, candidate_skill_id int64) error
+	UpdateCandidateSkill(ctx context.Context, updateRequest *models.RequestUpdateCandidateSkill) error
+	GetCandidateSkill(ctx context.Context, candidate_id int64) ([]models.ResponseCandidateSkill, error)
 }
 
 type CandidateService struct {
@@ -61,6 +66,7 @@ func (s *CandidateService) UpdateCandidateProfile(ctx context.Context, req model
 }
 
 func (s *CandidateService) GetCandidateProfile(ctx context.Context, candidateID int64) (*models.CandidateResponse, error) {
+	fmt.Println("lõi cai deo gì day: ", candidateID)
 	candidate, err := s.CanGorm.GetByCandidateID(ctx, candidateID)
 	if err != nil {
 		s.Logger.Error(err.Error())
@@ -118,4 +124,52 @@ func (s *CandidateService) UpdateStatusCandidate(ctx context.Context, candidate 
 		return err
 	}
 	return nil
+}
+
+// candidateSkill
+func (s *CandidateService) AddCandidateSkill(ctx context.Context, candidateSkill *models.CandidateSkill) error {
+	CandidateSkillModels := &models.CandidateSkill{
+		Id:          candidateSkill.Id,
+		CandidateId: candidateSkill.CandidateId,
+		SkillId:     candidateSkill.SkillId,
+		Media:       candidateSkill.Media}
+	err := s.CanGorm.AddCandidateSkill(ctx, CandidateSkillModels)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s *CandidateService) DeleteCandidateSkill(ctx context.Context, candidate_skill_id int64) error {
+
+	err := s.CanGorm.DeleteCandidateSkill(ctx, candidate_skill_id)
+	if err != nil {
+		s.Logger.Error("Can not delete to MySQL", zap.Error(err))
+		return err
+	}
+	return nil
+}
+
+func (s *CandidateService) UpdateCandidateSkill(ctx context.Context, updateRequest *models.RequestUpdateCandidateSkill) error {
+	updateData := map[string]interface{}{}
+	err1 := mapStructureDecodeWithTextUnmarshaler(updateRequest, &updateData)
+	if err1 != nil {
+		s.Logger.Error("Can not convert to map", zap.Error(err1))
+		return err1
+	}
+
+	err := s.CanGorm.UpdateCandidateSkill(ctx, updateRequest.ID, updateData)
+	if err != nil {
+		s.Logger.Error("Can not Update to MySQL", zap.Error(err))
+		return err
+	}
+	return nil
+}
+
+func (s *CandidateService) GetCandidateSkill(ctx context.Context, candidate_id int64) ([]models.ResponseCandidateSkill, error) {
+	acc, err := s.CanGorm.GetCandidateSkill(ctx, candidate_id)
+	if err != nil {
+		return nil, err
+	}
+	return acc, nil
 }

@@ -152,8 +152,8 @@ type JobForAdmin struct {
 	Role          string    `json:"role"`
 	Experience    string    `json:"experience"`
 	Location      string    `json:"location"`
-	HireDate      int64     `json:"hire_date"`
-	Status        int       `json:"status"`
+	HireDate      time.Time `json:"hire_date"`
+	Status        int64     `json:"status"`
 	CreatedAt     time.Time `json:"created_at"`
 	UpdatedAt     time.Time `json:"updated_at"`
 }
@@ -173,5 +173,5 @@ type ResponsetListJobAdmin struct {
 
 type RequestUpdateStatusJob struct {
 	JobID  int64 `json:"job_id"`
-	Status bool  `json:"status"`
+	Status int64 `json:"status"`
 }

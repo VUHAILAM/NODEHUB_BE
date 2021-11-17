@@ -17,6 +17,10 @@ const (
 	tableAccount = "account"
 )
 
+const (
+	tableCandidateSkill = "candidate_skill"
+)
+
 type ICandidateDatabase interface {
 	Create(ctx context.Context, createData *models.Candidate) (int64, error)
 	Update(ctx context.Context, candidateID int64, updateData *models.Candidate) error
@@ -24,6 +28,10 @@ type ICandidateDatabase interface {
 	GetAllCandidateForAdmin(ctx context.Context, name string, page int64, size int64) (*models.ResponsetListCandidateAdmin, error)
 	UpdateReviewCandidateByAdmin(ctx context.Context, candidate_id int64, data map[string]interface{}) error
 	UpdateStatusCandidate(ctx context.Context, candidate *models.RequestUpdateStatusCandidate, candidate_id int64) error
+	AddCandidateSkill(ctx context.Context, candidateSkill *models.CandidateSkill) error
+	DeleteCandidateSkill(ctx context.Context, candidate_skill_id int64) error
+	UpdateCandidateSkill(ctx context.Context, candidate_skill_id int64, data map[string]interface{}) error
+	GetCandidateSkill(ctx context.Context, candidate_id int64) ([]models.ResponseCandidateSkill, error)
 }
 
 type CandidateGorm struct {
@@ -135,4 +143,55 @@ func (g *CandidateGorm) UpdateStatusCandidate(ctx context.Context, candidate *mo
 		return err
 	}
 	return nil
+}
+
+//candidate skill
+func (g *CandidateGorm) AddCandidateSkill(ctx context.Context, candidateSkill *models.CandidateSkill) error {
+	db := g.DB.WithContext(ctx)
+	err := db.Table(tableCandidateSkill).Create(candidateSkill).Error
+	if err != nil {
+		g.Logger.Error("CandidateGorm: Create recruiter skill error", zap.Error(err))
+		return err
+	}
+	return nil
+}
+
+func (g *CandidateGorm) DeleteCandidateSkill(ctx context.Context, candidate_skill_id int64) error {
+	db := g.DB.WithContext(ctx)
+	CandidateSkill := models.CandidateSkill{}
+	err := db.Table(tableCandidateSkill).Delete(&CandidateSkill, candidate_skill_id).Error
+	if err != nil {
+		g.Logger.Error("RecruiterGorm: Delete skill error", zap.Error(err), zap.Int64("candidate_skill_id", candidate_skill_id))
+		return err
+	}
+	return nil
+}
+
+func (g *CandidateGorm) UpdateCandidateSkill(ctx context.Context, candidate_skill_id int64, data map[string]interface{}) error {
+	db := g.DB.WithContext(ctx)
+	err := db.Table(tableCandidateSkill).Where("id=?", candidate_skill_id).Updates(data).Error
+	if err != nil {
+		g.Logger.Error("RecruiterGorm: Update recruiter error", zap.Error(err), zap.Int64("candidate_skill_id", candidate_skill_id))
+		return err
+	}
+	return nil
+}
+
+func (g *CandidateGorm) GetCandidateSkill(ctx context.Context, candidate_id int64) ([]models.ResponseCandidateSkill, error) {
+	db := g.DB.WithContext(ctx)
+	arr := []models.ResponseCandidateSkill{}
+	data, err := db.Raw(`SELECT cs.id , cs.candidate_id , cs.skill_id , s.name , s.description , s.questions , s.icon , cs.media ,s.status , cs.created_at ,cs.updated_at
+	FROM nodehub.candidate_skill cs 
+	LEFT JOIN nodehub.skill s
+	ON cs.skill_id = s.skill_id
+	where s.status = 1 and cs.candidate_id = ?`, candidate_id).Rows()
+	if err != nil {
+		g.Logger.Error("MediaGorm: Get slide error", zap.Error(err))
+		return nil, err
+	}
+	for data.Next() {
+		// ScanRows scan a row into user
+		db.ScanRows(data, &arr)
+	}
+	return arr, nil
 }
