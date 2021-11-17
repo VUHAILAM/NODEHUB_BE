@@ -19,7 +19,8 @@ type IJobService interface {
 	CreateNewJob(ctx context.Context, job *models.CreateJobRequest) error
 	GetDetailJob(ctx context.Context, jobID int64) (*models.ESJob, error)
 	UpdateJob(ctx context.Context, updateRequest *models.RequestUpdateJob) error
-	GetAllJob(ctx context.Context, getRequest *models.RequestGetAllJob) (*models.ResponseGetAllJob, error)
+	GetAllJob(ctx context.Context, getRequest *models.RequestGetAllJob) (*models.ResponseGetJob, error)
+	GetJobsByRecruiterID(ctx context.Context, req *models.RequestGetJobsByRecruiter) (*models.ResponseGetJob, error)
 	GetAllJobForAdmin(ctx context.Context, name string, page int64, size int64) (*models.ResponsetListJobAdmin, error)
 	UpdateStatusJob(ctx context.Context, updateRequest *models.RequestUpdateStatusJob) error
 	DeleteJob(ctx context.Context, job_id int64) error
@@ -143,14 +144,28 @@ func (j *Job) UpdateJob(ctx context.Context, updateRequest *models.RequestUpdate
 	return nil
 }
 
-func (j *Job) GetAllJob(ctx context.Context, getRequest *models.RequestGetAllJob) (*models.ResponseGetAllJob, error) {
+func (j *Job) GetAllJob(ctx context.Context, getRequest *models.RequestGetAllJob) (*models.ResponseGetJob, error) {
 	offset := (getRequest.Page - 1) * getRequest.Size
 	jobs, total, err := j.JobES.GetAllJob(ctx, offset, getRequest.Size)
 	if err != nil {
 		j.Logger.Error("Can not Get all Job from ES", zap.Error(err))
 		return nil, err
 	}
-	resp := models.ResponseGetAllJob{
+	resp := models.ResponseGetJob{
+		Total:  total,
+		Result: jobs,
+	}
+	return &resp, nil
+}
+
+func (j *Job) GetJobsByRecruiterID(ctx context.Context, req *models.RequestGetJobsByRecruiter) (*models.ResponseGetJob, error) {
+	offset := (req.Page - 1) * req.Size
+	jobs, total, err := j.JobES.GetJobsByRecruiterID(ctx, req.RecruiterID, offset, req.Size)
+	if err != nil {
+		j.Logger.Error("Can not Get all Job by recruiter from ES", zap.Error(err))
+		return nil, err
+	}
+	resp := models.ResponseGetJob{
 		Total:  total,
 		Result: jobs,
 	}

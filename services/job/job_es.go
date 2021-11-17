@@ -19,6 +19,7 @@ type IJobElasticsearch interface {
 	GetJobByID(ctx context.Context, documentID string) (*models.ESJob, error)
 	GetAllJob(ctx context.Context, from, size int64) ([]models.ESJob, int64, error)
 	Update(ctx context.Context, documentID string, data map[string]interface{}) error
+	GetJobsByRecruiterID(ctx context.Context, recruiterID, from, size int64) ([]models.ESJob, int64, error)
 }
 
 type JobES struct {
@@ -84,6 +85,28 @@ func (e *JobES) GetJobByID(ctx context.Context, documentID string) (*models.ESJo
 		return nil, err
 	}
 	return &job, nil
+}
+
+func (e *JobES) GetJobsByRecruiterID(ctx context.Context, recruiterID, from, size int64) ([]models.ESJob, int64, error) {
+	searchService := e.ES.Search().Index(e.JobIndex).Query(elastic.NewTermQuery("recruiter_id", recruiterID))
+	searchResult, err := searchService.Sort("created_at", false).From(int(from)).Size(int(size)).Pretty(true).Do(ctx)
+	if err != nil {
+		e.Logger.Error("Job ES: Get Job List error", zap.Error(err))
+		return nil, 0, err
+	}
+	jobs := make([]models.ESJob, 0, size)
+
+	for _, hit := range searchResult.Hits.Hits {
+		var j models.ESJob
+		err := json.Unmarshal(hit.Source, &j)
+		if err != nil {
+			e.Logger.Error(err.Error())
+			continue
+		}
+		e.Logger.Info("job es", zap.Reflect("job es", j))
+		jobs = append(jobs, j)
+	}
+	return jobs, searchResult.TotalHits(), nil
 }
 
 func (e *JobES) Update(ctx context.Context, documentID string, data map[string]interface{}) error {

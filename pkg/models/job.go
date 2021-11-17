@@ -130,7 +130,13 @@ type RequestGetAllJob struct {
 	Size int64 `json:"size"`
 }
 
-type ResponseGetAllJob struct {
+type RequestGetJobsByRecruiter struct {
+	RecruiterID int64 `json:"recruiter_id"`
+	Page        int64 `json:"page"`
+	Size        int64 `json:"size"`
+}
+
+type ResponseGetJob struct {
 	Total  int64   `json:"total"`
 	Result []ESJob `json:"result"`
 }
