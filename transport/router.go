@@ -104,7 +104,8 @@ func (g *GinDependencies) InitGinEngine(config *config.Config) *gin.Engine {
 	jobCtl := nodehub.Group("/public/job")
 	jobCtl.GET("/getAllJob", g.JobSerializer.GetAllJob)
 	jobAdmin := nodehub.Group("/private/job").Use(middlewares.AuthorizationMiddleware(g.Auth, auth.AdminRole))
-	jobCtl.Use(middlewares.AuthorizationMiddleware(g.Auth, auth.CommonRole)).GET("/getJob", g.JobSerializer.GetDetailJob)
+	jobCtl.Use(middlewares.AuthorizationMiddleware(g.Auth, auth.CommonRole)).POST("/getJob", g.JobSerializer.GetDetailJob)
+	jobCtl.Use(middlewares.AuthorizationMiddleware(g.Auth, auth.CommonRole)).POST("", g.JobSerializer.GetAllJob)
 	jobCtl.Use(middlewares.AuthorizationMiddleware(g.Auth, auth.RecruiterRole)).POST("/create", g.JobSerializer.Create)
 	jobCtl.Use(middlewares.AuthorizationMiddleware(g.Auth, auth.RecruiterRole)).PUT("/update", g.JobSerializer.UpdateJob)
 	jobCtl.Use(middlewares.AuthorizationMiddleware(g.Auth, auth.CommonRole)).POST("/getCompanyJob", g.JobSerializer.GetJobsByRecruiter)
@@ -137,8 +138,8 @@ func (g *GinDependencies) InitGinEngine(config *config.Config) *gin.Engine {
 	canCtlAdmin.PUT("/updateStatusCandidate", g.CandidateSerializer.UpdateStatusCandidate)
 
 	jobSkill := nodehub.Group("/job-skill").Use(middlewares.AuthorizationMiddleware(g.Auth, auth.CommonRole))
-	jobSkill.GET("jobs", g.JobSkillSerializer.GetJobsBySkill)
-	jobSkill.GET("skills", g.JobSkillSerializer.GetSkillsByJob)
+	jobSkill.POST("jobs", g.JobSkillSerializer.GetJobsBySkill)
+	jobSkill.POST("skills", g.JobSkillSerializer.GetSkillsByJob)
 	//notification
 	notificationUser := nodehub.Group("/public/notification").Use(middlewares.AuthorizationMiddleware(g.Auth, auth.CommonRole))
 	notificationUser.POST("/getListNotificationByCandidate", g.NotificationSerializer.GetListNotificationByAccount)
