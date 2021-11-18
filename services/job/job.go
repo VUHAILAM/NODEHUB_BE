@@ -208,7 +208,21 @@ func (j *Job) GetAllJobForAdmin(ctx context.Context, name string, page int64, si
 func (j *Job) UpdateStatusJob(ctx context.Context, updateRequest *models.RequestUpdateStatusJob) error {
 	jobModels := &models.RequestUpdateStatusJob{
 		Status: updateRequest.Status}
+	updateES := models.ESJobUpdate{
+		JobID:  updateRequest.JobID,
+		Status: int(updateRequest.Status),
+	}
 	err := j.JobGorm.UpdateStatusJob(ctx, jobModels, updateRequest.JobID)
+	if err != nil {
+		return err
+	}
+	updateData := map[string]interface{}{}
+	err = mapStructureDecodeWithTextUnmarshaler(updateES, &updateData)
+	if err != nil {
+		j.Logger.Error("Can not convert to map", zap.Error(err))
+		return err
+	}
+	err = j.JobES.Update(ctx, string(updateRequest.JobID), updateData)
 	if err != nil {
 		return err
 	}
@@ -218,6 +232,10 @@ func (j *Job) DeleteJob(ctx context.Context, job_id int64) error {
 	err := j.JobGorm.DeleteJob(ctx, job_id)
 	if err != nil {
 		j.Logger.Error("Can not delete to MySQL", zap.Error(err))
+		return err
+	}
+	err = j.JobES.Delete(ctx, string(job_id))
+	if err != nil {
 		return err
 	}
 	return nil

@@ -20,6 +20,7 @@ type IJobElasticsearch interface {
 	GetAllJob(ctx context.Context, from, size int64) ([]models.ESJob, int64, error)
 	Update(ctx context.Context, documentID string, data map[string]interface{}) error
 	GetJobsByRecruiterID(ctx context.Context, recruiterID, from, size int64) ([]models.ESJob, int64, error)
+	Delete(ctx context.Context, documentID string) error
 }
 
 type JobES struct {
@@ -113,6 +114,15 @@ func (e *JobES) Update(ctx context.Context, documentID string, data map[string]i
 	_, err := e.ES.Update().Index(e.JobIndex).Id(documentID).Doc(data).DetectNoop(true).Do(ctx)
 	if err != nil {
 		e.Logger.Error("Job ES: Update Job error", zap.Error(err))
+		return err
+	}
+	return nil
+}
+
+func (e *JobES) Delete(ctx context.Context, documentID string) error {
+	_, err := e.ES.Delete().Index(e.JobIndex).Id(documentID).Do(ctx)
+	if err != nil {
+		e.Logger.Error("Job ES: Delete Job error", zap.Error(err))
 		return err
 	}
 	return nil
