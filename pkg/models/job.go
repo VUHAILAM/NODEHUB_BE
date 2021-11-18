@@ -58,6 +58,21 @@ func ToESJobCreate(job *Job) *ESJobCreate {
 	}
 }
 
+type ESJobUpdate struct {
+	JobID       int64     `json:"job_id,omitempty" mapstructure:"job_id,omitempty"`
+	RecruiterID int64     `json:"recruiter_id,omitempty" mapstructure:"recruiter_id,omitempty"`
+	Title       string    `json:"title,omitempty" mapstructure:"title,omitempty"`
+	Description string    `json:"description,omitempty" mapstructure:"description,omitempty"`
+	SalaryRange string    `json:"salary_range,omitempty" mapstructure:"salary_range,omitempty"`
+	Quantity    int64     `json:"quantity,omitempty" mapstructure:"quantity,omitempty"`
+	Role        string    `json:"role,omitempty" mapstructure:"role,omitempty"`
+	Experience  string    `json:"experience,omitempty" mapstructure:"experience,omitempty"`
+	Location    string    `json:"location,omitempty" mapstructure:"location,omitempty"`
+	HireDate    string    `json:"hire_date,omitempty" mapstructure:"hire_date,omitempty"`
+	Status      int       `json:"status,omitempty" mapstructure:"status,omitempty"`
+	Skills      []ESSkill `json:"skills,omitempty" mapstructure:"skills,omitempty"`
+}
+
 type ESJob struct {
 	JobID       int64     `json:"job_id"`
 	RecruiterID int64     `json:"recruiter_id"`
@@ -112,17 +127,17 @@ type RequestGetJobDetail struct {
 }
 
 type RequestUpdateJob struct {
-	JobID       int64  `json:"job_id,omitempty" mapstructure:"job_id,omitempty"`
-	RecruiterID int64  `json:"recruiter_id,omitempty" mapstructure:"recruiter_id,omitempty"`
-	Title       string `json:"title,omitempty" mapstructure:"title,omitempty"`
-	Description string `json:"description,omitempty" mapstructure:"description,omitempty"`
-	SalaryRange string `json:"salary_range,omitempty" mapstructure:"salary_range,omitempty"`
-	Quantity    int64  `json:"quantity,omitempty" mapstructure:"quantity,omitempty"`
-	Role        string `json:"role,omitempty" mapstructure:"role,omitempty"`
-	Experience  string `json:"experience,omitempty" mapstructure:"experience,omitempty"`
-	Location    string `json:"location,omitempty" mapstructure:"location,omitempty"`
-	Status      int    `json:"status,omitempty" mapstructure:"status,omitempty"`
-	HireDate    HDate  `json:"hire_date,omitempty" mapstructure:"hire_date,omitempty"`
+	JobID       int64  `json:"job_id,omitempty"`
+	RecruiterID int64  `json:"recruiter_id,omitempty"`
+	Title       string `json:"title,omitempty"`
+	Description string `json:"description,omitempty"`
+	SalaryRange string `json:"salary_range,omitempty"`
+	Quantity    int64  `json:"quantity,omitempty"`
+	Role        string `json:"role,omitempty"`
+	Experience  string `json:"experience,omitempty"`
+	Location    string `json:"location,omitempty"`
+	Status      int    `json:"status,omitempty"`
+	HireDate    HDate  `json:"hire_date,omitempty"`
 }
 
 type RequestGetAllJob struct {

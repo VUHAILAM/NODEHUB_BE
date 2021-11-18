@@ -123,8 +123,21 @@ func (j *Job) GetDetailJob(ctx context.Context, jobID int64) (*models.ESJob, err
 
 func (j *Job) UpdateJob(ctx context.Context, updateRequest *models.RequestUpdateJob) error {
 	j.Logger.Info("updateReq", zap.Reflect("Req", updateRequest))
+	updateES := models.ESJobUpdate{
+		JobID:       updateRequest.JobID,
+		RecruiterID: updateRequest.RecruiterID,
+		Title:       updateRequest.Title,
+		Description: updateRequest.Description,
+		SalaryRange: updateRequest.SalaryRange,
+		Quantity:    updateRequest.Quantity,
+		Role:        updateRequest.Role,
+		Experience:  updateRequest.Experience,
+		Location:    updateRequest.Location,
+		Status:      updateRequest.Status,
+		HireDate:    time.Time(updateRequest.HireDate).Format("2006-01-02"),
+	}
 	updateData := map[string]interface{}{}
-	err := mapStructureDecodeWithTextUnmarshaler(updateRequest, &updateData)
+	err := mapStructureDecodeWithTextUnmarshaler(updateES, &updateData)
 	if err != nil {
 		j.Logger.Error("Can not convert to map", zap.Error(err))
 		return err
