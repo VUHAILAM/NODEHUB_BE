@@ -100,9 +100,9 @@ func (g *JobApplyGorm) UpdateStatus(ctx context.Context, status string, jobID, c
 func (g *JobApplyGorm) GetCandidateApplyJob(ctx context.Context, jobID int64, offset, size int64) ([]*models.Candidate, int64, error) {
 	db := g.DB.WithContext(ctx)
 	var candidates []*models.Candidate
-	err := db.Table(jobTable).
+	err := db.Table(candidateTable).
 		Joins("INNER JOIN "+jobApplyTable+" ON "+candidateTable+".candidate_id = "+jobApplyTable+".candidate_id").
-		Where(jobTable+".job_id=?", jobID).
+		Where(jobApplyTable+".job_id=?", jobID).
 		Offset(int(offset)).Limit(int(size)).Order(jobApplyTable + ".updated_at desc").
 		Find(&candidates).Error
 	if err != nil {
@@ -110,8 +110,8 @@ func (g *JobApplyGorm) GetCandidateApplyJob(ctx context.Context, jobID int64, of
 		return nil, 0, err
 	}
 	var total int64
-	total = db.Table(jobTable).
+	total = db.Table(candidateTable).
 		Joins("INNER JOIN "+jobApplyTable+" ON "+candidateTable+".candidate_id = "+jobApplyTable+".candidate_id").
-		Where(jobTable+".job_id=?", jobID).RowsAffected
+		Where(jobApplyTable+".job_id=?", jobID).RowsAffected
 	return candidates, total, nil
 }
