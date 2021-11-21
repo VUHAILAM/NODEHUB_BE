@@ -155,7 +155,7 @@ func (g *CandidateGorm) UpdateReviewCandidateByAdmin(ctx context.Context, candid
 func (g *CandidateGorm) UpdateStatusCandidate(ctx context.Context, candidate *models.RequestUpdateStatusCandidate, candidate_id int64) error {
 	db := g.DB.WithContext(ctx)
 	err := db.Table(tableAccount).Where("id = ?", candidate_id).Updates(map[string]interface{}{
-		"find_job": candidate.Status}).Error
+		"status": candidate.Status}).Error
 	if err != nil {
 		g.Logger.Error("RecruiterGorm: Update status recruiter error", zap.Error(err))
 		return err

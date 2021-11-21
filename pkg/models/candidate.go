@@ -14,7 +14,7 @@ type CandidateRequest struct {
 	Avatar            string        `json:"avatar,omitempty"`
 	Banner            string        `json:"banner,omitempty"`
 	Phone             string        `json:"phone,omitempty"`
-	FindJob           bool          `json:"find_job,omitempty"`
+	FindJob           *bool         `json:"find_job,omitempty"`
 	NodehubReview     string        `json:"nodehub_review,omitempty"`
 	NodehubScore      int           `json:"nodehub_score,omitempty"`
 	CVManage          []CV          `json:"cv_manage,omitempty"`
@@ -36,7 +36,7 @@ type CandidateResponse struct {
 	Avatar            string        `json:"avatar"`
 	Banner            string        `json:"banner"`
 	Phone             string        `json:"phone"`
-	FindJob           bool          `json:"find_job"`
+	FindJob           *bool         `json:"find_job"`
 	NodehubReview     string        `json:"nodehub_review"`
 	NodehubScore      int           `json:"nodehub_score"`
 	CVManage          []CV          `json:"cv_manage"`
@@ -60,7 +60,7 @@ type CandidateRequestAdmin struct {
 	Avatar            string        `json:"avatar"`
 	Banner            string        `json:"banner"`
 	Phone             string        `json:"phone"`
-	FindJob           bool          `json:"find_job"`
+	FindJob           *bool         `json:"find_job"`
 	NodehubReview     string        `json:"nodehub_review"`
 	NodehubScore      int           `json:"nodehub_score"`
 	CVManage          []CV          `json:"cv_manage"`
@@ -85,7 +85,7 @@ type CandidateAdmin struct {
 	Avatar            string    `json:"avatar"`
 	Banner            string    `json:"banner"`
 	Phone             string    `json:"phone"`
-	FindJob           bool      `json:"find_job"`
+	FindJob           *bool     `json:"find_job"`
 	NodehubReview     string    `json:"nodehub_review"`
 	NodehubScore      int       `json:"nodehub_score"`
 	CvManage          string    `json:"cv_manage"`
@@ -130,7 +130,7 @@ type Candidate struct {
 	Avatar            string    `json:"avatar,omitempty"`
 	Banner            string    `json:"banner,omitempty"`
 	Phone             string    `json:"phone,omitempty"`
-	FindJob           bool      `json:"find_job,omitempty"`
+	FindJob           *bool     `json:"find_job,omitempty"`
 	NodehubReview     string    `json:"nodehub_review,omitempty"`
 	NodehubScore      int       `json:"nodehub_score,omitempty"`
 	JobStatus         string    `json:"job_status" gorm:"->"`
