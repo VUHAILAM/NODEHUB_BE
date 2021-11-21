@@ -24,6 +24,7 @@ type IJobService interface {
 	GetAllJobForAdmin(ctx context.Context, name string, page int64, size int64) (*models.ResponsetListJobAdmin, error)
 	UpdateStatusJob(ctx context.Context, updateRequest *models.RequestUpdateStatusJob) error
 	DeleteJob(ctx context.Context, job_id int64) error
+	SearchJob(ctx context.Context, searchReq models.RequestSearchJob) (*models.ResponseGetJob, error)
 }
 
 type Job struct {
@@ -239,4 +240,18 @@ func (j *Job) DeleteJob(ctx context.Context, job_id int64) error {
 		return err
 	}
 	return nil
+}
+
+func (j *Job) SearchJob(ctx context.Context, searchReq models.RequestSearchJob) (*models.ResponseGetJob, error) {
+	offset := (searchReq.Page - 1) * searchReq.Size
+	jobs, total, err := j.JobES.SearchJobs(ctx, searchReq.Text, searchReq.Location, offset, searchReq.Size)
+	if err != nil {
+		j.Logger.Error("Can not Searhc Job from ES", zap.Error(err))
+		return nil, err
+	}
+	resp := models.ResponseGetJob{
+		Total:  total,
+		Result: jobs,
+	}
+	return &resp, nil
 }

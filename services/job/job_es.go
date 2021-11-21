@@ -21,6 +21,7 @@ type IJobElasticsearch interface {
 	Update(ctx context.Context, documentID string, data map[string]interface{}) error
 	GetJobsByRecruiterID(ctx context.Context, recruiterID, from, size int64) ([]models.ESJob, int64, error)
 	Delete(ctx context.Context, documentID string) error
+	SearchJobs(ctx context.Context, text, location string, from, size int64) ([]models.ESJob, int64, error)
 }
 
 type JobES struct {
@@ -126,4 +127,31 @@ func (e *JobES) Delete(ctx context.Context, documentID string) error {
 		return err
 	}
 	return nil
+}
+
+func (e *JobES) SearchJobs(ctx context.Context, text, location string, from, size int64) ([]models.ESJob, int64, error) {
+	txtQuery := elastic.NewMultiMatchQuery(text, "description", "title", "role").
+		Type("most_fields").Fuzziness("AUTO")
+	locationQuery := elastic.NewMatchQuery("location", location)
+
+	generalQuery := elastic.NewBoolQuery().Must(txtQuery, locationQuery)
+	searchResult, err := e.ES.Search().Index(e.JobIndex).Query(generalQuery).
+		From(int(from)).Size(int(size)).Sort("_score", false).Do(ctx)
+	if err != nil {
+		e.Logger.Error("Job ES: Get Job List error", zap.Error(err))
+		return nil, 0, err
+	}
+	jobs := make([]models.ESJob, 0, size)
+
+	for _, hit := range searchResult.Hits.Hits {
+		var j models.ESJob
+		err := json.Unmarshal(hit.Source, &j)
+		if err != nil {
+			e.Logger.Error(err.Error())
+			continue
+		}
+		e.Logger.Info("job es", zap.Reflect("job es", j))
+		jobs = append(jobs, j)
+	}
+	return jobs, searchResult.TotalHits(), nil
 }

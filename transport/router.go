@@ -103,6 +103,7 @@ func (g *GinDependencies) InitGinEngine(config *config.Config) *gin.Engine {
 	jobCtl.Use(middlewares.AuthorizationMiddleware(g.Auth, auth.RecruiterRole)).POST("/create", g.JobSerializer.Create)
 	jobCtl.Use(middlewares.AuthorizationMiddleware(g.Auth, auth.RecruiterRole)).PUT("/update", g.JobSerializer.UpdateJob)
 	jobCtl.Use(middlewares.AuthorizationMiddleware(g.Auth, auth.CommonRole)).GET("/getCompanyJob", g.JobSerializer.GetJobsByRecruiter)
+	jobCtl.Use(middlewares.AuthorizationMiddleware(g.Auth, auth.CommonRole)).POST("/search", g.JobSerializer.SearchJob)
 	jobAdmin.POST("/getAllJobForAdmin", g.JobSerializer.GetAllJobForAdmin)
 	jobAdmin.PUT("/updateStatusJob", g.JobSerializer.UpdateStatusJob)
 	jobAdmin.DELETE("/deleteJob", g.JobSerializer.DeleteJob)

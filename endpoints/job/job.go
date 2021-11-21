@@ -214,3 +214,26 @@ func (s *JobSerializer) DeleteJob(ginCtx *gin.Context) {
 	}
 	ginx.BuildSuccessResponse(ginCtx, http.StatusAccepted, nil)
 }
+
+func (s *JobSerializer) SearchJob(ginCtx *gin.Context) {
+	ctx := ginCtx.Request.Context()
+	req := models.RequestSearchJob{}
+	err := json.NewDecoder(ginCtx.Request.Body).Decode(&req)
+	if err != nil {
+		s.Logger.Error("Parse request Search Job error", zap.Error(err))
+		ginx.BuildErrorResponse(ginCtx, err, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	resp, err := s.JobService.SearchJob(ctx, req)
+	if err != nil {
+		s.Logger.Error("Search Job error", zap.Error(err))
+		ginx.BuildErrorResponse(ginCtx, err, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+	ginx.BuildSuccessResponse(ginCtx, http.StatusAccepted, resp)
+}
