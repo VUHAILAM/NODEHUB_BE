@@ -190,3 +190,10 @@ type RequestUpdateStatusJob struct {
 	JobID  int64 `json:"job_id"`
 	Status int64 `json:"status"`
 }
+
+type RequestSearchJob struct {
+	Text     string `json:"text"`
+	Location string `json:"location"`
+	Page     int64  `json:"page"`
+	Size     int64  `json:"size"`
+}
