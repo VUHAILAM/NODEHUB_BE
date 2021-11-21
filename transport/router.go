@@ -109,10 +109,12 @@ func (g *GinDependencies) InitGinEngine(config *config.Config) *gin.Engine {
 	jobAdmin.DELETE("/deleteJob", g.JobSerializer.DeleteJob)
 
 	applyCtl := nodehub.Group("/job-candidate")
-	applyCtl.Use(middlewares.AuthorizationMiddleware(g.Auth, auth.CandidateRole)).POST("/apply", g.JobApplySerializer.Apply)
-	applyCtl.Use(middlewares.AuthorizationMiddleware(g.Auth, auth.CandidateRole)).GET("/jobs", g.JobApplySerializer.GetJobAppliedByCandidateID)
-	applyCtl.Use(middlewares.AuthorizationMiddleware(g.Auth, auth.RecruiterRole)).GET("/candidates", g.JobApplySerializer.GetCandidatesAppyJob)
-	applyCtl.Use(middlewares.AuthorizationMiddleware(g.Auth, auth.RecruiterRole)).PUT("/update", g.JobApplySerializer.UpdateStatus)
+	candidateApplyCtl := applyCtl.Group("/candidate").Use(middlewares.AuthorizationMiddleware(g.Auth, auth.CandidateRole))
+	candidateApplyCtl.POST("/apply", g.JobApplySerializer.Apply)
+	candidateApplyCtl.GET("/jobs", g.JobApplySerializer.GetJobAppliedByCandidateID)
+	recruiterApplyCtl := applyCtl.Group("/recruiter").Use(middlewares.AuthorizationMiddleware(g.Auth, auth.RecruiterRole))
+	recruiterApplyCtl.Use(middlewares.AuthorizationMiddleware(g.Auth, auth.RecruiterRole)).GET("/candidates", g.JobApplySerializer.GetCandidatesAppyJob)
+	recruiterApplyCtl.Use(middlewares.AuthorizationMiddleware(g.Auth, auth.RecruiterRole)).PUT("/update", g.JobApplySerializer.UpdateStatus)
 
 	canCtl := nodehub.Group("/candidate")
 	canCtlAdmin := nodehub.Group("/private/candidate").Use(middlewares.AuthorizationMiddleware(g.Auth, auth.AdminRole))
