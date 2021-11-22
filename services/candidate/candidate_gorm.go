@@ -32,6 +32,7 @@ type ICandidateDatabase interface {
 	DeleteCandidateSkill(ctx context.Context, candidate_skill_id int64) error
 	UpdateCandidateSkill(ctx context.Context, candidate_skill_id int64, data map[string]interface{}) error
 	GetCandidateSkill(ctx context.Context, candidate_id int64) ([]models.ResponseCandidateSkill, error)
+	SearchCandidate(ctx context.Context, text string, offset, page int64) ([]*models.Candidate, int64, error)
 }
 
 type CandidateGorm struct {
@@ -194,4 +195,16 @@ func (g *CandidateGorm) GetCandidateSkill(ctx context.Context, candidate_id int6
 		db.ScanRows(data, &arr)
 	}
 	return arr, nil
+}
+
+func (g *CandidateGorm) SearchCandidate(ctx context.Context, text string, offset, page int64) ([]*models.Candidate, int64, error) {
+	db := g.DB.WithContext(ctx).Table(candidateTable).Where("MATCH(first_name, last_name) AGAINST(?)", text)
+	var candidates []*models.Candidate
+	err := db.Offset(int(offset)).Limit(int(page)).Find(&candidates).Error
+	if err != nil {
+		g.Logger.Error(err.Error())
+		return nil, 0, err
+	}
+	total := db.RowsAffected
+	return candidates, total, nil
 }

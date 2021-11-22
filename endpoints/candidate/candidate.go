@@ -289,3 +289,26 @@ func (cs *CandidateSerializer) GetCandidateSkill(ginCtx *gin.Context) {
 		"data": data,
 	})
 }
+
+func (cs *CandidateSerializer) SearchCandidate(ginCtx *gin.Context) {
+	ctx := ginCtx.Request.Context()
+	req := models.RequestSearchCandidate{}
+	err := json.NewDecoder(ginCtx.Request.Body).Decode(&req)
+	if err != nil {
+		cs.Logger.Error("Parse request Search Candidate error", zap.Error(err))
+		ginx.BuildErrorResponse(ginCtx, err, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	resp, err := cs.CandidateService.SearchCandidate(ctx, req)
+	if err != nil {
+		cs.Logger.Error("Search Candidate error", zap.Error(err))
+		ginx.BuildErrorResponse(ginCtx, err, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+	ginx.BuildSuccessResponse(ginCtx, http.StatusAccepted, resp)
+}

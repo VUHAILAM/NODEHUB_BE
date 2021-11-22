@@ -439,3 +439,14 @@ func (c *CandidateAdmin) ToCandidateRequestAdmin() (CandidateRequestAdmin, error
 	}
 	return req, nil
 }
+
+type RequestSearchCandidate struct {
+	Text string `json:"text"`
+	Page int64  `json:"page"`
+	Size int64  `json:"size"`
+}
+
+type ResponseSearchCandidate struct {
+	Total      int64
+	Candidates []*Candidate
+}

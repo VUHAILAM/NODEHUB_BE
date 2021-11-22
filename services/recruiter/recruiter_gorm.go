@@ -22,6 +22,20 @@ const (
 	tableRecruiterSkill = "recruiter_skill"
 )
 
+type IRecruiterDatabase interface {
+	Create(ctx context.Context, recruiter *models.Recruiter) (int64, error)
+	AddRecruiterSkill(ctx context.Context, recruiterSkill *models.RecruiterSkill) error
+	UpdateProfile(ctx context.Context, recruiter *models.RequestUpdateRecruiter, recruiter_id int64) error
+	GetRecruiterSkill(ctx context.Context, recruiter_id int64) ([]models.ResponseRecruiterSkill, error)
+	GetProfile(ctx context.Context, id int64) (*models.Recruiter, error)
+	GetAllRecruiterForAdmin(ctx context.Context, name string, page int64, size int64) (*models.ResponsetListRecruiter, error)
+	UpdateReciuterByAdmin(ctx context.Context, recruiter_id int64, data map[string]interface{}) error
+	UpdateStatusReciuter(ctx context.Context, updateRequest *models.RequestUpdateStatusRecruiter, recruiter_id int64) error
+	GetAllRecruiterForCandidate(ctx context.Context, recruiterName string, skillName string, address string, page int64, size int64) (*models.ResponsetListRecruiterForCandidate, error)
+	DeleteRecruiterSkill(ctx context.Context, recruiter_skill_id int64) error
+	SearchRecruiter(ctx context.Context, text string, offset, size int64) ([]*models.Recruiter, int64, error)
+}
+
 type RecruiterGorm struct {
 	db     *gorm.DB
 	logger *zap.Logger
@@ -126,7 +140,7 @@ func (r *RecruiterGorm) GetAllRecruiterForAdmin(ctx context.Context, name string
 	limit := size
 	var total int64
 	//search query
-	data, err := db.Raw(`select r.recruiter_id, r.name, r.address, r.avartar, r.banner, 
+	data, err := db.Raw(`select r.recruiter_id, r.company_name, r.address, r.avartar, r.banner, 
 	r.phone, r.website, r.description, r.employee_quantity, r.contacter_name, r.contacter_phone, 
 	r.media, r.premium, r.nodehub_review, a.status, r.created_at, r.updated_at
 	FROM nodehub.recruiter r
@@ -238,4 +252,17 @@ func (r *RecruiterGorm) GetAllRecruiterForCandidate(ctx context.Context, recruit
 	resutl.Data = arr
 
 	return &resutl, nil
+}
+
+func (r *RecruiterGorm) SearchRecruiter(ctx context.Context, text string, offset, size int64) ([]*models.Recruiter, int64, error) {
+	db := r.db.WithContext(ctx).Table(tableRecruiter).Where("MATCH(name, description) AGAINST(?)", text)
+	var recruiters []*models.Recruiter
+	res := db.Offset(int(offset)).Limit(int(size)).Find(&recruiters)
+	err := res.Error
+	if err != nil {
+		r.logger.Error(err.Error())
+		return nil, 0, err
+	}
+	total := db.RowsAffected
+	return recruiters, total, nil
 }
