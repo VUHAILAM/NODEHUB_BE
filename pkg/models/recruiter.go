@@ -161,3 +161,14 @@ type RecruiterForCandidateCheck struct {
 	Banner      string `json:"banner"`
 	Description string `json:"description"`
 }
+
+type RequestSearchRecruiter struct {
+	Text string `json:"text"`
+	Page int64  `json:"page"`
+	Size int64  `json:"size"`
+}
+
+type ResponseSearchRecruiter struct {
+	Total      int64
+	Recruiters []*Recruiter
+}

@@ -21,6 +21,7 @@ type ICandidateService interface {
 	DeleteCandidateSkill(ctx context.Context, candidate_skill_id int64) error
 	UpdateCandidateSkill(ctx context.Context, updateRequest *models.RequestUpdateCandidateSkill) error
 	GetCandidateSkill(ctx context.Context, candidate_id int64) ([]models.ResponseCandidateSkill, error)
+	SearchCandidate(ctx context.Context, req models.RequestSearchCandidate) (*models.ResponseSearchCandidate, error)
 }
 
 type CandidateService struct {
@@ -172,4 +173,20 @@ func (s *CandidateService) GetCandidateSkill(ctx context.Context, candidate_id i
 		return nil, err
 	}
 	return acc, nil
+}
+
+func (s *CandidateService) SearchCandidate(ctx context.Context, req models.RequestSearchCandidate) (*models.ResponseSearchCandidate, error) {
+	offset := (req.Page - 1) * req.Size
+	candidates, total, err := s.CanGorm.SearchCandidate(ctx, req.Text, offset, req.Size)
+	if err != nil {
+		s.Logger.Error("Search candidate error", zap.Error(err))
+		return nil, err
+	}
+
+	resp := models.ResponseSearchCandidate{
+		Total:      total,
+		Candidates: candidates,
+	}
+
+	return &resp, nil
 }

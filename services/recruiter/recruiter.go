@@ -18,19 +18,7 @@ type IRecruiterService interface {
 	UpdateStatusReciuter(ctx context.Context, updateRequest *models.RequestUpdateStatusRecruiter, recruiter_id int64) error
 	GetAllRecruiterForCandidate(ctx context.Context, recruiterName string, skillName string, address string, page int64, size int64) (*models.ResponsetListRecruiterForCandidate, error)
 	DeleteRecruiterSkill(ctx context.Context, recruiter_skill_id int64) error
-}
-
-type IRecruiterDatabase interface {
-	Create(ctx context.Context, recruiter *models.Recruiter) (int64, error)
-	AddRecruiterSkill(ctx context.Context, recruiterSkill *models.RecruiterSkill) error
-	UpdateProfile(ctx context.Context, recruiter *models.RequestUpdateRecruiter, recruiter_id int64) error
-	GetRecruiterSkill(ctx context.Context, recruiter_id int64) ([]models.ResponseRecruiterSkill, error)
-	GetProfile(ctx context.Context, id int64) (*models.Recruiter, error)
-	GetAllRecruiterForAdmin(ctx context.Context, name string, page int64, size int64) (*models.ResponsetListRecruiter, error)
-	UpdateReciuterByAdmin(ctx context.Context, recruiter_id int64, data map[string]interface{}) error
-	UpdateStatusReciuter(ctx context.Context, updateRequest *models.RequestUpdateStatusRecruiter, recruiter_id int64) error
-	GetAllRecruiterForCandidate(ctx context.Context, recruiterName string, skillName string, address string, page int64, size int64) (*models.ResponsetListRecruiterForCandidate, error)
-	DeleteRecruiterSkill(ctx context.Context, recruiter_skill_id int64) error
+	SearchRecruiter(ctx context.Context, req models.RequestSearchRecruiter) (*models.ResponseSearchRecruiter, error)
 }
 
 type Recruiter struct {
@@ -157,4 +145,20 @@ func (r *Recruiter) GetAllRecruiterForCandidate(ctx context.Context, recruiterNa
 		return nil, err
 	}
 	return acc, nil
+}
+
+func (r *Recruiter) SearchRecruiter(ctx context.Context, req models.RequestSearchRecruiter) (*models.ResponseSearchRecruiter, error) {
+	offset := (req.Page - 1) * req.Size
+	recruiters, total, err := r.RecruiterGorm.SearchRecruiter(ctx, req.Text, offset, req.Size)
+	if err != nil {
+		r.Logger.Error("Search recruiter error", zap.Error(err))
+		return nil, err
+	}
+
+	resp := models.ResponseSearchRecruiter{
+		Total:      total,
+		Recruiters: recruiters,
+	}
+
+	return &resp, nil
 }

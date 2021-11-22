@@ -1,0 +1,1 @@
+ALTER TABLE candidate ADD FULLTEXT (first_name, last_name);
