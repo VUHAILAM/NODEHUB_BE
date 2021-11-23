@@ -256,13 +256,13 @@ func (r *RecruiterGorm) GetAllRecruiterForCandidate(ctx context.Context, recruit
 }
 
 func (r *RecruiterGorm) SearchRecruiter(ctx context.Context, text string, offset, size int64) ([]*models.Recruiter, int64, error) {
+	var recruiters []*models.Recruiter
 	db := r.db.WithContext(ctx).Table(tableRecruiter).Joins("Join "+tableRecruiterSkill+" on recruiter_skill.recruiter_id=recruiter.recruiter_id").
 		Joins("Join "+tableSkill+" on recruiter_skill.skill_id=skill.skill_id").
 		Where("MATCH(recruiter.name, recruiter.description) AGAINST(?) OR MATCH(skill.name) AGAINST(?)", text, text).
-		Group("recruiter.recruiter_id")
+		Group("recruiter.recruiter_id").Find(&recruiters)
 	total := db.RowsAffected
-	var recruiters []*models.Recruiter
-	res := db.Offset(int(offset)).Limit(int(size)).Find(&recruiters)
+	res := db.Offset(int(offset)).Limit(int(size))
 	err := res.Error
 	if err != nil {
 		r.logger.Error(err.Error())
