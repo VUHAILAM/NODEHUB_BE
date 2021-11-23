@@ -12,11 +12,6 @@ type INotificationService interface {
 	GetListNotificationByAccount(ctx context.Context, account_id int64, page int64, size int64) (*models.ResponsetListNotification, error)
 }
 
-type INotificationDatabase interface {
-	CreateNotification(ctx context.Context, notification *models.RequestCreateNotification) error
-	GetListNotificationByAccount(ctx context.Context, account_id int64, page int64, size int64) (*models.ResponsetListNotification, error)
-}
-
 type Notification struct {
 	NotificationGorm *NotificationGorm
 	Logger           *zap.Logger
@@ -36,7 +31,7 @@ func (n *Notification) CreateNotification(ctx context.Context, notification *mod
 		Content:    notification.Content,
 		Title:      notification.Title,
 		Key:        notification.Key,
-		Check_read: notification.Check_read,
+		CheckRead:  notification.CheckRead,
 	}
 	err := n.NotificationGorm.Create(ctx, notificationModels)
 	if err != nil {
