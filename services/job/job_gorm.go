@@ -44,7 +44,7 @@ func (g *JobGorm) Create(ctx context.Context, job *models.Job) (*models.Job, err
 func (g *JobGorm) Get(ctx context.Context, jobID int64) (*models.Job, error) {
 	db := g.DB.WithContext(ctx)
 	job := models.Job{}
-	err := db.Table(jobTable).Where("job_id=?", jobID).First(&job).Error
+	err := db.Table(jobTable).Select("job.*").Where("job_id=?", jobID).First(&job).Error
 	if err != nil {
 		g.Logger.Error("JobGorm: Get job error", zap.Error(err), zap.Int64("job_id", jobID))
 		return nil, err
