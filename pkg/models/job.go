@@ -9,20 +9,21 @@ import (
 type HDate time.Time
 
 type Job struct {
-	JobID       int64     `json:"job_id" gorm:"primaryKey"`
-	RecruiterID int64     `json:"recruiter_id"`
-	Title       string    `json:"title"`
-	Description string    `json:"description"`
-	SalaryRange string    `json:"salary_range"`
-	Quantity    int64     `json:"quantity"`
-	Role        string    `json:"role"`
-	Experience  string    `json:"experience"`
-	Location    string    `json:"location"`
-	HireDate    time.Time `json:"hire_date"`
-	Status      int       `json:"status"`
-	Skills      []ESSkill `json:"skills" gorm:"-"`
-	CreatedAt   time.Time `json:"created_at"`
-	UpdatedAt   time.Time `json:"updated_at"`
+	JobID           int64     `json:"job_id" gorm:"primaryKey"`
+	RecruiterID     int64     `json:"recruiter_id"`
+	Title           string    `json:"title"`
+	Description     string    `json:"description"`
+	SalaryRange     string    `json:"salary_range"`
+	Quantity        int64     `json:"quantity"`
+	Role            string    `json:"role"`
+	Experience      string    `json:"experience"`
+	Location        string    `json:"location"`
+	HireDate        time.Time `json:"hire_date"`
+	Status          int       `json:"status"`
+	CandidateStatus string    `json:"candidate_status" gorm:"->"`
+	Skills          []ESSkill `json:"skills" gorm:"-"`
+	CreatedAt       time.Time `json:"created_at"`
+	UpdatedAt       time.Time `json:"updated_at"`
 }
 
 type ESJobCreate struct {

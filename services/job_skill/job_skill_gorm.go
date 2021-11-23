@@ -60,7 +60,7 @@ func (g *JobSkillGorm) GetAllJobBySkill(ctx context.Context, skillID, offset, si
 	db := g.DB.WithContext(ctx)
 	var jobs []*models.Job
 	err := db.Table(jobTable).
-		Joins("INNER JOIN "+jobSkillTable+" ON "+jobTable+".job_id = "+jobSkillTable+".job_id").
+		Joins("JOIN "+jobSkillTable+" ON "+jobTable+".job_id = "+jobSkillTable+".job_id").
 		Where(jobSkillTable+".skill_id=?", skillID).
 		Offset(int(offset)).Limit(int(size)).Order(jobSkillTable + ".updated_at desc").
 		Find(&jobs).Error

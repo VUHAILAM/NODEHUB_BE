@@ -132,7 +132,8 @@ type Candidate struct {
 	Phone             string    `json:"phone,omitempty"`
 	FindJob           bool      `json:"find_job,omitempty"`
 	NodehubReview     string    `json:"nodehub_review,omitempty"`
-	NodehubScore      int       `json:"nodehub_score"`
+	NodehubScore      int       `json:"nodehub_score,omitempty"`
+	JobStatus         string    `json:"job_status" gorm:"->"`
 	CvManage          string    `json:"cv_manage,omitempty"`
 	ExperienceManage  string    `json:"experience_manage,omitempty"`
 	SocialManage      string    `json:"social_manage,omitempty"`

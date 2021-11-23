@@ -199,13 +199,13 @@ func (g *CandidateGorm) GetCandidateSkill(ctx context.Context, candidate_id int6
 }
 
 func (g *CandidateGorm) SearchCandidate(ctx context.Context, text string, score int, offset, page int64) ([]*models.Candidate, int64, error) {
+	var candidates []*models.Candidate
 	db := g.DB.WithContext(ctx).Table(candidateTable).Joins("Join "+tableCandidateSkill+" on candidate_skill.candidate_id=candidate.candidate_id").
 		Joins("Join "+tableSkill+" on candidate_skill.skill_id=skill.skill_id").
 		Where("MATCH(candidate.first_name, candidate.last_name) AGAINST(?) OR MATCH(skill.name) AGAINST(?)", text, text).Where("candidate.nodehub_score >= ?", score).
-		Group("candidate.candidate_id").Order("candidate.nodehub_score desc")
+		Group("candidate.candidate_id").Order("candidate.nodehub_score desc").Find(&candidates)
 	total := db.RowsAffected
-	var candidates []*models.Candidate
-	err := db.Offset(int(offset)).Limit(int(page)).Find(&candidates).Error
+	err := db.Offset(int(offset)).Limit(int(page)).Error
 	if err != nil {
 		g.Logger.Error(err.Error())
 		return nil, 0, err

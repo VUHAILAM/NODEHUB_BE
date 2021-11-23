@@ -68,11 +68,11 @@ func (g *JobApplyGorm) GetAppliedJobByJobID(ctx context.Context, jobID int64, of
 
 func (g *JobApplyGorm) GetAppliedJobByCandidateID(ctx context.Context, candidateID int64, offset, size int64) ([]*models.Job, int64, error) {
 	var jobs []*models.Job
-	db := g.DB.WithContext(ctx).Table(jobTable).Joins("JOIN "+jobApplyTable+" ON job.job_id=job_candidate.job_id").
-		Where("job_candidate.candidate_id=?", candidateID)
+	db := g.DB.WithContext(ctx).Table(jobTable).Select("job.*, job_candidate.status as candidate_status").
+		Joins("JOIN "+jobApplyTable+" ON job.job_id=job_candidate.job_id").
+		Where("job_candidate.candidate_id=?", candidateID).Find(&jobs)
 	total := db.RowsAffected
-	err := db.Offset(int(offset)).Limit(int(size)).Order(jobApplyTable + ".updated_at desc").
-		Find(&jobs).Error
+	err := db.Offset(int(offset)).Limit(int(size)).Order(jobApplyTable + ".updated_at desc").Error
 	if err != nil {
 		g.Logger.Error("JobApplyGorm: GetAppliedJobByJobID error", zap.Error(err))
 		return nil, 0, err
@@ -93,14 +93,16 @@ func (g *JobApplyGorm) UpdateStatus(ctx context.Context, status string, jobID, c
 
 func (g *JobApplyGorm) GetCandidateApplyJob(ctx context.Context, jobID int64, offset, size int64) ([]*models.Candidate, int64, error) {
 	var candidates []*models.Candidate
-	db := g.DB.WithContext(ctx).Table(candidateTable).Joins("JOIN "+jobApplyTable+" ON candidate.candidate_id=job_candidate.candidate_id").
-		Where("job_candidate.job_id=?", jobID)
+	db := g.DB.WithContext(ctx).Table(candidateTable).Select("candidate.*, job_candidate.status as job_status").
+		Joins("JOIN "+jobApplyTable+" ON candidate.candidate_id=job_candidate.candidate_id").
+		Where("job_candidate.job_id=?", jobID).Find(&candidates)
 	total := db.RowsAffected
-	err := db.Offset(int(offset)).Limit(int(size)).Order(jobApplyTable + ".updated_at desc").
-		Find(&candidates).Error
+	g.Logger.Info("Row count ", zap.Int64("count", total))
+	err := db.Offset(int(offset)).Limit(int(size)).Order(jobApplyTable + ".updated_at desc").Error
 	if err != nil {
 		g.Logger.Error("JobApplyGorm: GetAppliedJobByJobID error", zap.Error(err))
 		return nil, 0, err
 	}
+
 	return candidates, total, nil
 }
