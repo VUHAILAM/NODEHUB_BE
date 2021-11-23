@@ -19,6 +19,7 @@ const (
 
 const (
 	tableCandidateSkill = "candidate_skill"
+	tableSkill          = "skill"
 )
 
 type ICandidateDatabase interface {
@@ -32,7 +33,7 @@ type ICandidateDatabase interface {
 	DeleteCandidateSkill(ctx context.Context, candidate_skill_id int64) error
 	UpdateCandidateSkill(ctx context.Context, candidate_skill_id int64, data map[string]interface{}) error
 	GetCandidateSkill(ctx context.Context, candidate_id int64) ([]models.ResponseCandidateSkill, error)
-	SearchCandidate(ctx context.Context, text string, offset, page int64) ([]*models.Candidate, int64, error)
+	SearchCandidate(ctx context.Context, text string, score int, offset, page int64) ([]*models.Candidate, int64, error)
 }
 
 type CandidateGorm struct {
@@ -197,8 +198,11 @@ func (g *CandidateGorm) GetCandidateSkill(ctx context.Context, candidate_id int6
 	return arr, nil
 }
 
-func (g *CandidateGorm) SearchCandidate(ctx context.Context, text string, offset, page int64) ([]*models.Candidate, int64, error) {
-	db := g.DB.WithContext(ctx).Table(candidateTable).Where("MATCH(first_name, last_name) AGAINST(?)", text)
+func (g *CandidateGorm) SearchCandidate(ctx context.Context, text string, score int, offset, page int64) ([]*models.Candidate, int64, error) {
+	db := g.DB.WithContext(ctx).Table(candidateTable).Joins("Join "+tableCandidateSkill+" on candidate_skill.candidate_id=candidate.candidate_id").
+		Joins("Join "+tableSkill+" on candidate_skill.skill_id=skill.skill_id").
+		Where("MATCH(candidate.first_name, candidate.last_name) AGAINST(?) OR MATCH(skill.name) AGAINST(?)", text, text).Where("candidate.nodehub_score >= ?", score).
+		Group("candidate.candidate_id").Order("candidate.nodehub_score desc")
 	var candidates []*models.Candidate
 	err := db.Offset(int(offset)).Limit(int(page)).Find(&candidates).Error
 	if err != nil {

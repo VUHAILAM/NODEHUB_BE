@@ -20,6 +20,7 @@ const (
 
 const (
 	tableRecruiterSkill = "recruiter_skill"
+	tableSkill          = "skill"
 )
 
 type IRecruiterDatabase interface {
@@ -255,7 +256,10 @@ func (r *RecruiterGorm) GetAllRecruiterForCandidate(ctx context.Context, recruit
 }
 
 func (r *RecruiterGorm) SearchRecruiter(ctx context.Context, text string, offset, size int64) ([]*models.Recruiter, int64, error) {
-	db := r.db.WithContext(ctx).Table(tableRecruiter).Where("MATCH(name, description) AGAINST(?)", text)
+	db := r.db.WithContext(ctx).Table(tableRecruiter).Joins("Join "+tableRecruiterSkill+" on recruiter_skill.recruiter_id=recruiter.recruiter_id").
+		Joins("Join "+tableSkill+" on recruiter_skill.skill_id=skill.skill_id").
+		Where("MATCH(recruiter.name, recruiter.description) AGAINST(?) OR MATCH(skill.name) AGAINST(?)", text, text).
+		Group("recruiter.recruiter_id")
 	var recruiters []*models.Recruiter
 	res := db.Offset(int(offset)).Limit(int(size)).Find(&recruiters)
 	err := res.Error
