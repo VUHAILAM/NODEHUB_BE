@@ -177,7 +177,7 @@ func (s *CandidateService) GetCandidateSkill(ctx context.Context, candidate_id i
 
 func (s *CandidateService) SearchCandidate(ctx context.Context, req models.RequestSearchCandidate) (*models.ResponseSearchCandidate, error) {
 	offset := (req.Page - 1) * req.Size
-	candidates, total, err := s.CanGorm.SearchCandidate(ctx, req.Text, offset, req.Size)
+	candidates, total, err := s.CanGorm.SearchCandidate(ctx, req.Text, 0, offset, req.Size)
 	if err != nil {
 		s.Logger.Error("Search candidate error", zap.Error(err))
 		return nil, err

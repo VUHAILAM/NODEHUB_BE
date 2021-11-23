@@ -133,8 +133,8 @@ func (e *JobES) SearchJobs(ctx context.Context, text, location string, from, siz
 	txtQuery := elastic.NewMultiMatchQuery(text, "description", "title", "role").
 		Type("most_fields").Fuzziness("AUTO")
 	locationQuery := elastic.NewMatchQuery("location", location)
-
-	generalQuery := elastic.NewBoolQuery().Must(txtQuery, locationQuery)
+	skillQuery := elastic.NewNestedQuery("skills", elastic.NewMatchQuery("skills.name", text))
+	generalQuery := elastic.NewBoolQuery().Should(skillQuery, txtQuery).Must(locationQuery)
 	searchResult, err := e.ES.Search().Index(e.JobIndex).Query(generalQuery).
 		From(int(from)).Size(int(size)).Sort("_score", false).Do(ctx)
 	if err != nil {

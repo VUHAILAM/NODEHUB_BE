@@ -1,1 +1,1 @@
-ALTER TABLE recruiter ADD FULLTEXT (company_name, description);
+ALTER TABLE recruiter ADD FULLTEXT (name, description);

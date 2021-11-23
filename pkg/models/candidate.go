@@ -16,6 +16,7 @@ type CandidateRequest struct {
 	Phone             string        `json:"phone,omitempty"`
 	FindJob           bool          `json:"find_job,omitempty"`
 	NodehubReview     string        `json:"nodehub_review,omitempty"`
+	NodehubScore      int           `json:"nodehub_score,omitempty"`
 	CVManage          []CV          `json:"cv_manage,omitempty"`
 	ExperienceManage  []Experience  `json:"experience_manage,omitempty"`
 	SocialManage      []Social      `json:"social_manage,omitempty"`
@@ -37,6 +38,7 @@ type CandidateResponse struct {
 	Phone             string        `json:"phone"`
 	FindJob           bool          `json:"find_job"`
 	NodehubReview     string        `json:"nodehub_review"`
+	NodehubScore      int           `json:"nodehub_score"`
 	CVManage          []CV          `json:"cv_manage"`
 	ExperienceManage  []Experience  `json:"experience_manage"`
 	SocialManage      []Social      `json:"social_manage"`
@@ -60,6 +62,7 @@ type CandidateRequestAdmin struct {
 	Phone             string        `json:"phone"`
 	FindJob           bool          `json:"find_job"`
 	NodehubReview     string        `json:"nodehub_review"`
+	NodehubScore      int           `json:"nodehub_score"`
 	CVManage          []CV          `json:"cv_manage"`
 	ExperienceManage  []Experience  `json:"experience_manage"`
 	SocialManage      []Social      `json:"social_manage"`
@@ -84,6 +87,7 @@ type CandidateAdmin struct {
 	Phone             string    `json:"phone"`
 	FindJob           bool      `json:"find_job"`
 	NodehubReview     string    `json:"nodehub_review"`
+	NodehubScore      int       `json:"nodehub_score"`
 	CvManage          string    `json:"cv_manage"`
 	ExperienceManage  string    `json:"experience_manage"`
 	SocialManage      string    `json:"social_manage"`
@@ -128,6 +132,7 @@ type Candidate struct {
 	Phone             string    `json:"phone,omitempty"`
 	FindJob           bool      `json:"find_job,omitempty"`
 	NodehubReview     string    `json:"nodehub_review,omitempty"`
+	NodehubScore      int       `json:"nodehub_score"`
 	CvManage          string    `json:"cv_manage,omitempty"`
 	ExperienceManage  string    `json:"experience_manage,omitempty"`
 	SocialManage      string    `json:"social_manage,omitempty"`
@@ -250,6 +255,7 @@ func (req *CandidateRequest) ToCandidate() (Candidate, error) {
 		Phone:         req.Phone,
 		FindJob:       req.FindJob,
 		NodehubReview: req.NodehubReview,
+		NodehubScore:  req.NodehubScore,
 	}
 	if req.CVManage != nil {
 		candidate.CvManage = string(cvJson)
@@ -315,6 +321,7 @@ func (c *Candidate) ToCandidateRequest() (CandidateRequest, error) {
 		Phone:             c.Phone,
 		FindJob:           c.FindJob,
 		NodehubReview:     c.NodehubReview,
+		NodehubScore:      c.NodehubScore,
 		CVManage:          cvManage,
 		ExperienceManage:  exManage,
 		SocialManage:      socialManage,
@@ -370,6 +377,7 @@ func (c *Candidate) ToCandidateResponse() (CandidateResponse, error) {
 		Phone:             c.Phone,
 		FindJob:           c.FindJob,
 		NodehubReview:     c.NodehubReview,
+		NodehubScore:      c.NodehubScore,
 		CVManage:          cvManage,
 		ExperienceManage:  exManage,
 		SocialManage:      socialManage,
@@ -427,6 +435,7 @@ func (c *CandidateAdmin) ToCandidateRequestAdmin() (CandidateRequestAdmin, error
 		Phone:             c.Phone,
 		FindJob:           c.FindJob,
 		NodehubReview:     c.NodehubReview,
+		NodehubScore:      c.NodehubScore,
 		CVManage:          cvManage,
 		ExperienceManage:  exManage,
 		SocialManage:      socialManage,
@@ -441,9 +450,10 @@ func (c *CandidateAdmin) ToCandidateRequestAdmin() (CandidateRequestAdmin, error
 }
 
 type RequestSearchCandidate struct {
-	Text string `json:"text"`
-	Page int64  `json:"page"`
-	Size int64  `json:"size"`
+	Text  string `json:"text"`
+	Score int    `json:"score,omitempty"`
+	Page  int64  `json:"page"`
+	Size  int64  `json:"size"`
 }
 
 type ResponseSearchCandidate struct {
