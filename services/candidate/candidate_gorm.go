@@ -203,12 +203,12 @@ func (g *CandidateGorm) SearchCandidate(ctx context.Context, text string, score 
 		Joins("Join "+tableSkill+" on candidate_skill.skill_id=skill.skill_id").
 		Where("MATCH(candidate.first_name, candidate.last_name) AGAINST(?) OR MATCH(skill.name) AGAINST(?)", text, text).Where("candidate.nodehub_score >= ?", score).
 		Group("candidate.candidate_id").Order("candidate.nodehub_score desc")
+	total := db.RowsAffected
 	var candidates []*models.Candidate
 	err := db.Offset(int(offset)).Limit(int(page)).Find(&candidates).Error
 	if err != nil {
 		g.Logger.Error(err.Error())
 		return nil, 0, err
 	}
-	total := db.RowsAffected
 	return candidates, total, nil
 }
