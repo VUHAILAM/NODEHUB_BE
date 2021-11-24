@@ -9,7 +9,7 @@ import (
 
 type INotificationService interface {
 	CreateNotification(ctx context.Context, notification *models.RequestCreateNotification) error
-	GetListNotificationByAccount(ctx context.Context, account_id int64, page int64, size int64) (*models.ResponsetListNotification, error)
+	GetListNotificationByAccount(ctx context.Context, candidateID int64, page int64, size int64) (*models.ResponseListNotification, error)
 }
 
 type Notification struct {
@@ -40,10 +40,16 @@ func (n *Notification) CreateNotification(ctx context.Context, notification *mod
 	return nil
 }
 
-func (n *Notification) GetListNotificationByAccount(ctx context.Context, account_id int64, page int64, size int64) (*models.ResponsetListNotification, error) {
-	//acc, err := n.NotificationGorm.GetListNotificationByAccount(ctx, account_id, page, size)
-	//if err != nil {
-	//	return nil, err
-	//}
-	return nil, nil
+func (n *Notification) GetListNotificationByAccount(ctx context.Context, candidateID int64, page int64, size int64) (*models.ResponseListNotification, error) {
+	offset := (page - 1) * size
+	noti, total, err := n.NotificationGorm.GetListNotificationByAccount(ctx, candidateID, offset, size)
+	if err != nil {
+		n.Logger.Error(err.Error(), zap.Int64("candidate id", candidateID))
+		return nil, err
+	}
+	resp := models.ResponseListNotification{
+		Total:         total,
+		Notifications: noti,
+	}
+	return &resp, nil
 }

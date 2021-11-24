@@ -12,8 +12,8 @@ import (
 const tableNotification = "notification"
 
 type INotificationDatabase interface {
-	CreateNotification(ctx context.Context, notification *models.RequestCreateNotification) error
-	GetListNotificationByAccount(ctx context.Context, candidateID int64, offset int64, size int64) (*models.ResponsetListNotification, error)
+	Create(ctx context.Context, notification *models.Notification) error
+	GetListNotificationByAccount(ctx context.Context, candidateID int64, offset int64, size int64) ([]*models.Notification, int64, error)
 }
 
 type NotificationGorm struct {
