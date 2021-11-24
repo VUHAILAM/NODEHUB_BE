@@ -73,7 +73,7 @@ func (g *CandidateGorm) Update(ctx context.Context, candidateID int64, updateDat
 func (g *CandidateGorm) GetByCandidateID(ctx context.Context, candidateID int64) (*models.Candidate, error) {
 	db := g.DB.WithContext(ctx)
 	candidate := models.Candidate{}
-	err := db.Table(candidateTable).Where("candidate_id=?", candidateID).Take(&candidate).Error
+	err := db.Table(candidateTable).Select("candidate.*").Where("candidate_id=?", candidateID).Take(&candidate).Error
 	if err != nil {
 		g.Logger.Error(err.Error())
 		return nil, err
@@ -216,7 +216,7 @@ func (g *CandidateGorm) GetCandidateSkill(ctx context.Context, candidate_id int6
 
 func (g *CandidateGorm) SearchCandidate(ctx context.Context, text string, offset, page int64) ([]*models.Candidate, int64, error) {
 	var candidates []*models.Candidate
-	db := g.DB.WithContext(ctx).Table(candidateTable).Joins("Join "+tableCandidateSkill+" on candidate_skill.candidate_id=candidate.candidate_id").
+	db := g.DB.WithContext(ctx).Table(candidateTable).Select("candidate.*").Joins("Join "+tableCandidateSkill+" on candidate_skill.candidate_id=candidate.candidate_id").
 		Joins("Join "+tableSkill+" on candidate_skill.skill_id=skill.skill_id").
 		Where("MATCH(candidate.first_name, candidate.last_name) AGAINST(?) OR MATCH(skill.name) AGAINST(?)", text, text).
 		Group("candidate.candidate_id").Find(&candidates)

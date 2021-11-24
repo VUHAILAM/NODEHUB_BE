@@ -21,6 +21,7 @@ type Config struct {
 	JobESIndex string               `envconfig:"JOB_ES_INDEX" mapstructure:"job_es_index"`
 
 	Origin string `envconfig:"ORIGIN" mapstructure:"origin" default:"*"`
+	Domain string `envconfig:"DOMAIN" mapstructure:"domain"`
 
 	AccessTokenPrivateKey   string `envconfig:"ACCESS_TOKEN_PRIVATE_KEY" mapstructure:"access_token_private_key"`
 	AccessTokenPublicKey    string `envconfig:"ACCESS_TOKEN_PUBLIC_KEY" mapstructure:"access_token_public_key"`
