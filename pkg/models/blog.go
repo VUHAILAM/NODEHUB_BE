@@ -58,3 +58,8 @@ type RequestGetListBlog struct {
 	Page  int64  `json:"page"`
 	Size  int64  `json:"size"`
 }
+type RequestGetListBlogByCategoryId struct {
+	Category_id int64 `json:"category_id"`
+	Page        int64 `json:"page"`
+	Size        int64 `json:"size"`
+}
