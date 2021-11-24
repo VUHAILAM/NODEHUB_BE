@@ -164,7 +164,7 @@ func InitServer() *Server {
 	jobSerializer := job2.NewJobSerializer(jobService, logger)
 
 	jobApplyGorm := job_apply.NewJobApplyGorm(gormDB, logger)
-	jobApplyService := job_apply.NewJobApplyService(jobApplyGorm, logger)
+	jobApplyService := job_apply.NewJobApplyService(jobApplyGorm, nil, logger)
 	jobApplySerializer := job_apply2.NewJobApplySerializer(jobApplyService, logger)
 
 	//init media service

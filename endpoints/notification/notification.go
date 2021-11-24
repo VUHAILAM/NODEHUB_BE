@@ -29,7 +29,7 @@ func (n *NotificationSerializer) GetListNotificationByAccount(ginCtx *gin.Contex
 	req := models.RequestGetListNotification{}
 	err := json.NewDecoder(ginCtx.Request.Body).Decode(&req)
 	if err != nil {
-		n.Logger.Error("Parse request get list Notification error", zap.Error(err))
+		n.Logger.Error("Parse request get list NotificationService error", zap.Error(err))
 		ginx.BuildErrorResponse(ginCtx, err, gin.H{
 			"message": err.Error(),
 		})

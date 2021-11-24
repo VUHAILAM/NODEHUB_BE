@@ -5,6 +5,7 @@ import "time"
 type Notification struct {
 	NotificationID int64     `json:"notification_id" gorm:"primaryKey"`
 	CandidateID    int64     `json:"candidate_id"`
+	RecruiterID    int64     `json:"recruiter_id"`
 	Title          string    `json:"title"`
 	Content        string    `json:"content"`
 	Key            string    `json:"key"`
@@ -14,6 +15,7 @@ type Notification struct {
 }
 
 type RequestCreateNotification struct {
+	RecruiterID int64  `json:"recruiter_id"`
 	CandidateID int64  `json:"candidate_id"`
 	Title       string `json:"title"`
 	Content     string `json:"content"`
@@ -22,7 +24,8 @@ type RequestCreateNotification struct {
 }
 
 type RequestGetListNotification struct {
-	CandidateID int64 `json:"candidate_id"`
+	RecruiterID int64 `json:"recruiter_id,omitempty"`
+	CandidateID int64 `json:"candidate_id,omitempty"`
 	Page        int64 `json:"page"`
 	Size        int64 `json:"size"`
 }

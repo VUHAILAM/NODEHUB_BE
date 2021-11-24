@@ -24,9 +24,10 @@ type JobApply struct {
 	Logger       *zap.Logger
 }
 
-func NewJobApplyService(gorm *JobApplyGorm, logger *zap.Logger) *JobApply {
+func NewJobApplyService(gorm *JobApplyGorm, notiGorm *notification.NotificationGorm, logger *zap.Logger) *JobApply {
 	return &JobApply{
 		JobApplyGorm: gorm,
+		NotiGorm:     notiGorm,
 		Logger:       logger,
 	}
 }
@@ -50,8 +51,9 @@ func (ja *JobApply) CreateJobApply(ctx context.Context, req models.RequestApply)
 		Key:         "job",
 		CheckRead:   false,
 	}
-
-	err = ja.NotiGorm.Create(ctx, &noti)
+	notis := make([]*models.Notification, 0)
+	notis = append(notis, &noti)
+	err = ja.NotiGorm.Create(ctx, notis)
 	if err != nil {
 		ja.Logger.Error(err.Error())
 	}
@@ -114,8 +116,9 @@ func (ja *JobApply) UpdateStatusJobApplied(ctx context.Context, req models.Reque
 		Key:         "job apply",
 		CheckRead:   false,
 	}
-
-	err = ja.NotiGorm.Create(ctx, &noti)
+	notis := make([]*models.Notification, 0)
+	notis = append(notis, &noti)
+	err = ja.NotiGorm.Create(ctx, notis)
 	if err != nil {
 		ja.Logger.Error(err.Error())
 	}

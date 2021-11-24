@@ -30,8 +30,8 @@ type IRecruiterDatabase interface {
 	GetRecruiterSkill(ctx context.Context, recruiter_id int64) ([]models.ResponseRecruiterSkill, error)
 	GetProfile(ctx context.Context, id int64) (*models.Recruiter, error)
 	GetAllRecruiterForAdmin(ctx context.Context, name string, page int64, size int64) (*models.ResponsetListRecruiter, error)
-	UpdateReciuterByAdmin(ctx context.Context, recruiter_id int64, data map[string]interface{}) error
-	UpdateStatusReciuter(ctx context.Context, updateRequest *models.RequestUpdateStatusRecruiter, recruiter_id int64) error
+	UpdateRecruiterByAdmin(ctx context.Context, recruiter_id int64, data map[string]interface{}) error
+	UpdateStatusRecruiter(ctx context.Context, updateRequest *models.RequestUpdateStatusRecruiter, recruiter_id int64) error
 	GetAllRecruiterForCandidate(ctx context.Context, recruiterName string, skillName string, address string, page int64, size int64) (*models.ResponsetListRecruiterForCandidate, error)
 	DeleteRecruiterSkill(ctx context.Context, recruiter_skill_id int64) error
 	SearchRecruiter(ctx context.Context, text string, offset, size int64) ([]*models.Recruiter, int64, error)
@@ -183,7 +183,7 @@ func (r *RecruiterGorm) GetAllRecruiterForAdmin(ctx context.Context, name string
 	return &resutl, nil
 }
 
-func (r *RecruiterGorm) UpdateReciuterByAdmin(ctx context.Context, recruiter_id int64, data map[string]interface{}) error {
+func (r *RecruiterGorm) UpdateRecruiterByAdmin(ctx context.Context, recruiter_id int64, data map[string]interface{}) error {
 	db := r.db.WithContext(ctx)
 	err := db.Table(tableRecruiter).Where("recruiter_id=?", recruiter_id).Updates(data).Error
 	if err != nil {
@@ -193,7 +193,7 @@ func (r *RecruiterGorm) UpdateReciuterByAdmin(ctx context.Context, recruiter_id 
 	return nil
 }
 
-func (r *RecruiterGorm) UpdateStatusReciuter(ctx context.Context, recruiter *models.RequestUpdateStatusRecruiter, recruiter_id int64) error {
+func (r *RecruiterGorm) UpdateStatusRecruiter(ctx context.Context, recruiter *models.RequestUpdateStatusRecruiter, recruiter_id int64) error {
 	db := r.db.WithContext(ctx)
 	err := db.Table(tableAccount).Where("id = ?", recruiter_id).Updates(map[string]interface{}{
 		"status": recruiter.Status}).Error

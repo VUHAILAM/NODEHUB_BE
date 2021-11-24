@@ -38,7 +38,7 @@ func (s *JobApplySerializer) Apply(ginCtx *gin.Context) {
 	req := models.RequestApply{}
 	err := json.NewDecoder(ginCtx.Request.Body).Decode(&req)
 	if err != nil {
-		s.Logger.Error("Parse request Job Create error", zap.Error(err))
+		s.Logger.Error("Parse request Apply error", zap.Error(err))
 		ginx.BuildErrorResponse(ginCtx, err, gin.H{
 			"message": err.Error(),
 		})
@@ -63,7 +63,7 @@ func (s *JobApplySerializer) GetJobAppliedByJobID(ginCtx *gin.Context) {
 	req := models.RequestGetJobApplyByJobID{}
 	err := json.NewDecoder(ginCtx.Request.Body).Decode(&req)
 	if err != nil {
-		s.Logger.Error("Parse request Job Create error", zap.Error(err))
+		s.Logger.Error("Parse request Get Job Apply error", zap.Error(err))
 		ginx.BuildErrorResponse(ginCtx, err, gin.H{
 			"message": err.Error(),
 		})
