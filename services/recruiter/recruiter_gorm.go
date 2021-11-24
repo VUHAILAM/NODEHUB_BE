@@ -35,6 +35,8 @@ type IRecruiterDatabase interface {
 	GetAllRecruiterForCandidate(ctx context.Context, recruiterName string, skillName string, address string, page int64, size int64) (*models.ResponsetListRecruiterForCandidate, error)
 	DeleteRecruiterSkill(ctx context.Context, recruiter_skill_id int64) error
 	SearchRecruiter(ctx context.Context, text string, offset, size int64) ([]*models.Recruiter, int64, error)
+	GetAllRecruiter(ctx context.Context, offset, size int64) ([]*models.Recruiter, int64, error)
+	GetAllSkillByRecruiterID(ctx context.Context, recruiterID int64) ([]*models.Skill, error)
 }
 
 type RecruiterGorm struct {
@@ -68,6 +70,20 @@ func (r *RecruiterGorm) GetProfile(ctx context.Context, id int64) (*models.Recru
 		return nil, err
 	}
 	return &acc, nil
+}
+
+func (r *RecruiterGorm) GetAllRecruiter(ctx context.Context, offset, size int64) ([]*models.Recruiter, int64, error) {
+	var recruiters []*models.Recruiter
+	db := r.db.WithContext(ctx).Table(tableRecruiter).Select("recruiter.*").Find(&recruiters)
+	total := db.RowsAffected
+	recruiters = make([]*models.Recruiter, 0)
+	err := db.Offset(int(offset)).Limit(int(size)).Order("updated_at desc").Find(&recruiters).Error
+	if err != nil {
+		r.logger.Error(err.Error())
+		return nil, 0, err
+	}
+
+	return recruiters, total, nil
 }
 
 func (r *RecruiterGorm) UpdateProfile(ctx context.Context, recruiter *models.RequestUpdateRecruiter, recruiter_id int64) error {
@@ -262,11 +278,23 @@ func (r *RecruiterGorm) SearchRecruiter(ctx context.Context, text string, offset
 		Where("MATCH(recruiter.name, recruiter.description) AGAINST(?) OR MATCH(skill.name) AGAINST(?)", text, text).
 		Group("recruiter.recruiter_id").Find(&recruiters)
 	total := db.RowsAffected
-	res := db.Offset(int(offset)).Limit(int(size))
+	recruiters = make([]*models.Recruiter, 0)
+	res := db.Offset(int(offset)).Limit(int(size)).Find(&recruiters)
 	err := res.Error
 	if err != nil {
 		r.logger.Error(err.Error())
 		return nil, 0, err
 	}
 	return recruiters, total, nil
+}
+
+func (r *RecruiterGorm) GetAllSkillByRecruiterID(ctx context.Context, recruiterID int64) ([]*models.Skill, error) {
+	var skills []*models.Skill
+	db := r.db.WithContext(ctx).Table(tableSkill).Joins("Join "+tableRecruiterSkill+" on recruiter_skill.skill_id=skill.skill_id").
+		Where("recruiter_skill.recruiter_id=?", recruiterID).Find(&skills)
+	if db.Error != nil {
+		r.logger.Error(db.Error.Error())
+		return nil, db.Error
+	}
+	return skills, nil
 }

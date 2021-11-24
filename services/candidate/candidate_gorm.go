@@ -34,6 +34,8 @@ type ICandidateDatabase interface {
 	UpdateCandidateSkill(ctx context.Context, candidate_skill_id int64, data map[string]interface{}) error
 	GetCandidateSkill(ctx context.Context, candidate_id int64) ([]models.ResponseCandidateSkill, error)
 	SearchCandidate(ctx context.Context, text string, offset, page int64) ([]*models.Candidate, int64, error)
+	GetAllCandidate(ctx context.Context, offset, size int64) ([]*models.Candidate, int64, error)
+	GetAllSkillByCandidateID(ctx context.Context, candidateID int64) ([]*models.Skill, error)
 }
 
 type CandidateGorm struct {
@@ -77,6 +79,20 @@ func (g *CandidateGorm) GetByCandidateID(ctx context.Context, candidateID int64)
 		return nil, err
 	}
 	return &candidate, nil
+}
+
+func (g *CandidateGorm) GetAllCandidate(ctx context.Context, offset, size int64) ([]*models.Candidate, int64, error) {
+	var candidates []*models.Candidate
+	db := g.DB.WithContext(ctx).Table(candidateTable).Select("candidate.*").Find(&candidates)
+	total := db.RowsAffected
+	candidates = make([]*models.Candidate, 0)
+	err := db.Offset(int(offset)).Limit(int(size)).Order("updated_at desc").Find(&candidates).Error
+	if err != nil {
+		g.Logger.Error(err.Error())
+		return nil, 0, err
+	}
+
+	return candidates, total, nil
 }
 
 /*Get list candidate for admin*/
@@ -203,12 +219,24 @@ func (g *CandidateGorm) SearchCandidate(ctx context.Context, text string, offset
 	db := g.DB.WithContext(ctx).Table(candidateTable).Select("candidate.*").Joins("Join "+tableCandidateSkill+" on candidate_skill.candidate_id=candidate.candidate_id").
 		Joins("Join "+tableSkill+" on candidate_skill.skill_id=skill.skill_id").
 		Where("MATCH(candidate.first_name, candidate.last_name) AGAINST(?) OR MATCH(skill.name) AGAINST(?)", text, text).
-		Group("candidate.candidate_id").Order("candidate.nodehub_score desc").Find(&candidates)
+		Group("candidate.candidate_id").Find(&candidates)
 	total := db.RowsAffected
-	err := db.Offset(int(offset)).Limit(int(page)).Error
+	candidates = make([]*models.Candidate, 0)
+	err := db.Offset(int(offset)).Limit(int(page)).Find(&candidates).Error
 	if err != nil {
 		g.Logger.Error(err.Error())
 		return nil, 0, err
 	}
 	return candidates, total, nil
+}
+
+func (g *CandidateGorm) GetAllSkillByCandidateID(ctx context.Context, candidateID int64) ([]*models.Skill, error) {
+	var skills []*models.Skill
+	db := g.DB.WithContext(ctx).Table(tableSkill).Joins("Join "+tableCandidateSkill+" on candidate_skill.skill_id=skill.skill_id").
+		Where("candidate_skill.candidate_id=?", candidateID).Find(&skills)
+	if db.Error != nil {
+		g.Logger.Error(db.Error.Error())
+		return nil, db.Error
+	}
+	return skills, nil
 }

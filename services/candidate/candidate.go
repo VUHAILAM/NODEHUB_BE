@@ -177,15 +177,34 @@ func (s *CandidateService) GetCandidateSkill(ctx context.Context, candidate_id i
 
 func (s *CandidateService) SearchCandidate(ctx context.Context, req models.RequestSearchCandidate) (*models.ResponseSearchCandidate, error) {
 	offset := (req.Page - 1) * req.Size
-	candidates, total, err := s.CanGorm.SearchCandidate(ctx, req.Text, offset, req.Size)
+	var candidates []*models.Candidate
+	var total int64
+	var err error
+	if req.Text == "" {
+		candidates, total, err = s.CanGorm.GetAllCandidate(ctx, offset, req.Size)
+	} else {
+		candidates, total, err = s.CanGorm.SearchCandidate(ctx, req.Text, offset, req.Size)
+	}
 	if err != nil {
 		s.Logger.Error("Search candidate error", zap.Error(err))
 		return nil, err
 	}
-
+	candidatesWithSkills := make([]models.CandidateWithSkill, 0)
+	for _, candidate := range candidates {
+		skills, err := s.CanGorm.GetAllSkillByCandidateID(ctx, candidate.CandidateID)
+		if err != nil {
+			s.Logger.Error(err.Error(), zap.Int64("Candidate ID", candidate.CandidateID))
+			continue
+		}
+		cwk := models.CandidateWithSkill{
+			Candidate: candidate,
+			Skills:    skills,
+		}
+		candidatesWithSkills = append(candidatesWithSkills, cwk)
+	}
 	resp := models.ResponseSearchCandidate{
 		Total:      total,
-		Candidates: candidates,
+		Candidates: candidatesWithSkills,
 	}
 
 	return &resp, nil

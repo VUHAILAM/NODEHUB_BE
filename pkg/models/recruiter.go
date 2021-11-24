@@ -170,5 +170,10 @@ type RequestSearchRecruiter struct {
 
 type ResponseSearchRecruiter struct {
 	Total      int64
-	Recruiters []*Recruiter
+	Recruiters []RecruiterWithSkill
+}
+
+type RecruiterWithSkill struct {
+	Recruiter *Recruiter `json:"recruiter"`
+	Skills    []*Skill   `json:"skills"`
 }

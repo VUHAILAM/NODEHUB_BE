@@ -9,12 +9,7 @@ import (
 
 type INotificationService interface {
 	CreateNotification(ctx context.Context, notification *models.RequestCreateNotification) error
-	GetListNotificationByAccount(ctx context.Context, account_id int64, page int64, size int64) (*models.ResponsetListNotification, error)
-}
-
-type INotificationDatabase interface {
-	CreateNotification(ctx context.Context, notification *models.RequestCreateNotification) error
-	GetListNotificationByAccount(ctx context.Context, account_id int64, page int64, size int64) (*models.ResponsetListNotification, error)
+	GetListNotificationByAccount(ctx context.Context, candidateID int64, page int64, size int64) (*models.ResponseListNotification, error)
 }
 
 type Notification struct {
@@ -32,11 +27,11 @@ func NewNotification(notificationGorm *NotificationGorm, logger *zap.Logger) *No
 /*Create Notification*/
 func (n *Notification) CreateNotification(ctx context.Context, notification *models.RequestCreateNotification) error {
 	notificationModels := &models.Notification{
-		Account_id: notification.Account_id,
-		Content:    notification.Content,
-		Title:      notification.Title,
-		Key:        notification.Key,
-		Check_read: notification.Check_read,
+		CandidateID: notification.CandidateID,
+		Content:     notification.Content,
+		Title:       notification.Title,
+		Key:         notification.Key,
+		CheckRead:   notification.CheckRead,
 	}
 	err := n.NotificationGorm.Create(ctx, notificationModels)
 	if err != nil {
@@ -45,10 +40,16 @@ func (n *Notification) CreateNotification(ctx context.Context, notification *mod
 	return nil
 }
 
-func (n *Notification) GetListNotificationByAccount(ctx context.Context, account_id int64, page int64, size int64) (*models.ResponsetListNotification, error) {
-	acc, err := n.NotificationGorm.GetListNotificationByAccount(ctx, account_id, page, size)
+func (n *Notification) GetListNotificationByAccount(ctx context.Context, candidateID int64, page int64, size int64) (*models.ResponseListNotification, error) {
+	offset := (page - 1) * size
+	noti, total, err := n.NotificationGorm.GetListNotificationByAccount(ctx, candidateID, offset, size)
 	if err != nil {
+		n.Logger.Error(err.Error(), zap.Int64("candidate id", candidateID))
 		return nil, err
 	}
-	return acc, nil
+	resp := models.ResponseListNotification{
+		Total:         total,
+		Notifications: noti,
+	}
+	return &resp, nil
 }

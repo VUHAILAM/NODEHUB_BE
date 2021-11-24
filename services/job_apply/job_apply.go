@@ -3,6 +3,8 @@ package job_apply
 import (
 	"context"
 
+	"gitlab.com/hieuxeko19991/job4e_be/services/notification"
+
 	"gitlab.com/hieuxeko19991/job4e_be/pkg/models"
 
 	"go.uber.org/zap"
@@ -18,6 +20,7 @@ type IJobApplyService interface {
 
 type JobApply struct {
 	JobApplyGorm *JobApplyGorm
+	NotiGorm     notification.INotificationDatabase
 	Logger       *zap.Logger
 }
 
@@ -38,6 +41,19 @@ func (ja *JobApply) CreateJobApply(ctx context.Context, req models.RequestApply)
 	if err != nil {
 		ja.Logger.Error("Can not create apply candidate", zap.Error(err), zap.Reflect("request", req))
 		return err
+	}
+
+	noti := models.Notification{
+		CandidateID: req.CandidateID,
+		Title:       "Apply job successful",
+		Content:     "The recruiter has received your CV!! Good luck!!",
+		Key:         "job",
+		CheckRead:   false,
+	}
+
+	err = ja.NotiGorm.Create(ctx, &noti)
+	if err != nil {
+		ja.Logger.Error(err.Error())
 	}
 	return nil
 }
@@ -89,6 +105,19 @@ func (ja *JobApply) UpdateStatusJobApplied(ctx context.Context, req models.Reque
 	if err != nil {
 		ja.Logger.Error(err.Error())
 		return err
+	}
+
+	noti := models.Notification{
+		CandidateID: req.CandidateID,
+		Title:       "Your apply has new!!",
+		Content:     "The recruiter has update status your application!! Let check it!!",
+		Key:         "job apply",
+		CheckRead:   false,
+	}
+
+	err = ja.NotiGorm.Create(ctx, &noti)
+	if err != nil {
+		ja.Logger.Error(err.Error())
 	}
 	return nil
 }
