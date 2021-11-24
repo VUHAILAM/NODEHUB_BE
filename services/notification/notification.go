@@ -27,11 +27,11 @@ func NewNotification(notificationGorm *NotificationGorm, logger *zap.Logger) *No
 /*Create Notification*/
 func (n *Notification) CreateNotification(ctx context.Context, notification *models.RequestCreateNotification) error {
 	notificationModels := &models.Notification{
-		Account_id: notification.Account_id,
-		Content:    notification.Content,
-		Title:      notification.Title,
-		Key:        notification.Key,
-		CheckRead:  notification.CheckRead,
+		CandidateID: notification.CandidateID,
+		Content:     notification.Content,
+		Title:       notification.Title,
+		Key:         notification.Key,
+		CheckRead:   notification.CheckRead,
 	}
 	err := n.NotificationGorm.Create(ctx, notificationModels)
 	if err != nil {
@@ -41,9 +41,9 @@ func (n *Notification) CreateNotification(ctx context.Context, notification *mod
 }
 
 func (n *Notification) GetListNotificationByAccount(ctx context.Context, account_id int64, page int64, size int64) (*models.ResponsetListNotification, error) {
-	acc, err := n.NotificationGorm.GetListNotificationByAccount(ctx, account_id, page, size)
-	if err != nil {
-		return nil, err
-	}
-	return acc, nil
+	//acc, err := n.NotificationGorm.GetListNotificationByAccount(ctx, account_id, page, size)
+	//if err != nil {
+	//	return nil, err
+	//}
+	return nil, nil
 }

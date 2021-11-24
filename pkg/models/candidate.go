@@ -459,5 +459,10 @@ type RequestSearchCandidate struct {
 
 type ResponseSearchCandidate struct {
 	Total      int64
-	Candidates []*Candidate
+	Candidates []CandidateWithSkill
+}
+
+type CandidateWithSkill struct {
+	Candidate *Candidate `json:"candidate"`
+	Skills    []*Skill   `json:"skills"`
 }

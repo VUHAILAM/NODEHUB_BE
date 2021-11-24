@@ -41,5 +41,15 @@ func (n *NotificationGorm) Create(ctx context.Context, notification *models.Noti
 
 /*Get Notification*/
 func (n *NotificationGorm) GetListNotificationByAccount(ctx context.Context, candidateID int64, offset int64, size int64) ([]*models.Notification, int64, error) {
-	db := n.db.WithContext(ctx).Table(tableNotification)
+	var notifications []*models.Notification
+	db := n.db.WithContext(ctx).Table(tableNotification).Where("candidate_id=?", candidateID).Find(&notifications)
+	total := db.RowsAffected
+	notifications = make([]*models.Notification, 0)
+	err := db.Offset(int(offset)).Limit(int(size)).Find(&notifications).Order("created_at desc").Error
+
+	if err != nil {
+		n.logger.Error(err.Error())
+		return nil, 0, err
+	}
+	return notifications, total, nil
 }

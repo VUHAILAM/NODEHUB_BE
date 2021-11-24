@@ -149,15 +149,34 @@ func (r *Recruiter) GetAllRecruiterForCandidate(ctx context.Context, recruiterNa
 
 func (r *Recruiter) SearchRecruiter(ctx context.Context, req models.RequestSearchRecruiter) (*models.ResponseSearchRecruiter, error) {
 	offset := (req.Page - 1) * req.Size
-	recruiters, total, err := r.RecruiterGorm.SearchRecruiter(ctx, req.Text, offset, req.Size)
+	var recruiters []*models.Recruiter
+	var total int64
+	var err error
+	if req.Text == "" {
+		recruiters, total, err = r.RecruiterGorm.GetAllRecruiter(ctx, offset, req.Size)
+	} else {
+		recruiters, total, err = r.RecruiterGorm.SearchRecruiter(ctx, req.Text, offset, req.Size)
+	}
 	if err != nil {
 		r.Logger.Error("Search recruiter error", zap.Error(err))
 		return nil, err
 	}
-
+	recruitersWithSkills := make([]models.RecruiterWithSkill, 0)
+	for _, recruiter := range recruiters {
+		skills, err := r.RecruiterGorm.GetAllSkillByRecruiterID(ctx, recruiter.RecruiterID)
+		if err != nil {
+			r.Logger.Error(err.Error(), zap.Int64("Recruiter ID", recruiter.RecruiterID))
+			continue
+		}
+		rwk := models.RecruiterWithSkill{
+			Recruiter: recruiter,
+			Skills:    skills,
+		}
+		recruitersWithSkills = append(recruitersWithSkills, rwk)
+	}
 	resp := models.ResponseSearchRecruiter{
 		Total:      total,
-		Recruiters: recruiters,
+		Recruiters: recruitersWithSkills,
 	}
 
 	return &resp, nil

@@ -35,7 +35,7 @@ func (n *NotificationSerializer) GetListNotificationByAccount(ginCtx *gin.Contex
 		})
 		return
 	}
-	data, err := n.notificationService.GetListNotificationByAccount(ctx, req.Account_id, req.Page, req.Size)
+	data, err := n.notificationService.GetListNotificationByAccount(ctx, req.CandidateID, req.Page, req.Size)
 	if err != nil {
 		n.Logger.Error("getlistNotification error", zap.Error(err))
 		ginx.BuildErrorResponse(ginCtx, err, gin.H{
