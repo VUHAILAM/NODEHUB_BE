@@ -312,3 +312,26 @@ func (cs *CandidateSerializer) SearchCandidate(ginCtx *gin.Context) {
 	}
 	ginx.BuildSuccessResponse(ginCtx, http.StatusAccepted, resp)
 }
+
+func (cs *CandidateSerializer) GetAllCandidate(ginCtx *gin.Context) {
+	ctx := ginCtx.Request.Context()
+	req := models.RequestSearchCandidate{}
+	err := json.NewDecoder(ginCtx.Request.Body).Decode(&req)
+	if err != nil {
+		cs.Logger.Error("Parse request Get All Candidate error", zap.Error(err))
+		ginx.BuildErrorResponse(ginCtx, err, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	resp, err := cs.CandidateService.GetAllCandidate(ctx, req)
+	if err != nil {
+		cs.Logger.Error("Get All Candidate error", zap.Error(err))
+		ginx.BuildErrorResponse(ginCtx, err, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+	ginx.BuildSuccessResponse(ginCtx, http.StatusAccepted, resp)
+}

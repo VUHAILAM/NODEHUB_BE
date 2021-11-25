@@ -451,10 +451,9 @@ func (c *CandidateAdmin) ToCandidateRequestAdmin() (CandidateRequestAdmin, error
 }
 
 type RequestSearchCandidate struct {
-	Text  string `json:"text"`
-	Score int    `json:"score,omitempty"`
-	Page  int64  `json:"page"`
-	Size  int64  `json:"size"`
+	Text string `json:"text,omitempty"`
+	Page int64  `json:"page"`
+	Size int64  `json:"size"`
 }
 
 type ResponseSearchCandidate struct {

@@ -22,6 +22,7 @@ type ICandidateService interface {
 	UpdateCandidateSkill(ctx context.Context, updateRequest *models.RequestUpdateCandidateSkill) error
 	GetCandidateSkill(ctx context.Context, candidate_id int64) ([]models.ResponseCandidateSkill, error)
 	SearchCandidate(ctx context.Context, req models.RequestSearchCandidate) (*models.ResponseSearchCandidate, error)
+	GetAllCandidate(ctx context.Context, req models.RequestSearchCandidate) (*models.ResponseSearchCandidate, error)
 }
 
 type CandidateService struct {
@@ -187,6 +188,34 @@ func (s *CandidateService) SearchCandidate(ctx context.Context, req models.Reque
 	}
 	if err != nil {
 		s.Logger.Error("Search candidate error", zap.Error(err))
+		return nil, err
+	}
+	candidatesWithSkills := make([]models.CandidateWithSkill, 0)
+	for _, candidate := range candidates {
+		skills, err := s.CanGorm.GetAllSkillByCandidateID(ctx, candidate.CandidateID)
+		if err != nil {
+			s.Logger.Error(err.Error(), zap.Int64("Candidate ID", candidate.CandidateID))
+			continue
+		}
+		cwk := models.CandidateWithSkill{
+			Candidate: candidate,
+			Skills:    skills,
+		}
+		candidatesWithSkills = append(candidatesWithSkills, cwk)
+	}
+	resp := models.ResponseSearchCandidate{
+		Total:      total,
+		Candidates: candidatesWithSkills,
+	}
+
+	return &resp, nil
+}
+
+func (s *CandidateService) GetAllCandidate(ctx context.Context, req models.RequestSearchCandidate) (*models.ResponseSearchCandidate, error) {
+	offset := (req.Page - 1) * req.Size
+	candidates, total, err := s.CanGorm.GetAllCandidate(ctx, offset, req.Size)
+	if err != nil {
+		s.Logger.Error("Get all candidate error", zap.Error(err))
 		return nil, err
 	}
 	candidatesWithSkills := make([]models.CandidateWithSkill, 0)

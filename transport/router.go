@@ -87,7 +87,7 @@ func (g *GinDependencies) InitGinEngine(config *config.Config) *gin.Engine {
 	mediaCtlUser.GET("/getSlide", g.MediaSerializer.GetSlide)
 	//recruiter profile
 	recruiterProfile := nodehub.Group("/public/recruiter")
-	recruiterProfile.POST("", g.RecruiterSerializer.GetAllRecruiter)
+	recruiterProfile.POST("/getAllRecruiter", g.RecruiterSerializer.GetAllRecruiter)
 	recruiterAdmin := nodehub.Group("/private/recruiter").Use(middlewares.AuthorizationMiddleware(g.Auth, auth.AdminRole))
 	recruiterCandidate := nodehub.Group("/public/recruiterCan").Use(middlewares.AuthorizationMiddleware(g.Auth, auth.CandidateRole))
 	recruiterProfile.Use(middlewares.AuthorizationMiddleware(g.Auth, auth.CommonRole)).GET("/getProfile", g.RecruiterSerializer.GetProfileRecruiter)
@@ -102,7 +102,7 @@ func (g *GinDependencies) InitGinEngine(config *config.Config) *gin.Engine {
 	recruiterCandidate.POST("/getAllRecruiterForCandidate", g.RecruiterSerializer.GetAllRecruiterForCandidate)
 	//Job
 	jobCtl := nodehub.Group("/public/job")
-	jobCtl.GET("", g.JobSerializer.GetAllJob)
+	jobCtl.GET("/getAllJob", g.JobSerializer.GetAllJob)
 	jobAdmin := nodehub.Group("/private/job").Use(middlewares.AuthorizationMiddleware(g.Auth, auth.AdminRole))
 	jobCtl.Use(middlewares.AuthorizationMiddleware(g.Auth, auth.CommonRole)).GET("/getJob", g.JobSerializer.GetDetailJob)
 	jobCtl.Use(middlewares.AuthorizationMiddleware(g.Auth, auth.RecruiterRole)).POST("/create", g.JobSerializer.Create)
@@ -122,6 +122,7 @@ func (g *GinDependencies) InitGinEngine(config *config.Config) *gin.Engine {
 	recruiterApplyCtl.Use(middlewares.AuthorizationMiddleware(g.Auth, auth.RecruiterRole)).PUT("/update", g.JobApplySerializer.UpdateStatus)
 
 	canCtl := nodehub.Group("/candidate")
+	canCtl.POST("/getAllCandidate", g.CandidateSerializer.GetAllCandidate)
 	canCtlAdmin := nodehub.Group("/private/candidate").Use(middlewares.AuthorizationMiddleware(g.Auth, auth.AdminRole))
 	canCtl.Use(middlewares.AuthorizationMiddleware(g.Auth, auth.CommonRole)).GET("/profile", g.CandidateSerializer.GetProfile)
 	canCtl.Use(middlewares.AuthorizationMiddleware(g.Auth, auth.CommonRole)).POST("/search", g.CandidateSerializer.SearchCandidate)
