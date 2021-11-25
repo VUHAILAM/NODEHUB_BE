@@ -72,7 +72,8 @@ func (g *JobApplyGorm) GetAppliedJobByCandidateID(ctx context.Context, candidate
 		Joins("JOIN "+jobApplyTable+" ON job.job_id=job_candidate.job_id").
 		Where("job_candidate.candidate_id=?", candidateID).Find(&jobs)
 	total := db.RowsAffected
-	err := db.Offset(int(offset)).Limit(int(size)).Order(jobApplyTable + ".updated_at desc").Error
+	jobs = make([]*models.Job, 0)
+	err := db.Offset(int(offset)).Limit(int(size)).Order(jobApplyTable + ".updated_at desc").Find(&jobs).Error
 	if err != nil {
 		g.Logger.Error("JobApplyGorm: GetAppliedJobByJobID error", zap.Error(err))
 		return nil, 0, err
@@ -97,8 +98,8 @@ func (g *JobApplyGorm) GetCandidateApplyJob(ctx context.Context, jobID int64, of
 		Joins("JOIN "+jobApplyTable+" ON candidate.candidate_id=job_candidate.candidate_id").
 		Where("job_candidate.job_id=?", jobID).Find(&candidates)
 	total := db.RowsAffected
-	g.Logger.Info("Row count ", zap.Int64("count", total))
-	err := db.Offset(int(offset)).Limit(int(size)).Order(jobApplyTable + ".updated_at desc").Error
+	candidates = make([]*models.Candidate, 0)
+	err := db.Offset(int(offset)).Limit(int(size)).Order(jobApplyTable + ".updated_at desc").Find(&candidates).Error
 	if err != nil {
 		g.Logger.Error("JobApplyGorm: GetAppliedJobByJobID error", zap.Error(err))
 		return nil, 0, err

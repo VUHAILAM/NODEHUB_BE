@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"net/http"
 
+	"gitlab.com/hieuxeko19991/job4e_be/endpoints/follow"
+
 	"github.com/gin-gonic/gin"
 	"gitlab.com/hieuxeko19991/job4e_be/cmd/config"
 	"gitlab.com/hieuxeko19991/job4e_be/endpoints/account"
@@ -35,6 +37,7 @@ type GinDependencies struct {
 	CandidateSerializer    *candidate.CandidateSerializer
 	JobSkillSerializer     *job_skill.JobSkillSerializer
 	NotificationSerializer *notification.NotificationSerializer
+	FollowSerializer       *follow.FollowSerializer
 }
 
 func (g *GinDependencies) InitGinEngine(config *config.Config) *gin.Engine {
@@ -84,6 +87,7 @@ func (g *GinDependencies) InitGinEngine(config *config.Config) *gin.Engine {
 	mediaCtlUser.GET("/getSlide", g.MediaSerializer.GetSlide)
 	//recruiter profile
 	recruiterProfile := nodehub.Group("/public/recruiter")
+	recruiterProfile.POST("", g.RecruiterSerializer.GetAllRecruiter)
 	recruiterAdmin := nodehub.Group("/private/recruiter").Use(middlewares.AuthorizationMiddleware(g.Auth, auth.AdminRole))
 	recruiterCandidate := nodehub.Group("/public/recruiterCan").Use(middlewares.AuthorizationMiddleware(g.Auth, auth.CandidateRole))
 	recruiterProfile.Use(middlewares.AuthorizationMiddleware(g.Auth, auth.CommonRole)).GET("/getProfile", g.RecruiterSerializer.GetProfileRecruiter)
@@ -98,9 +102,9 @@ func (g *GinDependencies) InitGinEngine(config *config.Config) *gin.Engine {
 	recruiterCandidate.POST("/getAllRecruiterForCandidate", g.RecruiterSerializer.GetAllRecruiterForCandidate)
 	//Job
 	jobCtl := nodehub.Group("/public/job")
+	jobCtl.GET("", g.JobSerializer.GetAllJob)
 	jobAdmin := nodehub.Group("/private/job").Use(middlewares.AuthorizationMiddleware(g.Auth, auth.AdminRole))
 	jobCtl.Use(middlewares.AuthorizationMiddleware(g.Auth, auth.CommonRole)).GET("/getJob", g.JobSerializer.GetDetailJob)
-	jobCtl.Use(middlewares.AuthorizationMiddleware(g.Auth, auth.CommonRole)).GET("", g.JobSerializer.GetAllJob)
 	jobCtl.Use(middlewares.AuthorizationMiddleware(g.Auth, auth.RecruiterRole)).POST("/create", g.JobSerializer.Create)
 	jobCtl.Use(middlewares.AuthorizationMiddleware(g.Auth, auth.RecruiterRole)).PUT("/update", g.JobSerializer.UpdateJob)
 	jobCtl.Use(middlewares.AuthorizationMiddleware(g.Auth, auth.CommonRole)).POST("/getCompanyJob", g.JobSerializer.GetJobsByRecruiter)
@@ -136,7 +140,21 @@ func (g *GinDependencies) InitGinEngine(config *config.Config) *gin.Engine {
 	jobSkill.GET("skills", g.JobSkillSerializer.GetSkillsByJob)
 	//notification
 	notificationUser := nodehub.Group("/public/notification").Use(middlewares.AuthorizationMiddleware(g.Auth, auth.CommonRole))
-	notificationUser.POST("/getListNotificationByAccount", g.NotificationSerializer.GetListNotificationByAccount)
+	notificationUser.POST("/getListNotificationByCandidate", g.NotificationSerializer.GetListNotificationByAccount)
+	notificationUser.POST("/getListNotificationByRecruiter", g.NotificationSerializer.GetListNotificationByRecruiter)
+
+	//follow
+	followCtl := nodehub.Group("/follow")
+	followCommon := followCtl.Group("/common").Use(middlewares.AuthorizationMiddleware(g.Auth, auth.CommonRole))
+	followCommon.POST("/count-follow-of-recruiter", g.FollowSerializer.CountFollowOfRecruiter)
+	followCommon.POST("/count-follow-of-candidate", g.FollowSerializer.CountFollowOfCandidate)
+	followCommon.POST("/exist", g.FollowSerializer.FollowExist)
+	followCandidate := followCtl.Group("/candidate").Use(middlewares.AuthorizationMiddleware(g.Auth, auth.CandidateRole))
+	followCandidate.POST("/follow", g.FollowSerializer.Follow)
+	followCandidate.POST("/unfollow", g.FollowSerializer.UnFollow)
+	followCandidate.POST("/get-follow-recruiter", g.FollowSerializer.GetListRecruiter)
+	followRecruiter := followCtl.Group("/recruiter").Use(middlewares.AuthorizationMiddleware(g.Auth, auth.RecruiterRole))
+	followRecruiter.POST("/get-follow-candidate", g.FollowSerializer.GetListCandidate)
 	return engine
 }
 

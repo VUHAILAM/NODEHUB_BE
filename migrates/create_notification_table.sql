@@ -1,7 +1,8 @@
 CREATE TABLE `notification`
 (
     `notification_id` BIGINT NOT NULL AUTO_INCREMENT,
-    `candidate_id` BIGINT NOT NULL,
+    `candidate_id` BIGINT DEFAULT 0,
+    `recruiter_id` BIGINT DEFAULT 0,
     `title` varchar(255) NOT NULL,
     `content`  varchar(255) NOT NULL,
     `key`  varchar(255) NOT NULL,

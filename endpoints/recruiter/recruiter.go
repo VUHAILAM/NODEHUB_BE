@@ -264,3 +264,26 @@ func (r *RecruiterSerializer) SearchRecruiter(ginCtx *gin.Context) {
 	}
 	ginx.BuildSuccessResponse(ginCtx, http.StatusAccepted, resp)
 }
+
+func (r *RecruiterSerializer) GetAllRecruiter(ginCtx *gin.Context) {
+	ctx := ginCtx.Request.Context()
+	req := models.RequestSearchRecruiter{}
+	err := json.NewDecoder(ginCtx.Request.Body).Decode(&req)
+	if err != nil {
+		r.Logger.Error("Parse request Search Recruiter error", zap.Error(err))
+		ginx.BuildErrorResponse(ginCtx, err, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	resp, err := r.recruiterService.GetAllRecruiter(ctx, req)
+	if err != nil {
+		r.Logger.Error("Search Recruiter error", zap.Error(err))
+		ginx.BuildErrorResponse(ginCtx, err, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+	ginx.BuildSuccessResponse(ginCtx, http.StatusAccepted, resp)
+}

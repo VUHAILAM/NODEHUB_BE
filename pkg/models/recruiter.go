@@ -163,7 +163,7 @@ type RecruiterForCandidateCheck struct {
 }
 
 type RequestSearchRecruiter struct {
-	Text string `json:"text"`
+	Text string `json:"text,omitempty"`
 	Page int64  `json:"page"`
 	Size int64  `json:"size"`
 }

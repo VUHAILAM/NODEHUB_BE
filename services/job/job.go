@@ -4,6 +4,12 @@ import (
 	"context"
 	"time"
 
+	"gitlab.com/hieuxeko19991/job4e_be/services/follow"
+
+	"gitlab.com/hieuxeko19991/job4e_be/services/recruiter"
+
+	"gitlab.com/hieuxeko19991/job4e_be/services/notification"
+
 	"gitlab.com/hieuxeko19991/job4e_be/services/skill"
 
 	"gitlab.com/hieuxeko19991/job4e_be/services/job_skill"
@@ -28,23 +34,28 @@ type IJobService interface {
 }
 
 type Job struct {
-	JobGorm      *JobGorm
-	JobES        *JobES
-	JobSkillGorm job_skill.IJobSkillDatabase
-	SkillGorm    *skill.SkillGorm
+	JobGorm       *JobGorm
+	JobES         *JobES
+	JobSkillGorm  job_skill.IJobSkillDatabase
+	SkillGorm     *skill.SkillGorm
+	NotiGorm      notification.INotificationDatabase
+	RecruiterGorm recruiter.IRecruiterDatabase
+	FollowGorm    follow.IFollowDatabase
 
 	Conf   *config.Config
 	Logger *zap.Logger
 }
 
-func NewJobService(jobGorm *JobGorm, jobES *JobES, js *job_skill.JobSkillGorm, skillgorm *skill.SkillGorm, conf *config.Config, logger *zap.Logger) *Job {
+func NewJobService(jobGorm *JobGorm, jobES *JobES, js *job_skill.JobSkillGorm, skillgorm *skill.SkillGorm, notiGorm *notification.NotificationGorm, recruiterGorm *recruiter.RecruiterGorm, followGorm *follow.FollowGorm, conf *config.Config, logger *zap.Logger) *Job {
 	return &Job{
-		JobGorm:      jobGorm,
-		JobES:        jobES,
-		SkillGorm:    skillgorm,
-		JobSkillGorm: js,
-		Conf:         conf,
-		Logger:       logger,
+		JobGorm:       jobGorm,
+		JobES:         jobES,
+		SkillGorm:     skillgorm,
+		JobSkillGorm:  js,
+		NotiGorm:      notiGorm,
+		RecruiterGorm: recruiterGorm,
+		Conf:          conf,
+		Logger:        logger,
 	}
 }
 
@@ -110,6 +121,33 @@ func (j *Job) CreateNewJob(ctx context.Context, job *models.CreateJobRequest) er
 		return err
 	}
 
+	candidates, err := j.FollowGorm.GetListCandidateID(ctx, job.RecruiterID)
+	if err != nil {
+		j.Logger.Error(err.Error())
+		return err
+	}
+	recruiterInfo, err := j.RecruiterGorm.GetProfile(ctx, job.RecruiterID)
+	if err != nil {
+		j.Logger.Error(err.Error())
+		return err
+	}
+	notis := make([]*models.Notification, 0)
+	for _, cid := range candidates {
+		noti := &models.Notification{
+			CandidateID: cid.CandidateID,
+			Title:       recruiterInfo.Name + " has a new job maybe fit to you. Let check it!!",
+			Content:     recruiterInfo.Name + " has a new job maybe fit to you. Let check it!!",
+			Key:         "job",
+			CheckRead:   false,
+		}
+		notis = append(notis, noti)
+	}
+
+	err = j.NotiGorm.Create(ctx, notis)
+	if err != nil {
+		j.Logger.Error(err.Error())
+		return err
+	}
 	return nil
 }
 

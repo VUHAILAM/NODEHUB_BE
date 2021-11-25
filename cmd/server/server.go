@@ -4,6 +4,9 @@ import (
 	"context"
 	"net/http"
 
+	follow2 "gitlab.com/hieuxeko19991/job4e_be/endpoints/follow"
+	"gitlab.com/hieuxeko19991/job4e_be/services/follow"
+
 	"gitlab.com/hieuxeko19991/job4e_be/cmd/config"
 	account2 "gitlab.com/hieuxeko19991/job4e_be/endpoints/account"
 	blog2 "gitlab.com/hieuxeko19991/job4e_be/endpoints/blog"
@@ -157,25 +160,29 @@ func InitServer() *Server {
 	jobSkillGorm := job_skill.NewJobSkillGorm(gormDB, logger)
 	jobSkillService := job_skill.NewJobSkill(jobSkillGorm, logger)
 	jobSkillSerializer := job_skill2.NewJobSkillSerializer(jobSkillService, logger)
+	//init notification service
+	notificationGorm := notification.NewNotificationGorm(gormDB, logger)
+	notificationService := notification.NewNotification(notificationGorm, logger)
+	notificationSerializer := notification2.NewNotificationSerializer(notificationService, logger)
+
+	//init follow service
+	followGorm := follow.NewFollowGorm(gormDB, logger)
+	followService := follow.NewFollowService(followGorm, notificationGorm, candidateGorm, recruiterGorm, logger)
+	followSerializer := follow2.NewFollowSerializer(followService, logger)
 	// init job service
 	jobES := job.NewJobES(esClient, conf.JobESIndex, logger)
 	jobGorm := job.NewJobGorm(gormDB, logger)
-	jobService := job.NewJobService(jobGorm, jobES, jobSkillGorm, skillGorm, conf, logger)
+	jobService := job.NewJobService(jobGorm, jobES, jobSkillGorm, skillGorm, notificationGorm, recruiterGorm, followGorm, conf, logger)
 	jobSerializer := job2.NewJobSerializer(jobService, logger)
 
 	jobApplyGorm := job_apply.NewJobApplyGorm(gormDB, logger)
-	jobApplyService := job_apply.NewJobApplyService(jobApplyGorm, logger)
+	jobApplyService := job_apply.NewJobApplyService(jobApplyGorm, jobGorm, notificationGorm, logger)
 	jobApplySerializer := job_apply2.NewJobApplySerializer(jobApplyService, logger)
 
 	//init media service
 	mediaGorm := media.NewMediaGorm(gormDB, logger)
 	mediaService := media.NewMediaCategory(mediaGorm, logger)
 	mediaSerializer := media2.NewMediaSerializer(mediaService, logger)
-
-	//init notification service
-	notificationGorm := notification.NewNotificationGorm(gormDB, logger)
-	notificationService := notification.NewNotification(notificationGorm, logger)
-	notificationSerializer := notification2.NewNotificationSerializer(notificationService, logger)
 
 	ginDepen := transport.GinDependencies{
 		AccountSerializer:      accountSerializer,
@@ -189,7 +196,9 @@ func InitServer() *Server {
 		RecruiterSerializer:    recruiterSerializer,
 		CandidateSerializer:    canSerializer,
 		JobSkillSerializer:     jobSkillSerializer,
-		NotificationSerializer: notificationSerializer}
+		NotificationSerializer: notificationSerializer,
+		FollowSerializer:       followSerializer,
+	}
 	ginHandler := ginDepen.InitGinEngine(conf)
 	return &Server{
 		HttpServer: &http.Server{

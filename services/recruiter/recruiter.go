@@ -19,6 +19,7 @@ type IRecruiterService interface {
 	GetAllRecruiterForCandidate(ctx context.Context, recruiterName string, skillName string, address string, page int64, size int64) (*models.ResponsetListRecruiterForCandidate, error)
 	DeleteRecruiterSkill(ctx context.Context, recruiter_skill_id int64) error
 	SearchRecruiter(ctx context.Context, req models.RequestSearchRecruiter) (*models.ResponseSearchRecruiter, error)
+	GetAllRecruiter(ctx context.Context, req models.RequestSearchRecruiter) (*models.ResponseSearchRecruiter, error)
 }
 
 type Recruiter struct {
@@ -109,7 +110,7 @@ func (r *Recruiter) UpdateReciuterByAdmin(ctx context.Context, updateRequest *mo
 		return err1
 	}
 
-	err := r.RecruiterGorm.UpdateReciuterByAdmin(ctx, updateRequest.RecruiterID, updateData)
+	err := r.RecruiterGorm.UpdateRecruiterByAdmin(ctx, updateRequest.RecruiterID, updateData)
 	if err != nil {
 		r.Logger.Error("Can not Update to MySQL", zap.Error(err))
 		return err
@@ -120,7 +121,7 @@ func (r *Recruiter) UpdateReciuterByAdmin(ctx context.Context, updateRequest *mo
 func (r *Recruiter) UpdateStatusReciuter(ctx context.Context, updateRequest *models.RequestUpdateStatusRecruiter, recruiter_id int64) error {
 	recruiterModels := &models.RequestUpdateStatusRecruiter{
 		Status: updateRequest.Status}
-	err := r.RecruiterGorm.UpdateStatusReciuter(ctx, recruiterModels, recruiter_id)
+	err := r.RecruiterGorm.UpdateStatusRecruiter(ctx, recruiterModels, recruiter_id)
 	if err != nil {
 		return err
 	}
@@ -157,6 +158,34 @@ func (r *Recruiter) SearchRecruiter(ctx context.Context, req models.RequestSearc
 	} else {
 		recruiters, total, err = r.RecruiterGorm.SearchRecruiter(ctx, req.Text, offset, req.Size)
 	}
+	if err != nil {
+		r.Logger.Error("Search recruiter error", zap.Error(err))
+		return nil, err
+	}
+	recruitersWithSkills := make([]models.RecruiterWithSkill, 0)
+	for _, recruiter := range recruiters {
+		skills, err := r.RecruiterGorm.GetAllSkillByRecruiterID(ctx, recruiter.RecruiterID)
+		if err != nil {
+			r.Logger.Error(err.Error(), zap.Int64("Recruiter ID", recruiter.RecruiterID))
+			continue
+		}
+		rwk := models.RecruiterWithSkill{
+			Recruiter: recruiter,
+			Skills:    skills,
+		}
+		recruitersWithSkills = append(recruitersWithSkills, rwk)
+	}
+	resp := models.ResponseSearchRecruiter{
+		Total:      total,
+		Recruiters: recruitersWithSkills,
+	}
+
+	return &resp, nil
+}
+
+func (r *Recruiter) GetAllRecruiter(ctx context.Context, req models.RequestSearchRecruiter) (*models.ResponseSearchRecruiter, error) {
+	offset := (req.Page - 1) * req.Size
+	recruiters, total, err := r.RecruiterGorm.GetAllRecruiter(ctx, offset, req.Size)
 	if err != nil {
 		r.Logger.Error("Search recruiter error", zap.Error(err))
 		return nil, err
