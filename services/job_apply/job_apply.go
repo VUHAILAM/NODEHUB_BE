@@ -3,10 +3,9 @@ package job_apply
 import (
 	"context"
 
-	"gitlab.com/hieuxeko19991/job4e_be/services/notification"
-
 	"gitlab.com/hieuxeko19991/job4e_be/pkg/models"
-
+	"gitlab.com/hieuxeko19991/job4e_be/services/job"
+	"gitlab.com/hieuxeko19991/job4e_be/services/notification"
 	"go.uber.org/zap"
 )
 
@@ -21,13 +20,15 @@ type IJobApplyService interface {
 type JobApply struct {
 	JobApplyGorm *JobApplyGorm
 	NotiGorm     notification.INotificationDatabase
+	JobGorm      job.IJobDatabase
 	Logger       *zap.Logger
 }
 
-func NewJobApplyService(gorm *JobApplyGorm, notiGorm *notification.NotificationGorm, logger *zap.Logger) *JobApply {
+func NewJobApplyService(gorm *JobApplyGorm, jobGorm *job.JobGorm, notiGorm *notification.NotificationGorm, logger *zap.Logger) *JobApply {
 	return &JobApply{
 		JobApplyGorm: gorm,
 		NotiGorm:     notiGorm,
+		JobGorm:      jobGorm,
 		Logger:       logger,
 	}
 }
@@ -43,16 +44,28 @@ func (ja *JobApply) CreateJobApply(ctx context.Context, req models.RequestApply)
 		ja.Logger.Error("Can not create apply candidate", zap.Error(err), zap.Reflect("request", req))
 		return err
 	}
-
-	noti := models.Notification{
+	job, err := ja.JobGorm.Get(ctx, req.JobID)
+	if err != nil {
+		ja.Logger.Error(err.Error())
+		return err
+	}
+	notiCandidate := models.Notification{
 		CandidateID: req.CandidateID,
-		Title:       "Apply job successful",
+		Title:       "Apply job " + job.Title + " successful",
 		Content:     "The recruiter has received your CV!! Good luck!!",
 		Key:         "job",
 		CheckRead:   false,
 	}
+	notiRecruiter := models.Notification{
+		RecruiterID: job.RecruiterID,
+		Title:       "A candidate apply to your job",
+		Content:     job.Title + ":This job has a new candidate. Let check it!!",
+		Key:         "job-apply",
+		CheckRead:   false,
+	}
 	notis := make([]*models.Notification, 0)
-	notis = append(notis, &noti)
+	notis = append(notis, &notiCandidate)
+	notis = append(notis, &notiRecruiter)
 	err = ja.NotiGorm.Create(ctx, notis)
 	if err != nil {
 		ja.Logger.Error(err.Error())
@@ -108,12 +121,16 @@ func (ja *JobApply) UpdateStatusJobApplied(ctx context.Context, req models.Reque
 		ja.Logger.Error(err.Error())
 		return err
 	}
-
+	job, err := ja.JobGorm.Get(ctx, req.JobID)
+	if err != nil {
+		ja.Logger.Error(err.Error())
+		return err
+	}
 	noti := models.Notification{
 		CandidateID: req.CandidateID,
-		Title:       "Your apply has new!!",
+		Title:       "Your apply to " + job.Title + " has new!!",
 		Content:     "The recruiter has update status your application!! Let check it!!",
-		Key:         "job apply",
+		Key:         "job-apply",
 		CheckRead:   false,
 	}
 	notis := make([]*models.Notification, 0)

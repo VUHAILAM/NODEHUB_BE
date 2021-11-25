@@ -140,7 +140,8 @@ func (g *GinDependencies) InitGinEngine(config *config.Config) *gin.Engine {
 	jobSkill.GET("skills", g.JobSkillSerializer.GetSkillsByJob)
 	//notification
 	notificationUser := nodehub.Group("/public/notification").Use(middlewares.AuthorizationMiddleware(g.Auth, auth.CommonRole))
-	notificationUser.POST("/getListNotificationByAccount", g.NotificationSerializer.GetListNotificationByAccount)
+	notificationUser.POST("/getListNotificationByCandidate", g.NotificationSerializer.GetListNotificationByAccount)
+	notificationUser.POST("/getListNotificationByRecruiter", g.NotificationSerializer.GetListNotificationByRecruiter)
 
 	//follow
 	followCtl := nodehub.Group("/follow")

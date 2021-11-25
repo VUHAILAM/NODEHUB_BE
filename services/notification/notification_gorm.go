@@ -14,6 +14,7 @@ const tableNotification = "notification"
 type INotificationDatabase interface {
 	Create(ctx context.Context, notification []*models.Notification) error
 	GetListNotificationByCandidate(ctx context.Context, candidateID int64, offset int64, size int64) ([]*models.Notification, int64, error)
+	GetListNotificationByRecruiter(ctx context.Context, recruiterID int64, offset int64, size int64) ([]*models.Notification, int64, error)
 }
 
 type NotificationGorm struct {

@@ -3,6 +3,11 @@ package follow
 import (
 	"context"
 
+	"gitlab.com/hieuxeko19991/job4e_be/services/candidate"
+	"gitlab.com/hieuxeko19991/job4e_be/services/recruiter"
+
+	"gitlab.com/hieuxeko19991/job4e_be/services/notification"
+
 	"gitlab.com/hieuxeko19991/job4e_be/pkg/models"
 
 	"go.uber.org/zap"
@@ -19,14 +24,21 @@ type IFollowService interface {
 }
 
 type FollowService struct {
-	FollowGorm IFollowDatabase
-	Logger     *zap.Logger
+	FollowGorm    IFollowDatabase
+	NotiGorm      notification.INotificationDatabase
+	CandidateGorm candidate.ICandidateDatabase
+	RecruiterGorm recruiter.IRecruiterDatabase
+
+	Logger *zap.Logger
 }
 
-func NewFollowService(gorm *FollowGorm, logger *zap.Logger) *FollowService {
+func NewFollowService(gorm *FollowGorm, notiGorm *notification.NotificationGorm, canGorm *candidate.CandidateGorm, recruiterGorm *recruiter.RecruiterGorm, logger *zap.Logger) *FollowService {
 	return &FollowService{
-		FollowGorm: gorm,
-		Logger:     logger,
+		FollowGorm:    gorm,
+		NotiGorm:      notiGorm,
+		CandidateGorm: canGorm,
+		RecruiterGorm: recruiterGorm,
+		Logger:        logger,
 	}
 }
 
@@ -36,6 +48,42 @@ func (s *FollowService) Follow(ctx context.Context, req models.RequestFollow) er
 		RecruiterID: req.RecruiterID,
 	}
 	err := s.FollowGorm.Create(ctx, &follow)
+	if err != nil {
+		s.Logger.Error(err.Error())
+		return err
+	}
+	candidateInfor, err := s.CandidateGorm.GetByCandidateID(ctx, req.CandidateID)
+	if err != nil {
+		s.Logger.Error(err.Error())
+		return err
+	}
+
+	recruiterInfor, err := s.RecruiterGorm.GetProfile(ctx, req.RecruiterID)
+	if err != nil {
+		s.Logger.Error(err.Error())
+		return err
+	}
+
+	notiCandidate := &models.Notification{
+		CandidateID: req.CandidateID,
+		Title:       recruiterInfor.Name + " is following you",
+		Content:     recruiterInfor.Name + " is following you",
+		Key:         "recruiter",
+		CheckRead:   false,
+	}
+
+	notiRecruiter := &models.Notification{
+		RecruiterID: recruiterInfor.RecruiterID,
+		Title:       candidateInfor.FirstName + " is following you",
+		Content:     candidateInfor.FirstName + " is following you",
+		Key:         "candidate",
+		CheckRead:   false,
+	}
+	notis := make([]*models.Notification, 0)
+	notis = append(notis, notiCandidate)
+	notis = append(notis, notiRecruiter)
+
+	err = s.NotiGorm.Create(ctx, notis)
 	if err != nil {
 		s.Logger.Error(err.Error())
 		return err

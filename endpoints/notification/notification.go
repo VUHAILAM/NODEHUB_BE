@@ -35,7 +35,32 @@ func (n *NotificationSerializer) GetListNotificationByAccount(ginCtx *gin.Contex
 		})
 		return
 	}
-	data, err := n.notificationService.GetListNotificationByAccount(ctx, req.CandidateID, req.Page, req.Size)
+	data, err := n.notificationService.GetListNotificationByCandidate(ctx, req.CandidateID, req.Page, req.Size)
+	if err != nil {
+		n.Logger.Error("getlistNotification error", zap.Error(err))
+		ginx.BuildErrorResponse(ginCtx, err, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	ginx.BuildSuccessResponse(ginCtx, http.StatusAccepted, gin.H{
+		"data": data,
+	})
+}
+
+func (n *NotificationSerializer) GetListNotificationByRecruiter(ginCtx *gin.Context) {
+	ctx := ginCtx.Request.Context()
+	req := models.RequestGetListNotification{}
+	err := json.NewDecoder(ginCtx.Request.Body).Decode(&req)
+	if err != nil {
+		n.Logger.Error("Parse request get list NotificationService error", zap.Error(err))
+		ginx.BuildErrorResponse(ginCtx, err, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+	data, err := n.notificationService.GetListNotificationByRecruiter(ctx, req.RecruiterID, req.Page, req.Size)
 	if err != nil {
 		n.Logger.Error("getlistNotification error", zap.Error(err))
 		ginx.BuildErrorResponse(ginCtx, err, gin.H{
