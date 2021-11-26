@@ -1,1 +1,1 @@
-ALTER TABLE `candidate` ADD nodehub_score INT DEFAULT 0
+ALTER TABLE `candidate` ADD nodehub_score INT DEFAULT 1

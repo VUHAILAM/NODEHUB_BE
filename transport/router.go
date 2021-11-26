@@ -133,7 +133,7 @@ func (g *GinDependencies) InitGinEngine(config *config.Config) *gin.Engine {
 	canCtl.Use(middlewares.AuthorizationMiddleware(g.Auth, auth.CandidateRole)).POST("/addCandidateSkill", g.CandidateSerializer.AddCandidateSkill)
 	canCtl.Use(middlewares.AuthorizationMiddleware(g.Auth, auth.CandidateRole)).DELETE("/deleteCandidateSkill", g.CandidateSerializer.DeleteCandidateSkill)
 	canCtl.Use(middlewares.AuthorizationMiddleware(g.Auth, auth.CandidateRole)).PUT("/updateCandidateSkill", g.CandidateSerializer.UpdateCandidateSkill)
-	canCtl.Use(middlewares.AuthorizationMiddleware(g.Auth, auth.CandidateRole)).GET("/getCandidateSkill", g.CandidateSerializer.GetCandidateSkill)
+	canCtl.Use(middlewares.AuthorizationMiddleware(g.Auth, auth.CommonRole)).GET("/getCandidateSkill", g.CandidateSerializer.GetCandidateSkill)
 	canCtlAdmin.POST("/getAllCandidateForAdmin", g.CandidateSerializer.GetAllCandidateForAdmin)
 	canCtlAdmin.PUT("/updateReviewCandidateByAdmin", g.CandidateSerializer.UpdateReviewCandidateByAdmin)
 	canCtlAdmin.PUT("/updateStatusCandidate", g.CandidateSerializer.UpdateStatusCandidate)
