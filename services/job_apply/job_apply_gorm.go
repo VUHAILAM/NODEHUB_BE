@@ -21,6 +21,7 @@ type IJobApplyDatabase interface {
 	GetAppliedJobByCandidateID(ctx context.Context, candidateID int64, offset, size int64) ([]*models.Job, int64, error)
 	UpdateStatus(ctx context.Context, status string, jobID, candidateID int64) error
 	GetCandidateApplyJob(ctx context.Context, jobID int64, offset, size int64) ([]*models.Candidate, int64, error)
+	CountByStatus(ctx context.Context, status string) (int64, error)
 }
 
 type JobApplyGorm struct {
@@ -106,4 +107,16 @@ func (g *JobApplyGorm) GetCandidateApplyJob(ctx context.Context, jobID int64, of
 	}
 
 	return candidates, total, nil
+}
+
+func (g *JobApplyGorm) CountByStatus(ctx context.Context, status string) (int64, error) {
+	var count int64
+	db := g.DB.WithContext(ctx).Table(jobApplyTable).Select("COUNT(candidate_id) as count").
+		Where("status=?", status).Count(&count)
+	err := db.Error
+	if err != nil {
+		g.Logger.Error(err.Error())
+		return 0, err
+	}
+	return count, nil
 }

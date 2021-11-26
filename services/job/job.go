@@ -31,6 +31,7 @@ type IJobService interface {
 	UpdateStatusJob(ctx context.Context, updateRequest *models.RequestUpdateStatusJob) error
 	DeleteJob(ctx context.Context, job_id int64) error
 	SearchJob(ctx context.Context, searchReq models.RequestSearchJob) (*models.ResponseGetJob, error)
+	CountJob(ctx context.Context) (int64, error)
 }
 
 type Job struct {
@@ -54,8 +55,10 @@ func NewJobService(jobGorm *JobGorm, jobES *JobES, js *job_skill.JobSkillGorm, s
 		JobSkillGorm:  js,
 		NotiGorm:      notiGorm,
 		RecruiterGorm: recruiterGorm,
-		Conf:          conf,
-		Logger:        logger,
+		FollowGorm:    followGorm,
+
+		Conf:   conf,
+		Logger: logger,
 	}
 }
 
@@ -282,7 +285,14 @@ func (j *Job) DeleteJob(ctx context.Context, job_id int64) error {
 
 func (j *Job) SearchJob(ctx context.Context, searchReq models.RequestSearchJob) (*models.ResponseGetJob, error) {
 	offset := (searchReq.Page - 1) * searchReq.Size
-	jobs, total, err := j.JobES.SearchJobs(ctx, searchReq.Text, searchReq.Location, offset, searchReq.Size)
+	jobs := make([]models.ESJob, 0)
+	var total int64
+	var err error
+	if searchReq.Text == "" && searchReq.Location == "" {
+		jobs, total, err = j.JobES.GetAllJob(ctx, offset, searchReq.Size)
+	} else {
+		jobs, total, err = j.JobES.SearchJobs(ctx, searchReq.Text, searchReq.Location, offset, searchReq.Size)
+	}
 	if err != nil {
 		j.Logger.Error("Can not Searhc Job from ES", zap.Error(err))
 		return nil, err
@@ -292,4 +302,8 @@ func (j *Job) SearchJob(ctx context.Context, searchReq models.RequestSearchJob) 
 		Result: jobs,
 	}
 	return &resp, nil
+}
+
+func (j *Job) CountJob(ctx context.Context) (int64, error) {
+	return j.JobGorm.Count(ctx)
 }

@@ -237,3 +237,17 @@ func (s *JobSerializer) SearchJob(ginCtx *gin.Context) {
 	}
 	ginx.BuildSuccessResponse(ginCtx, http.StatusAccepted, resp)
 }
+
+func (s *JobSerializer) CountJob(ginCtx *gin.Context) {
+	ctx := ginCtx.Request.Context()
+
+	count, err := s.JobService.CountJob(ctx)
+	if err != nil {
+		s.Logger.Error("Count Job error", zap.Error(err))
+		ginx.BuildErrorResponse(ginCtx, err, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+	ginx.BuildSuccessResponse(ginCtx, http.StatusAccepted, count)
+}

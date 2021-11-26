@@ -37,6 +37,7 @@ type IRecruiterDatabase interface {
 	SearchRecruiter(ctx context.Context, text string, offset, size int64) ([]*models.Recruiter, int64, error)
 	GetAllRecruiter(ctx context.Context, offset, size int64) ([]*models.Recruiter, int64, error)
 	GetAllSkillByRecruiterID(ctx context.Context, recruiterID int64) ([]*models.Skill, error)
+	Count(ctx context.Context) (int64, error)
 }
 
 type RecruiterGorm struct {
@@ -297,4 +298,16 @@ func (r *RecruiterGorm) GetAllSkillByRecruiterID(ctx context.Context, recruiterI
 		return nil, db.Error
 	}
 	return skills, nil
+}
+
+func (r *RecruiterGorm) Count(ctx context.Context) (int64, error) {
+	var count int64
+	db := r.db.WithContext(ctx)
+	err := db.Table(tableRecruiter).Count(&count).Error
+	if err != nil {
+		r.logger.Error(err.Error())
+		return 0, err
+	}
+
+	return count, nil
 }

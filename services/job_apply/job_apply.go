@@ -3,6 +3,8 @@ package job_apply
 import (
 	"context"
 
+	"gitlab.com/hieuxeko19991/job4e_be/services/job_skill"
+
 	"gitlab.com/hieuxeko19991/job4e_be/pkg/models"
 	"gitlab.com/hieuxeko19991/job4e_be/services/job"
 	"gitlab.com/hieuxeko19991/job4e_be/services/notification"
@@ -11,24 +13,27 @@ import (
 
 type IJobApplyService interface {
 	CreateJobApply(ctx context.Context, req models.RequestApply) error
-	GetJobsByJobID(ctx context.Context, req models.RequestGetJobApplyByJobID) (*models.ResponseGetJobApply, error)
 	GetJobByCandidateID(ctx context.Context, req models.RequestGetJobApplyByCandidateID) (*models.ResponseGetJobApply, error)
 	GetCandidatesApplyJob(ctx context.Context, req models.RequestGetJobApplyByJobID) (*models.ResponseGetCandidateApply, error)
 	UpdateStatusJobApplied(ctx context.Context, req models.RequestUpdateStatusJobApplied) error
+	CountCandidateByStatus(ctx context.Context, req models.RequestCountStatus) (int64, error)
 }
 
 type JobApply struct {
 	JobApplyGorm *JobApplyGorm
 	NotiGorm     notification.INotificationDatabase
 	JobGorm      job.IJobDatabase
-	Logger       *zap.Logger
+	JobSkill     job_skill.IJobSkillDatabase
+
+	Logger *zap.Logger
 }
 
-func NewJobApplyService(gorm *JobApplyGorm, jobGorm *job.JobGorm, notiGorm *notification.NotificationGorm, logger *zap.Logger) *JobApply {
+func NewJobApplyService(gorm *JobApplyGorm, jobGorm *job.JobGorm, notiGorm *notification.NotificationGorm, jobSkill *job_skill.JobSkillGorm, logger *zap.Logger) *JobApply {
 	return &JobApply{
 		JobApplyGorm: gorm,
 		NotiGorm:     notiGorm,
 		JobGorm:      jobGorm,
+		JobSkill:     jobSkill,
 		Logger:       logger,
 	}
 }
@@ -73,20 +78,6 @@ func (ja *JobApply) CreateJobApply(ctx context.Context, req models.RequestApply)
 	return nil
 }
 
-func (ja *JobApply) GetJobsByJobID(ctx context.Context, req models.RequestGetJobApplyByJobID) (*models.ResponseGetJobApply, error) {
-	offset := (req.Page - 1) * req.Size
-	jobs, total, err := ja.JobApplyGorm.GetAppliedJobByJobID(ctx, req.JobID, offset, req.Size)
-	if err != nil {
-		ja.Logger.Error("Can not get jobs", zap.Error(err), zap.Int64("job_id", req.JobID))
-		return nil, err
-	}
-	resp := models.ResponseGetJobApply{
-		Total:  total,
-		Result: jobs,
-	}
-	return &resp, nil
-}
-
 func (ja *JobApply) GetJobByCandidateID(ctx context.Context, req models.RequestGetJobApplyByCandidateID) (*models.ResponseGetJobApply, error) {
 	offset := (req.Page - 1) * req.Size
 	jobs, total, err := ja.JobApplyGorm.GetAppliedJobByCandidateID(ctx, req.CandidateID, offset, req.Size)
@@ -94,9 +85,22 @@ func (ja *JobApply) GetJobByCandidateID(ctx context.Context, req models.RequestG
 		ja.Logger.Error("Can not get jobs", zap.Error(err), zap.Int64("candidate_id", req.CandidateID))
 		return nil, err
 	}
+	jobsWithSkills := make([]models.JobWithSkill, 0)
+	for _, job := range jobs {
+		skills, err := ja.JobSkill.GetAllSkillByJob(ctx, job.JobID)
+		if err != nil {
+			ja.Logger.Error(err.Error(), zap.Int64("Job ID", job.JobID))
+			continue
+		}
+		rwk := models.JobWithSkill{
+			Job:    job,
+			Skills: skills,
+		}
+		jobsWithSkills = append(jobsWithSkills, rwk)
+	}
 	resp := models.ResponseGetJobApply{
 		Total:  total,
-		Result: jobs,
+		Result: jobsWithSkills,
 	}
 	return &resp, nil
 }
@@ -140,4 +144,8 @@ func (ja *JobApply) UpdateStatusJobApplied(ctx context.Context, req models.Reque
 		ja.Logger.Error(err.Error())
 	}
 	return nil
+}
+
+func (ja *JobApply) CountCandidateByStatus(ctx context.Context, req models.RequestCountStatus) (int64, error) {
+	return ja.JobApplyGorm.CountByStatus(ctx, req.Status)
 }

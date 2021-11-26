@@ -335,3 +335,17 @@ func (cs *CandidateSerializer) GetAllCandidate(ginCtx *gin.Context) {
 	}
 	ginx.BuildSuccessResponse(ginCtx, http.StatusAccepted, resp)
 }
+
+func (cs *CandidateSerializer) CountCandidate(ginCtx *gin.Context) {
+	ctx := ginCtx.Request.Context()
+
+	count, err := cs.CandidateService.CountCandidate(ctx)
+	if err != nil {
+		cs.Logger.Error("Count Candidate error", zap.Error(err))
+		ginx.BuildErrorResponse(ginCtx, err, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+	ginx.BuildSuccessResponse(ginCtx, http.StatusAccepted, count)
+}

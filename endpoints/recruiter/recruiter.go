@@ -287,3 +287,17 @@ func (r *RecruiterSerializer) GetAllRecruiter(ginCtx *gin.Context) {
 	}
 	ginx.BuildSuccessResponse(ginCtx, http.StatusAccepted, resp)
 }
+
+func (r *RecruiterSerializer) CountRecruiter(ginCtx *gin.Context) {
+	ctx := ginCtx.Request.Context()
+
+	count, err := r.recruiterService.CountRecruiter(ctx)
+	if err != nil {
+		r.Logger.Error("Count Recruiter error", zap.Error(err))
+		ginx.BuildErrorResponse(ginCtx, err, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+	ginx.BuildSuccessResponse(ginCtx, http.StatusAccepted, count)
+}
