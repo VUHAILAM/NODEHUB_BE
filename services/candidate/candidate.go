@@ -23,6 +23,7 @@ type ICandidateService interface {
 	GetCandidateSkill(ctx context.Context, candidate_id int64) ([]models.ResponseCandidateSkill, error)
 	SearchCandidate(ctx context.Context, req models.RequestSearchCandidate) (*models.ResponseSearchCandidate, error)
 	GetAllCandidate(ctx context.Context, req models.RequestSearchCandidate) (*models.ResponseSearchCandidate, error)
+	CountCandidate(ctx context.Context) (int64, error)
 }
 
 type CandidateService struct {
@@ -237,4 +238,8 @@ func (s *CandidateService) GetAllCandidate(ctx context.Context, req models.Reque
 	}
 
 	return &resp, nil
+}
+
+func (s *CandidateService) CountCandidate(ctx context.Context) (int64, error) {
+	return s.CanGorm.Count(ctx)
 }

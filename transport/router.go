@@ -89,6 +89,7 @@ func (g *GinDependencies) InitGinEngine(config *config.Config) *gin.Engine {
 	//recruiter profile
 	recruiterProfile := nodehub.Group("/public/recruiter")
 	recruiterProfile.POST("/getAllRecruiter", g.RecruiterSerializer.GetAllRecruiter)
+	recruiterProfile.GET("/count", g.RecruiterSerializer.CountRecruiter)
 	recruiterAdmin := nodehub.Group("/private/recruiter").Use(middlewares.AuthorizationMiddleware(g.Auth, auth.AdminRole))
 	recruiterCandidate := nodehub.Group("/public/recruiterCan").Use(middlewares.AuthorizationMiddleware(g.Auth, auth.CandidateRole))
 	recruiterProfile.Use(middlewares.AuthorizationMiddleware(g.Auth, auth.CommonRole)).GET("/getProfile", g.RecruiterSerializer.GetProfileRecruiter)
@@ -104,6 +105,7 @@ func (g *GinDependencies) InitGinEngine(config *config.Config) *gin.Engine {
 	//Job
 	jobCtl := nodehub.Group("/public/job")
 	jobCtl.GET("/getAllJob", g.JobSerializer.GetAllJob)
+	jobCtl.GET("/count", g.JobSerializer.CountJob)
 	jobAdmin := nodehub.Group("/private/job").Use(middlewares.AuthorizationMiddleware(g.Auth, auth.AdminRole))
 	jobCtl.Use(middlewares.AuthorizationMiddleware(g.Auth, auth.CommonRole)).POST("/getJob", g.JobSerializer.GetDetailJob)
 	jobCtl.Use(middlewares.AuthorizationMiddleware(g.Auth, auth.CommonRole)).POST("", g.JobSerializer.GetAllJob)
@@ -116,6 +118,7 @@ func (g *GinDependencies) InitGinEngine(config *config.Config) *gin.Engine {
 	jobAdmin.DELETE("/deleteJob", g.JobSerializer.DeleteJob)
 
 	applyCtl := nodehub.Group("/job-candidate")
+	applyCtl.POST("/count", g.JobApplySerializer.CountCandidateByStatus)
 	candidateApplyCtl := applyCtl.Group("/candidate").Use(middlewares.AuthorizationMiddleware(g.Auth, auth.CandidateRole))
 	candidateApplyCtl.POST("/apply", g.JobApplySerializer.Apply)
 	candidateApplyCtl.POST("/jobs", g.JobApplySerializer.GetJobAppliedByCandidateID)
@@ -125,6 +128,7 @@ func (g *GinDependencies) InitGinEngine(config *config.Config) *gin.Engine {
 
 	canCtl := nodehub.Group("/candidate")
 	canCtl.POST("/getAllCandidate", g.CandidateSerializer.GetAllCandidate)
+	canCtl.GET("/count", g.CandidateSerializer.CountCandidate)
 	canCtlAdmin := nodehub.Group("/private/candidate").Use(middlewares.AuthorizationMiddleware(g.Auth, auth.AdminRole))
 	canCtl.Use(middlewares.AuthorizationMiddleware(g.Auth, auth.CommonRole)).POST("/profile", g.CandidateSerializer.GetProfile)
 	canCtl.Use(middlewares.AuthorizationMiddleware(g.Auth, auth.CommonRole)).POST("/search", g.CandidateSerializer.SearchCandidate)

@@ -36,11 +36,20 @@ type RequestUpdateStatusJobApplied struct {
 }
 
 type ResponseGetJobApply struct {
-	Total  int64  `json:"total"`
-	Result []*Job `json:"result"`
+	Total  int64          `json:"total"`
+	Result []JobWithSkill `json:"result"`
 }
 
 type ResponseGetCandidateApply struct {
-	Total  int64 `json:"total"`
-	Result []*Candidate
+	Total  int64        `json:"total"`
+	Result []*Candidate `json:"result"`
+}
+
+type RequestCountStatus struct {
+	Status string `json:"status"`
+}
+
+type JobWithSkill struct {
+	Job    *Job     `json:"candidate"`
+	Skills []*Skill `json:"skills"`
 }

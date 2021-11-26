@@ -17,6 +17,7 @@ type IJobDatabase interface {
 	Create(ctx context.Context, job *models.Job) (*models.Job, error)
 	Get(ctx context.Context, jobID int64) (*models.Job, error)
 	Update(ctx context.Context, jobID int64, data map[string]interface{}) error
+	Count(ctx context.Context) (int64, error)
 }
 
 type JobGorm struct {
@@ -121,4 +122,15 @@ func (j *JobGorm) DeleteJob(ctx context.Context, job_id int64) error {
 		return err
 	}
 	return nil
+}
+
+func (j *JobGorm) Count(ctx context.Context) (int64, error) {
+	var count int64
+	db := j.DB.WithContext(ctx)
+	err := db.Table(jobTable).Count(&count).Error
+	if err != nil {
+		j.Logger.Error(err.Error())
+		return 0, err
+	}
+	return count, nil
 }

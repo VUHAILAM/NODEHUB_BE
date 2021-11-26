@@ -36,6 +36,7 @@ type ICandidateDatabase interface {
 	SearchCandidate(ctx context.Context, text string, offset, page int64) ([]*models.Candidate, int64, error)
 	GetAllCandidate(ctx context.Context, offset, size int64) ([]*models.Candidate, int64, error)
 	GetAllSkillByCandidateID(ctx context.Context, candidateID int64) ([]*models.Skill, error)
+	Count(ctx context.Context) (int64, error)
 }
 
 type CandidateGorm struct {
@@ -239,4 +240,16 @@ func (g *CandidateGorm) GetAllSkillByCandidateID(ctx context.Context, candidateI
 		return nil, db.Error
 	}
 	return skills, nil
+}
+
+func (g *CandidateGorm) Count(ctx context.Context) (int64, error) {
+	var count int64
+	db := g.DB.WithContext(ctx)
+	err := db.Table(candidateTable).Count(&count).Error
+	if err != nil {
+		g.Logger.Error(err.Error())
+		return 0, err
+	}
+
+	return count, nil
 }

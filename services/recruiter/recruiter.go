@@ -20,6 +20,7 @@ type IRecruiterService interface {
 	DeleteRecruiterSkill(ctx context.Context, recruiter_skill_id int64) error
 	SearchRecruiter(ctx context.Context, req models.RequestSearchRecruiter) (*models.ResponseSearchRecruiter, error)
 	GetAllRecruiter(ctx context.Context, req models.RequestSearchRecruiter) (*models.ResponseSearchRecruiter, error)
+	CountRecruiter(ctx context.Context) (int64, error)
 }
 
 type Recruiter struct {
@@ -209,4 +210,8 @@ func (r *Recruiter) GetAllRecruiter(ctx context.Context, req models.RequestSearc
 	}
 
 	return &resp, nil
+}
+
+func (r *Recruiter) CountRecruiter(ctx context.Context) (int64, error) {
+	return r.RecruiterGorm.Count(ctx)
 }
