@@ -12,6 +12,7 @@ type IBlogService interface {
 	GetListBlogUser(ctx context.Context, title string, page int64, size int64) (*models.ResponsetListBlog, error)
 	CreateBlog(ctx context.Context, blog *models.RequestCreateBlog) error
 	UpdateBlog(ctx context.Context, blog *models.RequestCreateBlog, Blog_id int64) error
+	GetListBlogByCategory(ctx context.Context, category_id int64, page int64, size int64) (*models.ResponsetListBlog, error)
 }
 
 type IBlogDatabase interface {
@@ -19,6 +20,7 @@ type IBlogDatabase interface {
 	GetListBlogUser(ctx context.Context, title string, page int64, size int64) (*models.ResponsetListBlog, error)
 	Create(ctx context.Context, blog *models.Blog) error
 	Update(ctx context.Context, blog *models.RequestUpdateBlog, Blog_id int64) error
+	GetListBlogByCategory(ctx context.Context, category_id int64, page int64, size int64) (*models.ResponsetListBlog, error)
 }
 
 type Blog struct {
@@ -43,6 +45,13 @@ func (b *Blog) GetListBlog(ctx context.Context, title string, page int64, size i
 
 func (b *Blog) GetListBlogUser(ctx context.Context, title string, page int64, size int64) (*models.ResponsetListBlog, error) {
 	acc, err := b.BlogGorm.GetListBlogUser(ctx, title, page, size)
+	if err != nil {
+		return nil, err
+	}
+	return acc, nil
+}
+func (b *Blog) GetListBlogByCategory(ctx context.Context, category_id int64, page int64, size int64) (*models.ResponsetListBlog, error) {
+	acc, err := b.BlogGorm.GetListBlogByCategory(ctx, category_id, page, size)
 	if err != nil {
 		return nil, err
 	}

@@ -73,6 +73,30 @@ func (bl *BlogSerializer) GetListBlogUser(ginCtx *gin.Context) {
 		"data": data,
 	})
 }
+func (bl *BlogSerializer) GetListBlogByCategory(ginCtx *gin.Context) {
+	ctx := ginCtx.Request.Context()
+	req := models.RequestGetListBlogByCategoryId{}
+	err := json.NewDecoder(ginCtx.Request.Body).Decode(&req)
+	if err != nil {
+		bl.Logger.Error("Parse request get list error", zap.Error(err))
+		ginx.BuildErrorResponse(ginCtx, err, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+	data, err := bl.blogService.GetListBlogByCategory(ctx, req.Category_id, req.Page, req.Size)
+	if err != nil {
+		bl.Logger.Error("GetListBlogByCategory error", zap.Error(err))
+		ginx.BuildErrorResponse(ginCtx, err, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	ginx.BuildSuccessResponse(ginCtx, http.StatusAccepted, gin.H{
+		"data": data,
+	})
+}
 
 func (bl *BlogSerializer) CreateBlog(ginCtx *gin.Context) {
 	ctx := ginCtx.Request.Context()
