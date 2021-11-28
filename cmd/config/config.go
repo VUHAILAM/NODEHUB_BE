@@ -40,7 +40,7 @@ func NewConfig() (*Config, error) {
 	cnf := Config{}
 	viper.SetDefault("HTTP_ADDR", "0.0.0.0:8080")
 	viper.SetDefault("MYSQL_CONN_MAX_LIFE_TIME_SECOND", 300)
-	viper.SetDefault("JWT_EXPRIVATION", 30)
+	viper.SetDefault("JWT_EXPRIVATION", 120)
 	viper.SetDefault("RESET_PASSWORD_EXPIRATION", 5)
 	viper.SetDefault("VERIFY_EMAIL_EXPIRATION", 5)
 	viper.SetDefault("MAIL_VERIFICATION_TEMPLATE_ID", "d-fb85ced2fa3146c1a72f05f5cde5635c")

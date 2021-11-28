@@ -9,7 +9,7 @@ import (
 
 type IBlogService interface {
 	GetListBlog(ctx context.Context, title string, page int64, size int64) (*models.ResponsetListBlog, error)
-	GetListBlogUser(ctx context.Context, title string, page int64, size int64) (*models.ResponsetListBlog, error)
+	GetListBlogUser(ctx context.Context, title string, category_id int64, page int64, size int64) (*models.ResponsetListBlog, error)
 	CreateBlog(ctx context.Context, blog *models.RequestCreateBlog) error
 	UpdateBlog(ctx context.Context, blog *models.RequestCreateBlog, Blog_id int64) error
 	GetListBlogByCategory(ctx context.Context, category_id int64, page int64, size int64) (*models.ResponsetListBlog, error)
@@ -17,7 +17,7 @@ type IBlogService interface {
 
 type IBlogDatabase interface {
 	GetListBlog(ctx context.Context, title string, page int64, size int64) (*models.ResponsetListBlog, error)
-	GetListBlogUser(ctx context.Context, title string, page int64, size int64) (*models.ResponsetListBlog, error)
+	GetListBlogUser(ctx context.Context, title string, category_id int64, page int64, size int64) (*models.ResponsetListBlog, error)
 	Create(ctx context.Context, blog *models.Blog) error
 	Update(ctx context.Context, blog *models.RequestUpdateBlog, Blog_id int64) error
 	GetListBlogByCategory(ctx context.Context, category_id int64, page int64, size int64) (*models.ResponsetListBlog, error)
@@ -43,8 +43,8 @@ func (b *Blog) GetListBlog(ctx context.Context, title string, page int64, size i
 	return acc, nil
 }
 
-func (b *Blog) GetListBlogUser(ctx context.Context, title string, page int64, size int64) (*models.ResponsetListBlog, error) {
-	acc, err := b.BlogGorm.GetListBlogUser(ctx, title, page, size)
+func (b *Blog) GetListBlogUser(ctx context.Context, title string, category_id int64, page int64, size int64) (*models.ResponsetListBlog, error) {
+	acc, err := b.BlogGorm.GetListBlogUser(ctx, title, category_id, page, size)
 	if err != nil {
 		return nil, err
 	}

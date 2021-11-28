@@ -122,7 +122,7 @@ func (fg *FollowGorm) GetFollowingRecruiter(ctx context.Context, candidateID int
 
 func (fg *FollowGorm) GetListCandidateID(ctx context.Context, recruiterID int64) ([]*models.Follow, error) {
 	var candidateIDs []*models.Follow
-	db := fg.DB.WithContext(ctx).Table(followTable).Where("recruiterID=?", recruiterID).Find(&candidateIDs)
+	db := fg.DB.WithContext(ctx).Table(followTable).Where("recruiter_id=?", recruiterID).Find(&candidateIDs)
 	if db.Error != nil {
 		fg.Logger.Error(db.Error.Error())
 		return nil, db.Error

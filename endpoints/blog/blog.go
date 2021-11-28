@@ -60,7 +60,7 @@ func (bl *BlogSerializer) GetListBlogUser(ginCtx *gin.Context) {
 		})
 		return
 	}
-	data, err := bl.blogService.GetListBlogUser(ctx, req.Title, req.Page, req.Size)
+	data, err := bl.blogService.GetListBlogUser(ctx, req.Title, req.Category_id, req.Page, req.Size)
 	if err != nil {
 		bl.Logger.Error("GetListBlogUser error", zap.Error(err))
 		ginx.BuildErrorResponse(ginCtx, err, gin.H{
