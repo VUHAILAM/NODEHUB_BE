@@ -156,9 +156,7 @@ func (s *FollowSerializer) FollowExist(ginCtx *gin.Context) {
 	follow, err := s.FollowService.FollowExist(ctx, req)
 	if err != nil {
 		s.Logger.Error("Follow Exist error", zap.Error(err))
-		ginx.BuildErrorResponse(ginCtx, err, gin.H{
-			"message": err.Error(),
-		})
+		ginx.BuildSuccessResponse(ginCtx, http.StatusAccepted, models.Follow{})
 		return
 	}
 	ginx.BuildSuccessResponse(ginCtx, http.StatusAccepted, follow)

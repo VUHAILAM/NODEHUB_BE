@@ -200,9 +200,7 @@ func (s *JobApplySerializer) CheckApplied(ginCtx *gin.Context) {
 	jobapply, err := s.JobApplyService.CheckApplied(ctx, req)
 	if err != nil {
 		s.Logger.Error("Count Status error", zap.Error(err))
-		ginx.BuildErrorResponse(ginCtx, err, gin.H{
-			"message": err.Error(),
-		})
+		ginx.BuildSuccessResponse(ginCtx, http.StatusAccepted, models.JobApply{})
 		return
 	}
 	ginx.BuildSuccessResponse(ginCtx, http.StatusAccepted, jobapply)
