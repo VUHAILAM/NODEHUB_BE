@@ -38,7 +38,7 @@ type Account struct {
 	Logger        *zap.Logger
 }
 
-func NewAccount(accountGorm *AccountGorm, recruiterGorm *recruiter.RecruiterGorm, auth *auth.AuthHandler, conf *config.Config, mailSV *email2.SGMailService, logger *zap.Logger, candidateGorm *candidate.CandidateGorm) *Account {
+func NewAccount(accountGorm *AccountGorm, recruiterGorm *recruiter.RecruiterGorm, candidateGorm *candidate.CandidateGorm, auth *auth.AuthHandler, conf *config.Config, mailSV *email2.SGMailService, logger *zap.Logger) *Account {
 	return &Account{
 		AccountGorm:   accountGorm,
 		RecruiterGorm: recruiterGorm,
@@ -149,6 +149,15 @@ func (a *Account) Register(ctx context.Context, account *models.RequestRegisterA
 			a.Logger.Error("Create Recruiter error", zap.Error(err))
 			return err
 		}
+		rs := models.RecruiterSkill{
+			SkillId:     1,
+			RecruiterId: accountID,
+		}
+		err = a.RecruiterGorm.AddRecruiterSkill(ctx, &rs)
+		if err != nil {
+			a.Logger.Error("Create Recruiter error", zap.Error(err))
+			return err
+		}
 	}
 	if account.Type == auth.CandidateRole {
 		candidateModel := &models.Candidate{
@@ -165,6 +174,16 @@ func (a *Account) Register(ctx context.Context, account *models.RequestRegisterA
 			PrizeManage:       "[]",
 		}
 		_, err = a.CandidateGorm.Create(ctx, candidateModel)
+		if err != nil {
+			a.Logger.Error("Create Candidate error", zap.Error(err))
+			return err
+		}
+		cs := models.CandidateSkill{
+			SkillId:     1,
+			CandidateId: accountID,
+			Media:       "Nothing",
+		}
+		err = a.CandidateGorm.AddCandidateSkill(ctx, &cs)
 		if err != nil {
 			a.Logger.Error("Create Candidate error", zap.Error(err))
 			return err

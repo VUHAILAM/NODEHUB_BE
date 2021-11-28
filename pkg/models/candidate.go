@@ -19,6 +19,7 @@ type CandidateRequest struct {
 	NodehubScore      int           `json:"nodehub_score,omitempty"`
 	CVManage          []CV          `json:"cv_manage,omitempty"`
 	ExperienceManage  []Experience  `json:"experience_manage,omitempty"`
+	EducationManage   []Education   `json:"education_manage,omitempty"`
 	SocialManage      []Social      `json:"social_manage,omitempty"`
 	ProjectManage     []Project     `json:"project_manage,omitempty"`
 	CertificateManage []Certificate `json:"certificate_manage,omitempty"`
@@ -42,6 +43,7 @@ type CandidateResponse struct {
 	NodehubScore      int           `json:"nodehub_score"`
 	CVManage          []CV          `json:"cv_manage"`
 	ExperienceManage  []Experience  `json:"experience_manage"`
+	EducationManage   []Education   `json:"education_manage"`
 	SocialManage      []Social      `json:"social_manage"`
 	ProjectManage     []Project     `json:"project_manage"`
 	CertificateManage []Certificate `json:"certificate_manage"`
@@ -66,6 +68,7 @@ type CandidateRequestAdmin struct {
 	NodehubScore      int           `json:"nodehub_score"`
 	CVManage          []CV          `json:"cv_manage"`
 	ExperienceManage  []Experience  `json:"experience_manage"`
+	EducationManage   []Education   `json:"education_manage"`
 	SocialManage      []Social      `json:"social_manage"`
 	ProjectManage     []Project     `json:"project_manage"`
 	CertificateManage []Certificate `json:"certificate_manage"`
@@ -91,6 +94,7 @@ type CandidateAdmin struct {
 	NodehubScore      int       `json:"nodehub_score"`
 	CvManage          string    `json:"cv_manage"`
 	ExperienceManage  string    `json:"experience_manage"`
+	EducationManage   string    `json:"education_manage"`
 	SocialManage      string    `json:"social_manage"`
 	ProjectManage     string    `json:"project_manage"`
 	CertificateManage string    `json:"certificate_manage"`
@@ -138,6 +142,7 @@ type Candidate struct {
 	JobStatus         string    `json:"job_status" gorm:"->"`
 	CvManage          string    `json:"cv_manage,omitempty"`
 	ExperienceManage  string    `json:"experience_manage,omitempty"`
+	EducationManage   string    `json:"education_manage,omitempty"`
 	SocialManage      string    `json:"social_manage,omitempty"`
 	ProjectManage     string    `json:"project_manage,omitempty"`
 	CertificateManage string    `json:"certificate_manage,omitempty"`
@@ -222,12 +227,27 @@ type Prize struct {
 	Link      string `json:"link,omitempty"`
 }
 
+type Education struct {
+	School      string `json:"school,omitempty"`
+	Degree      string `json:"degree,omitempty"`
+	Field       string `json:"field,omitempty"`
+	StartTime   string `json:"start_time,omitempty"`
+	EndTime     string `json:"end_time,omitempty"`
+	Description string `json:"description,omitempty"`
+	Media       string `json:"media,omitempty"`
+	Link        string `json:"link,omitempty"`
+}
+
 func (req *CandidateRequest) ToCandidate() (Candidate, error) {
 	cvJson, err := json.Marshal(req.CVManage)
 	if err != nil {
 		return Candidate{}, err
 	}
 	exJson, err := json.Marshal(req.ExperienceManage)
+	if err != nil {
+		return Candidate{}, err
+	}
+	eduJson, err := json.Marshal(req.EducationManage)
 	if err != nil {
 		return Candidate{}, err
 	}
@@ -266,6 +286,9 @@ func (req *CandidateRequest) ToCandidate() (Candidate, error) {
 	if req.ExperienceManage != nil {
 		candidate.ExperienceManage = string(exJson)
 	}
+	if req.EducationManage != nil {
+		candidate.EducationManage = string(eduJson)
+	}
 	if req.SocialManage != nil {
 		candidate.SocialManage = string(socialJson)
 	}
@@ -289,6 +312,11 @@ func (c *Candidate) ToCandidateRequest() (CandidateRequest, error) {
 	}
 	var exManage []Experience
 	err = json.Unmarshal([]byte(c.ExperienceManage), &exManage)
+	if err != nil {
+		return CandidateRequest{}, err
+	}
+	var eduManage []Education
+	err = json.Unmarshal([]byte(c.EducationManage), &eduManage)
 	if err != nil {
 		return CandidateRequest{}, err
 	}
@@ -327,6 +355,7 @@ func (c *Candidate) ToCandidateRequest() (CandidateRequest, error) {
 		NodehubScore:      c.NodehubScore,
 		CVManage:          cvManage,
 		ExperienceManage:  exManage,
+		EducationManage:   eduManage,
 		SocialManage:      socialManage,
 		ProjectManage:     prjManage,
 		CertificateManage: certManage,
@@ -345,6 +374,11 @@ func (c *Candidate) ToCandidateResponse() (CandidateResponse, error) {
 	}
 	var exManage []Experience
 	err = json.Unmarshal([]byte(c.ExperienceManage), &exManage)
+	if err != nil {
+		return CandidateResponse{}, err
+	}
+	var eduManage []Education
+	err = json.Unmarshal([]byte(c.EducationManage), &eduManage)
 	if err != nil {
 		return CandidateResponse{}, err
 	}
@@ -384,6 +418,7 @@ func (c *Candidate) ToCandidateResponse() (CandidateResponse, error) {
 		NodehubScore:      c.NodehubScore,
 		CVManage:          cvManage,
 		ExperienceManage:  exManage,
+		EducationManage:   eduManage,
 		SocialManage:      socialManage,
 		ProjectManage:     prjManage,
 		CertificateManage: certManage,
@@ -402,6 +437,11 @@ func (c *CandidateAdmin) ToCandidateRequestAdmin() (CandidateRequestAdmin, error
 	}
 	var exManage []Experience
 	err = json.Unmarshal([]byte(c.ExperienceManage), &exManage)
+	if err != nil {
+		return CandidateRequestAdmin{}, err
+	}
+	var eduManage []Education
+	err = json.Unmarshal([]byte(c.EducationManage), &eduManage)
 	if err != nil {
 		return CandidateRequestAdmin{}, err
 	}
@@ -442,6 +482,7 @@ func (c *CandidateAdmin) ToCandidateRequestAdmin() (CandidateRequestAdmin, error
 		NodehubScore:      c.NodehubScore,
 		CVManage:          cvManage,
 		ExperienceManage:  exManage,
+		EducationManage:   eduManage,
 		SocialManage:      socialManage,
 		ProjectManage:     prjManage,
 		CertificateManage: certManage,

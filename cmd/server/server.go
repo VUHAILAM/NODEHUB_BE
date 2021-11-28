@@ -129,38 +129,17 @@ func InitServer() *Server {
 	authHandler := auth.NewAuthHandler(logger, conf)
 	mailService := email.NewSGMailService(logger, conf)
 
-	candidateGorm := candidate.NewCandidateGorm(gormDB, logger)
-	recruiterGorm := recruiter.NewRecruiterGorm(gormDB, logger)
-	accountGorm := account.NewAccountGorm(gormDB, logger)
-	accountService := account.NewAccount(accountGorm, recruiterGorm, authHandler, conf, mailService, logger, candidateGorm)
-	accountSerializer := account2.NewAccountSerializer(accountService, logger)
-	//init candidate profile
-
-	canService := candidate.NewCandidateService(candidateGorm, logger)
-	canSerializer := candidate2.NewCandidateSerializer(canService, logger)
-	// init account service
-
-	//init recruiter service
-	recruiterService := recruiter.NewRecruiterCategory(recruiterGorm, logger)
-	recruiterSerializer := recruiter2.NewRecruiterSerializer(recruiterService, logger)
-
-	//init blog service
-	blogGorm := blog.NewBlogGorm(gormDB, logger)
-	blogService := blog.NewBlog(blogGorm, logger)
-	blogSerializer := blog2.NewBlogSerializer(blogService, logger)
 	//init skill service
 	skillGorm := skill.NewSkillGorm(gormDB, logger)
 	skillService := skill.NewSkill(skillGorm, logger)
 	skillSerializer := skill2.NewSkillSerializer(skillService, logger)
-	//init category service
-	categoryGorm := category.NewCategoryGorm(gormDB, logger)
-	categoryService := category.NewCategory(categoryGorm, logger)
-	categorySerializer := category2.NewCategorySerializer(categoryService, logger)
-
 	//init job skill
 	jobSkillGorm := job_skill.NewJobSkillGorm(gormDB, logger)
 	jobSkillService := job_skill.NewJobSkill(jobSkillGorm, logger)
 	jobSkillSerializer := job_skill2.NewJobSkillSerializer(jobSkillService, logger)
+
+	candidateGorm := candidate.NewCandidateGorm(gormDB, logger)
+	recruiterGorm := recruiter.NewRecruiterGorm(gormDB, logger)
 	//init notification service
 	notificationGorm := notification.NewNotificationGorm(gormDB, logger)
 	notificationService := notification.NewNotification(notificationGorm, logger)
@@ -179,6 +158,28 @@ func InitServer() *Server {
 	jobApplyGorm := job_apply.NewJobApplyGorm(gormDB, logger)
 	jobApplyService := job_apply.NewJobApplyService(jobApplyGorm, jobGorm, notificationGorm, jobSkillGorm, logger)
 	jobApplySerializer := job_apply2.NewJobApplySerializer(jobApplyService, logger)
+	accountGorm := account.NewAccountGorm(gormDB, logger)
+	accountService := account.NewAccount(accountGorm, recruiterGorm, candidateGorm, authHandler, conf, mailService, logger)
+	accountSerializer := account2.NewAccountSerializer(accountService, logger)
+	//init candidate profile
+
+	canService := candidate.NewCandidateService(candidateGorm, logger)
+	canSerializer := candidate2.NewCandidateSerializer(canService, logger)
+	// init account service
+
+	//init recruiter service
+	recruiterService := recruiter.NewRecruiterCategory(recruiterGorm, logger)
+	recruiterSerializer := recruiter2.NewRecruiterSerializer(recruiterService, logger)
+
+	//init blog service
+	blogGorm := blog.NewBlogGorm(gormDB, logger)
+	blogService := blog.NewBlog(blogGorm, logger)
+	blogSerializer := blog2.NewBlogSerializer(blogService, logger)
+
+	//init category service
+	categoryGorm := category.NewCategoryGorm(gormDB, logger)
+	categoryService := category.NewCategory(categoryGorm, logger)
+	categorySerializer := category2.NewCategorySerializer(categoryService, logger)
 
 	//init media service
 	mediaGorm := media.NewMediaGorm(gormDB, logger)
