@@ -4,14 +4,13 @@ import (
 	"fmt"
 	"net/http"
 
-	"gitlab.com/hieuxeko19991/job4e_be/endpoints/follow"
-
 	"github.com/gin-gonic/gin"
 	"gitlab.com/hieuxeko19991/job4e_be/cmd/config"
 	"gitlab.com/hieuxeko19991/job4e_be/endpoints/account"
 	"gitlab.com/hieuxeko19991/job4e_be/endpoints/blog"
 	"gitlab.com/hieuxeko19991/job4e_be/endpoints/candidate"
 	"gitlab.com/hieuxeko19991/job4e_be/endpoints/category"
+	"gitlab.com/hieuxeko19991/job4e_be/endpoints/follow"
 	"gitlab.com/hieuxeko19991/job4e_be/endpoints/job"
 	"gitlab.com/hieuxeko19991/job4e_be/endpoints/job_apply"
 	"gitlab.com/hieuxeko19991/job4e_be/endpoints/job_skill"
@@ -53,7 +52,6 @@ func (g *GinDependencies) InitGinEngine(config *config.Config) *gin.Engine {
 	authenCommon.POST("/forgot-password", g.AccountSerializer.ForgotPassword)
 	authenCommon.PUT("/reset-password", g.AccountSerializer.ResetPassword)
 	authenCommon.PUT("/verify-email", g.AccountSerializer.VerifyEmail)
-	authenCommon.POST("/public-profile", g.AccountSerializer.PublicProfile)
 
 	authenCommon.Use(middlewares.AuthorizationMiddleware(g.Auth, auth.CommonRole)).PUT("/change-password", g.AccountSerializer.ChangePassword)
 	accessToken := nodehub.Group("")
@@ -90,6 +88,7 @@ func (g *GinDependencies) InitGinEngine(config *config.Config) *gin.Engine {
 	recruiterProfile := nodehub.Group("/public/recruiter")
 	recruiterProfile.POST("/getAllRecruiter", g.RecruiterSerializer.GetAllRecruiter)
 	recruiterProfile.GET("/count", g.RecruiterSerializer.CountRecruiter)
+	recruiterProfile.POST("/public-profile", g.RecruiterSerializer.PublicProfile)
 	recruiterAdmin := nodehub.Group("/private/recruiter").Use(middlewares.AuthorizationMiddleware(g.Auth, auth.AdminRole))
 	recruiterCandidate := nodehub.Group("/public/recruiterCan").Use(middlewares.AuthorizationMiddleware(g.Auth, auth.CandidateRole))
 	recruiterProfile.Use(middlewares.AuthorizationMiddleware(g.Auth, auth.CommonRole)).GET("/getProfile", g.RecruiterSerializer.GetProfileRecruiter)
@@ -121,6 +120,7 @@ func (g *GinDependencies) InitGinEngine(config *config.Config) *gin.Engine {
 	applyCtl.POST("/count", g.JobApplySerializer.CountCandidateByStatus)
 	candidateApplyCtl := applyCtl.Group("/candidate").Use(middlewares.AuthorizationMiddleware(g.Auth, auth.CandidateRole))
 	candidateApplyCtl.POST("/apply", g.JobApplySerializer.Apply)
+	candidateApplyCtl.POST("/check-applied", g.JobApplySerializer.CheckApplied)
 	candidateApplyCtl.POST("/jobs", g.JobApplySerializer.GetJobAppliedByCandidateID)
 	recruiterApplyCtl := applyCtl.Group("/recruiter").Use(middlewares.AuthorizationMiddleware(g.Auth, auth.RecruiterRole))
 	recruiterApplyCtl.Use(middlewares.AuthorizationMiddleware(g.Auth, auth.RecruiterRole)).POST("/candidates", g.JobApplySerializer.GetCandidatesAppyJob)
@@ -129,6 +129,7 @@ func (g *GinDependencies) InitGinEngine(config *config.Config) *gin.Engine {
 	canCtl := nodehub.Group("/candidate")
 	canCtl.POST("/getAllCandidate", g.CandidateSerializer.GetAllCandidate)
 	canCtl.GET("/count", g.CandidateSerializer.CountCandidate)
+	canCtl.POST("/public-profile", g.CandidateSerializer.PublicProfile)
 	canCtlAdmin := nodehub.Group("/private/candidate").Use(middlewares.AuthorizationMiddleware(g.Auth, auth.AdminRole))
 	canCtl.Use(middlewares.AuthorizationMiddleware(g.Auth, auth.CommonRole)).POST("/profile", g.CandidateSerializer.GetProfile)
 	canCtl.Use(middlewares.AuthorizationMiddleware(g.Auth, auth.CommonRole)).POST("/search", g.CandidateSerializer.SearchCandidate)

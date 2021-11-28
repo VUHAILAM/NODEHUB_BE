@@ -4,18 +4,17 @@ import (
 	"context"
 	"net/http"
 
-	follow2 "gitlab.com/hieuxeko19991/job4e_be/endpoints/follow"
-	"gitlab.com/hieuxeko19991/job4e_be/services/follow"
-
 	"gitlab.com/hieuxeko19991/job4e_be/cmd/config"
 	account2 "gitlab.com/hieuxeko19991/job4e_be/endpoints/account"
 	blog2 "gitlab.com/hieuxeko19991/job4e_be/endpoints/blog"
 	candidate2 "gitlab.com/hieuxeko19991/job4e_be/endpoints/candidate"
 	category2 "gitlab.com/hieuxeko19991/job4e_be/endpoints/category"
+	follow2 "gitlab.com/hieuxeko19991/job4e_be/endpoints/follow"
 	job2 "gitlab.com/hieuxeko19991/job4e_be/endpoints/job"
 	job_apply2 "gitlab.com/hieuxeko19991/job4e_be/endpoints/job_apply"
 	job_skill2 "gitlab.com/hieuxeko19991/job4e_be/endpoints/job_skill"
 	media2 "gitlab.com/hieuxeko19991/job4e_be/endpoints/media"
+	notification2 "gitlab.com/hieuxeko19991/job4e_be/endpoints/notification"
 	recruiter2 "gitlab.com/hieuxeko19991/job4e_be/endpoints/recruiter"
 	skill2 "gitlab.com/hieuxeko19991/job4e_be/endpoints/skill"
 	"gitlab.com/hieuxeko19991/job4e_be/pkg/auth"
@@ -26,17 +25,15 @@ import (
 	"gitlab.com/hieuxeko19991/job4e_be/services/candidate"
 	"gitlab.com/hieuxeko19991/job4e_be/services/category"
 	"gitlab.com/hieuxeko19991/job4e_be/services/email"
+	"gitlab.com/hieuxeko19991/job4e_be/services/follow"
 	"gitlab.com/hieuxeko19991/job4e_be/services/job"
 	"gitlab.com/hieuxeko19991/job4e_be/services/job_apply"
 	"gitlab.com/hieuxeko19991/job4e_be/services/job_skill"
 	"gitlab.com/hieuxeko19991/job4e_be/services/media"
+	"gitlab.com/hieuxeko19991/job4e_be/services/notification"
 	"gitlab.com/hieuxeko19991/job4e_be/services/recruiter"
 	"gitlab.com/hieuxeko19991/job4e_be/services/skill"
 	"gitlab.com/hieuxeko19991/job4e_be/transport"
-
-	notification2 "gitlab.com/hieuxeko19991/job4e_be/endpoints/notification"
-	"gitlab.com/hieuxeko19991/job4e_be/services/notification"
-
 	"go.uber.org/zap"
 )
 
@@ -131,18 +128,22 @@ func InitServer() *Server {
 	}
 	authHandler := auth.NewAuthHandler(logger, conf)
 	mailService := email.NewSGMailService(logger, conf)
-	//init candidate profile
+
 	candidateGorm := candidate.NewCandidateGorm(gormDB, logger)
+	recruiterGorm := recruiter.NewRecruiterGorm(gormDB, logger)
+	accountGorm := account.NewAccountGorm(gormDB, logger)
+	accountService := account.NewAccount(accountGorm, recruiterGorm, authHandler, conf, mailService, logger, candidateGorm)
+	accountSerializer := account2.NewAccountSerializer(accountService, logger)
+	//init candidate profile
+
 	canService := candidate.NewCandidateService(candidateGorm, logger)
 	canSerializer := candidate2.NewCandidateSerializer(canService, logger)
 	// init account service
-	recruiterGorm := recruiter.NewRecruiterGorm(gormDB, logger)
+
 	//init recruiter service
 	recruiterService := recruiter.NewRecruiterCategory(recruiterGorm, logger)
 	recruiterSerializer := recruiter2.NewRecruiterSerializer(recruiterService, logger)
-	accountGorm := account.NewAccountGorm(gormDB, logger)
-	accountService := account.NewAccount(accountGorm, recruiterGorm, authHandler, conf, mailService, logger, candidateGorm)
-	accountSerializer := account2.NewAccountSerializer(accountService, canService, recruiterService, logger)
+
 	//init blog service
 	blogGorm := blog.NewBlogGorm(gormDB, logger)
 	blogService := blog.NewBlog(blogGorm, logger)

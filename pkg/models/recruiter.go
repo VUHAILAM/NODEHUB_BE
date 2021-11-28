@@ -4,6 +4,7 @@ import "time"
 
 type Recruiter struct {
 	RecruiterID      int64     `json:"recruiter_id" gorm:"primaryKey"`
+	Email            string    `json:"email" gorm:"-"`
 	Name             string    `json:"name"`
 	Address          string    `json:"address"`
 	Avartar          string    `json:"avartar"`

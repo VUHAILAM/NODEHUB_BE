@@ -64,13 +64,19 @@ func (r *RecruiterGorm) Create(ctx context.Context, recruiter *models.Recruiter)
 
 func (r *RecruiterGorm) GetProfile(ctx context.Context, id int64) (*models.Recruiter, error) {
 	db := r.db.WithContext(ctx)
-	acc := models.Recruiter{}
-	err := db.Table(tableRecruiter).Where("recruiter_id=?", id).First(&acc).Error
+	rec := models.Recruiter{}
+	err := db.Table(tableRecruiter).Where("recruiter_id=?", id).First(&rec).Error
 	if err != nil {
 		r.logger.Error("RecruiterGorm: Get recruiter error", zap.Error(err))
 		return nil, err
 	}
-	return &acc, nil
+	acc := models.Account{}
+	err = db.Table(tableAccount).Where("id=?", id).Take(&acc).Error
+	if err != nil {
+		r.logger.Error(err.Error())
+	}
+	rec.Email = acc.Email
+	return &rec, nil
 }
 
 func (r *RecruiterGorm) GetAllRecruiter(ctx context.Context, offset, size int64) ([]*models.Recruiter, int64, error) {

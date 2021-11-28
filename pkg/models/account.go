@@ -51,6 +51,5 @@ type RequestVerifyEmail struct {
 }
 
 type RequestPublicProfile struct {
-	ID           int64 `json:"id"`
-	Account_type int64 `json:"account_type"`
+	ID int64 `json:"id"`
 }

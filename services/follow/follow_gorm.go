@@ -106,7 +106,7 @@ func (fg *FollowGorm) GetFollowedRecruiter(ctx context.Context, recruiterID int6
 
 func (fg *FollowGorm) GetFollowingRecruiter(ctx context.Context, candidateID int64, offset, size int64) ([]*models.Recruiter, int64, error) {
 	var recruiters []*models.Recruiter
-	db := fg.DB.WithContext(ctx).Table(recruiterTable).Select("candidate.*").
+	db := fg.DB.WithContext(ctx).Table(recruiterTable).Select("recruiter.*").
 		Joins("JOIN "+followTable+" ON recruiter.recruiter_id=follow.recruiter_id").
 		Where("follow.candidate_id=?", candidateID).Find(&recruiters)
 	total := db.RowsAffected

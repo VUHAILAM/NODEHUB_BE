@@ -128,17 +128,18 @@ type RequestGetJobDetail struct {
 }
 
 type RequestUpdateJob struct {
-	JobID       int64  `json:"job_id,omitempty"`
-	RecruiterID int64  `json:"recruiter_id,omitempty"`
-	Title       string `json:"title,omitempty"`
-	Description string `json:"description,omitempty"`
-	SalaryRange string `json:"salary_range,omitempty"`
-	Quantity    int64  `json:"quantity,omitempty"`
-	Role        string `json:"role,omitempty"`
-	Experience  string `json:"experience,omitempty"`
-	Location    string `json:"location,omitempty"`
-	Status      int    `json:"status,omitempty"`
-	HireDate    HDate  `json:"hire_date,omitempty"`
+	JobID       int64   `json:"job_id,omitempty"`
+	RecruiterID int64   `json:"recruiter_id,omitempty"`
+	Title       string  `json:"title,omitempty"`
+	Description string  `json:"description,omitempty"`
+	SalaryRange string  `json:"salary_range,omitempty"`
+	Quantity    int64   `json:"quantity,omitempty"`
+	Role        string  `json:"role,omitempty"`
+	Experience  string  `json:"experience,omitempty"`
+	Location    string  `json:"location,omitempty"`
+	Status      int     `json:"status,omitempty"`
+	HireDate    HDate   `json:"hire_date,omitempty"`
+	SkillIDs    []int64 `json:"skill_ids,omitempty"`
 }
 
 type RequestGetAllJob struct {

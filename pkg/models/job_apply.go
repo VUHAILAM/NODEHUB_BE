@@ -53,3 +53,8 @@ type JobWithSkill struct {
 	Job    *Job     `json:"candidate"`
 	Skills []*Skill `json:"skills"`
 }
+
+type RequestCheckApply struct {
+	CandidateID int64 `json:"candidate_id"`
+	JobID       int64 `json:"job_id"`
+}

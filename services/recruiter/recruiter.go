@@ -36,11 +36,11 @@ func NewRecruiterCategory(recruiterGorm *RecruiterGorm, logger *zap.Logger) *Rec
 }
 
 func (r *Recruiter) GetProfileRecruiter(ctx context.Context, id int64) (*models.Recruiter, error) {
-	acc, err := r.RecruiterGorm.GetProfile(ctx, id)
+	rec, err := r.RecruiterGorm.GetProfile(ctx, id)
 	if err != nil {
 		return nil, err
 	}
-	return acc, nil
+	return rec, nil
 }
 
 func (r *Recruiter) UpdateProfile(ctx context.Context, recruiter *models.RequestUpdateRecruiter, recruiter_id int64) error {

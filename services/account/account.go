@@ -4,22 +4,15 @@ import (
 	"context"
 	"time"
 
-	"gitlab.com/hieuxeko19991/job4e_be/services/candidate"
-
-	"gitlab.com/hieuxeko19991/job4e_be/services/recruiter"
-
-	email2 "gitlab.com/hieuxeko19991/job4e_be/services/email"
-
 	"github.com/dgrijalva/jwt-go"
-
-	"gitlab.com/hieuxeko19991/job4e_be/cmd/config"
-
-	"gitlab.com/hieuxeko19991/job4e_be/pkg/auth"
-
-	"gitlab.com/hieuxeko19991/job4e_be/pkg/utils"
-
 	"github.com/pkg/errors"
+	"gitlab.com/hieuxeko19991/job4e_be/cmd/config"
+	"gitlab.com/hieuxeko19991/job4e_be/pkg/auth"
 	"gitlab.com/hieuxeko19991/job4e_be/pkg/models"
+	"gitlab.com/hieuxeko19991/job4e_be/pkg/utils"
+	"gitlab.com/hieuxeko19991/job4e_be/services/candidate"
+	email2 "gitlab.com/hieuxeko19991/job4e_be/services/email"
+	"gitlab.com/hieuxeko19991/job4e_be/services/recruiter"
 	"go.uber.org/zap"
 	"golang.org/x/crypto/bcrypt"
 )

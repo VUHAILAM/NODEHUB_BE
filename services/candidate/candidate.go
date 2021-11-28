@@ -2,7 +2,6 @@ package candidate
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/mitchellh/mapstructure"
 	"gitlab.com/hieuxeko19991/job4e_be/pkg/models"
@@ -69,7 +68,6 @@ func (s *CandidateService) UpdateCandidateProfile(ctx context.Context, req model
 }
 
 func (s *CandidateService) GetCandidateProfile(ctx context.Context, candidateID int64) (*models.CandidateResponse, error) {
-	fmt.Println("lõi cai deo gì day: ", candidateID)
 	candidate, err := s.CanGorm.GetByCandidateID(ctx, candidateID)
 	if err != nil {
 		s.Logger.Error(err.Error())
@@ -80,6 +78,7 @@ func (s *CandidateService) GetCandidateProfile(ctx context.Context, candidateID 
 		s.Logger.Error(err.Error())
 		return nil, err
 	}
+
 	return &resp, nil
 }
 

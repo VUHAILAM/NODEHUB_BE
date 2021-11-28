@@ -301,3 +301,29 @@ func (r *RecruiterSerializer) CountRecruiter(ginCtx *gin.Context) {
 	}
 	ginx.BuildSuccessResponse(ginCtx, http.StatusAccepted, count)
 }
+
+func (r *RecruiterSerializer) PublicProfile(ginCtx *gin.Context) {
+	ctx := ginCtx.Request.Context()
+	req := models.RequestPublicProfile{}
+	err := json.NewDecoder(ginCtx.Request.Body).Decode(&req)
+	if err != nil {
+		r.Logger.Error("Parse request PublicProfile error", zap.Error(err))
+		ginx.BuildErrorResponse(ginCtx, err, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	data, err := r.recruiterService.GetProfileRecruiter(ctx, req.ID)
+	if err != nil {
+		r.Logger.Error("GetProfileRecruiter error", zap.Error(err))
+		ginx.BuildErrorResponse(ginCtx, err, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+	ginx.BuildSuccessResponse(ginCtx, http.StatusAccepted, gin.H{
+		"data": data,
+	})
+
+}

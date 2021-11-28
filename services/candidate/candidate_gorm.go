@@ -79,6 +79,12 @@ func (g *CandidateGorm) GetByCandidateID(ctx context.Context, candidateID int64)
 		g.Logger.Error(err.Error())
 		return nil, err
 	}
+	acc := models.Account{}
+	err = db.Table(tableAccount).Where("id=?", candidateID).Take(&acc).Error
+	if err != nil {
+		g.Logger.Error(err.Error())
+	}
+	candidate.Email = acc.Email
 	return &candidate, nil
 }
 

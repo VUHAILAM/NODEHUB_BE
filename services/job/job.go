@@ -178,8 +178,41 @@ func (j *Job) UpdateJob(ctx context.Context, updateRequest *models.RequestUpdate
 		Status:      updateRequest.Status,
 		HireDate:    time.Time(updateRequest.HireDate).Format("2006-01-02"),
 	}
+	var err error
+	if updateRequest.SkillIDs != nil && len(updateRequest.SkillIDs) != 0 {
+		skillList, err := j.SkillGorm.GetSkillByIDs(ctx, updateRequest.SkillIDs)
+		if err != nil {
+			j.Logger.Error(err.Error())
+			return err
+		}
+		var esSkill []models.ESSkill
+		for _, skill := range skillList {
+			esSk := models.ToESSkill(&skill)
+			esSkill = append(esSkill, esSk)
+		}
+		updateES.Skills = esSkill
+
+		err = j.JobSkillGorm.Delete(ctx, updateRequest.JobID)
+		if err != nil {
+			j.Logger.Error(err.Error())
+			return err
+		}
+		var jobSkill []*models.JobSkill
+		for _, skillID := range updateRequest.SkillIDs {
+			jsk := &models.JobSkill{
+				SkillID: skillID,
+				JobID:   updateRequest.JobID,
+			}
+			jobSkill = append(jobSkill, jsk)
+		}
+		err = j.JobSkillGorm.Create(ctx, jobSkill)
+		if err != nil {
+			j.Logger.Error(err.Error())
+			return err
+		}
+	}
 	updateData := map[string]interface{}{}
-	err := mapStructureDecodeWithTextUnmarshaler(updateES, &updateData)
+	err = mapStructureDecodeWithTextUnmarshaler(updateES, &updateData)
 	if err != nil {
 		j.Logger.Error("Can not convert to map", zap.Error(err))
 		return err
@@ -190,7 +223,10 @@ func (j *Job) UpdateJob(ctx context.Context, updateRequest *models.RequestUpdate
 		j.Logger.Error("Can not Update to ES", zap.Error(err))
 		return err
 	}
-
+	_, ok := updateData["skills"]
+	if ok {
+		delete(updateData, "skills")
+	}
 	err = j.JobGorm.Update(ctx, updateRequest.JobID, updateData)
 	if err != nil {
 		j.Logger.Error("Can not Update to MySQL", zap.Error(err))

@@ -29,6 +29,7 @@ type CandidateRequest struct {
 
 type CandidateResponse struct {
 	CandidateID       int64         `json:"candidate_id"`
+	Email             string        `json:"email"`
 	FirstName         string        `json:"first_name"`
 	LastName          string        `json:"last_name"`
 	BirthDay          string        `json:"birth_day"`
@@ -123,6 +124,7 @@ type RequestUpdateStatusCandidate struct {
 
 type Candidate struct {
 	CandidateID       int64     `json:"candidate_id,omitempty" gorm:"primaryKey"`
+	Email             string    `json:"email" gorm:"-"`
 	FirstName         string    `json:"first_name,omitempty"`
 	LastName          string    `json:"last_name,omitempty"`
 	BirthDay          string    `json:"birth_day,omitempty"`
@@ -369,6 +371,7 @@ func (c *Candidate) ToCandidateResponse() (CandidateResponse, error) {
 
 	req := CandidateResponse{
 		CandidateID:       c.CandidateID,
+		Email:             c.Email,
 		FirstName:         c.FirstName,
 		LastName:          c.LastName,
 		BirthDay:          c.BirthDay,

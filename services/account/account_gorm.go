@@ -3,9 +3,8 @@ package account
 import (
 	"context"
 
-	"go.uber.org/zap"
-
 	"gitlab.com/hieuxeko19991/job4e_be/pkg/models"
+	"go.uber.org/zap"
 	"gorm.io/gorm"
 )
 
