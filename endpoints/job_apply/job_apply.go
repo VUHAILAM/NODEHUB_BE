@@ -184,3 +184,26 @@ func (s *JobApplySerializer) CountCandidateByStatus(ginCtx *gin.Context) {
 	}
 	ginx.BuildSuccessResponse(ginCtx, http.StatusAccepted, count)
 }
+
+func (s *JobApplySerializer) CheckApplied(ginCtx *gin.Context) {
+	ctx := ginCtx.Request.Context()
+	req := models.RequestCheckApply{}
+	err := json.NewDecoder(ginCtx.Request.Body).Decode(&req)
+	if err != nil {
+		s.Logger.Error("Parse request Check apply error", zap.Error(err))
+		ginx.BuildErrorResponse(ginCtx, err, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	jobapply, err := s.JobApplyService.CheckApplied(ctx, req)
+	if err != nil {
+		s.Logger.Error("Count Status error", zap.Error(err))
+		ginx.BuildErrorResponse(ginCtx, err, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+	ginx.BuildSuccessResponse(ginCtx, http.StatusAccepted, jobapply)
+}

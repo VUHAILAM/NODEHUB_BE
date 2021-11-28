@@ -18,6 +18,7 @@ type IJobSkillDatabase interface {
 	Create(ctx context.Context, jobSkill []*models.JobSkill) error
 	GetAllSkillByJob(ctx context.Context, jobID int64) ([]*models.Skill, error)
 	GetAllJobBySkill(ctx context.Context, skillID, offset, size int64) ([]*models.Job, int64, error)
+	Delete(ctx context.Context, jobID int64) error
 }
 
 type JobSkillGorm struct {
@@ -37,6 +38,16 @@ func (g *JobSkillGorm) Create(ctx context.Context, jobSkill []*models.JobSkill) 
 	err := db.Table(jobSkillTable).Create(&jobSkill).Error
 	if err != nil {
 		g.Logger.Error("JobSkillGorm: Create job skill error", zap.Error(err))
+		return err
+	}
+	return nil
+}
+
+func (g *JobSkillGorm) Delete(ctx context.Context, jobID int64) error {
+	db := g.DB.WithContext(ctx)
+	err := db.Table(jobSkillTable).Where("job_id=?", jobID).Delete(&models.JobSkill{}).Error
+	if err != nil {
+		g.Logger.Error("JobSkillGorm: Delete job skill error", zap.Error(err))
 		return err
 	}
 	return nil

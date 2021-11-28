@@ -17,6 +17,7 @@ type IJobApplyService interface {
 	GetCandidatesApplyJob(ctx context.Context, req models.RequestGetJobApplyByJobID) (*models.ResponseGetCandidateApply, error)
 	UpdateStatusJobApplied(ctx context.Context, req models.RequestUpdateStatusJobApplied) error
 	CountCandidateByStatus(ctx context.Context, req models.RequestCountStatus) (int64, error)
+	CheckApplied(ctx context.Context, req models.RequestCheckApply) (*models.JobApply, error)
 }
 
 type JobApply struct {
@@ -148,4 +149,7 @@ func (ja *JobApply) UpdateStatusJobApplied(ctx context.Context, req models.Reque
 
 func (ja *JobApply) CountCandidateByStatus(ctx context.Context, req models.RequestCountStatus) (int64, error) {
 	return ja.JobApplyGorm.CountByStatus(ctx, req.Status)
+}
+func (ja *JobApply) CheckApplied(ctx context.Context, req models.RequestCheckApply) (*models.JobApply, error) {
+	return ja.JobApplyGorm.CheckApplied(ctx, req.JobID, req.CandidateID)
 }

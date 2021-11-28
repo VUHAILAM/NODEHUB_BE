@@ -349,3 +349,31 @@ func (cs *CandidateSerializer) CountCandidate(ginCtx *gin.Context) {
 	}
 	ginx.BuildSuccessResponse(ginCtx, http.StatusAccepted, count)
 }
+
+func (cs *CandidateSerializer) PublicProfile(ginCtx *gin.Context) {
+	ctx := ginCtx.Request.Context()
+	req := models.RequestPublicProfile{}
+	err := json.NewDecoder(ginCtx.Request.Body).Decode(&req)
+	if err != nil {
+		cs.Logger.Error("Parse request PublicProfile error", zap.Error(err))
+		ginx.BuildErrorResponse(ginCtx, err, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	candidateID := req.ID
+
+	data, err := cs.CandidateService.GetCandidateProfile(ctx, candidateID)
+	if err != nil {
+		cs.Logger.Error("GetCandidateProfile error", zap.Error(err))
+		ginx.BuildErrorResponse(ginCtx, err, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+	ginx.BuildSuccessResponse(ginCtx, http.StatusAccepted, gin.H{
+		"data": data,
+	})
+
+}
