@@ -12,6 +12,7 @@ CREATE TABLE `candidate`
     `nodehub_review` LONGTEXT CHARSET utf8 NOT NULL,
     `cv_manage` LONGTEXT CHARSET utf8 NOT NULL,
     `experience_manage` LONGTEXT CHARSET utf8 NOT NULL,
+    `education_manage` LONGTEXT CHARSET utf8 NOT NULL,
     `social_manage` LONGTEXT CHARSET utf8 NOT NULL,
     `project_manage` LONGTEXT CHARSET utf8 NOT NULL,
     `certificate_manage` LONGTEXT CHARSET utf8 NOT NULL,
