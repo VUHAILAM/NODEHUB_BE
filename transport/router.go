@@ -152,6 +152,8 @@ func (g *GinDependencies) InitGinEngine(config *config.Config) *gin.Engine {
 	notificationUser := nodehub.Group("/public/notification").Use(middlewares.AuthorizationMiddleware(g.Auth, auth.CommonRole))
 	notificationUser.POST("/getListNotificationByCandidate", g.NotificationSerializer.GetListNotificationByAccount)
 	notificationUser.POST("/getListNotificationByRecruiter", g.NotificationSerializer.GetListNotificationByRecruiter)
+	notificationUser.PUT("/markRead", g.NotificationSerializer.MarkRead)
+	notificationUser.PUT("/markReadAll", g.NotificationSerializer.MarkReadAll)
 
 	//follow
 	followCtl := nodehub.Group("/follow")

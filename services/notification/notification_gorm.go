@@ -15,6 +15,8 @@ type INotificationDatabase interface {
 	Create(ctx context.Context, notification []*models.Notification) error
 	GetListNotificationByCandidate(ctx context.Context, candidateID int64, offset int64, size int64) ([]*models.Notification, int64, error)
 	GetListNotificationByRecruiter(ctx context.Context, recruiterID int64, offset int64, size int64) ([]*models.Notification, int64, error)
+	UpdateCheckRead(ctx context.Context, notificationID int64) error
+	UpdateCheckReadByAccountID(ctx context.Context, field string, accountID int64) error
 }
 
 type NotificationGorm struct {
@@ -67,4 +69,24 @@ func (n *NotificationGorm) GetListNotificationByRecruiter(ctx context.Context, r
 		return nil, 0, err
 	}
 	return notifications, total, nil
+}
+
+func (n *NotificationGorm) UpdateCheckRead(ctx context.Context, notificationID int64) error {
+	db := n.db.WithContext(ctx)
+	err := db.Table(tableNotification).Where("notification_id=?", notificationID).Update("check_read", true).Error
+	if err != nil {
+		n.logger.Error(err.Error())
+		return err
+	}
+	return nil
+}
+
+func (n *NotificationGorm) UpdateCheckReadByAccountID(ctx context.Context, field string, accountID int64) error {
+	db := n.db.WithContext(ctx)
+	err := db.Table(tableNotification).Where(field+"=?", accountID).Update("check_read", true).Error
+	if err != nil {
+		n.logger.Error(err.Error())
+		return err
+	}
+	return nil
 }
