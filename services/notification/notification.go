@@ -3,6 +3,10 @@ package notification
 import (
 	"context"
 
+	"github.com/pkg/errors"
+
+	"gitlab.com/hieuxeko19991/job4e_be/pkg/auth"
+
 	"gitlab.com/hieuxeko19991/job4e_be/pkg/models"
 	"go.uber.org/zap"
 )
@@ -11,6 +15,8 @@ type INotificationService interface {
 	CreateNotification(ctx context.Context, notification []*models.RequestCreateNotification) error
 	GetListNotificationByCandidate(ctx context.Context, candidateID int64, page int64, size int64) (*models.ResponseListNotification, error)
 	GetListNotificationByRecruiter(ctx context.Context, recruiterID int64, page int64, size int64) (*models.ResponseListNotification, error)
+	MarkRead(ctx context.Context, req models.RequestMarkRead) error
+	MarkReadAll(ctx context.Context, req models.RequestMarkReadAll) error
 }
 
 type NotificationService struct {
@@ -72,4 +78,18 @@ func (n *NotificationService) GetListNotificationByRecruiter(ctx context.Context
 		Notifications: noti,
 	}
 	return &resp, nil
+}
+
+func (n *NotificationService) MarkRead(ctx context.Context, req models.RequestMarkRead) error {
+	return n.NotificationGorm.UpdateCheckRead(ctx, req.NotificationID)
+}
+
+func (n *NotificationService) MarkReadAll(ctx context.Context, req models.RequestMarkReadAll) error {
+	switch req.Role {
+	case auth.CandidateRole:
+		return n.NotificationGorm.UpdateCheckReadByAccountID(ctx, "candidate_id", req.AccountID)
+	case auth.RecruiterRole:
+		return n.NotificationGorm.UpdateCheckReadByAccountID(ctx, "recruiter_id", req.AccountID)
+	}
+	return errors.New("Role not found")
 }

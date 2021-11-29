@@ -73,3 +73,49 @@ func (n *NotificationSerializer) GetListNotificationByRecruiter(ginCtx *gin.Cont
 		"data": data,
 	})
 }
+
+func (n *NotificationSerializer) MarkRead(ginCtx *gin.Context) {
+	ctx := ginCtx.Request.Context()
+	req := models.RequestMarkRead{}
+	err := json.NewDecoder(ginCtx.Request.Body).Decode(&req)
+	if err != nil {
+		n.Logger.Error("Parse request Mark Read error", zap.Error(err))
+		ginx.BuildErrorResponse(ginCtx, err, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+	err = n.notificationService.MarkRead(ctx, req)
+	if err != nil {
+		n.Logger.Error("Mark read error", zap.Error(err))
+		ginx.BuildErrorResponse(ginCtx, err, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	ginx.BuildSuccessResponse(ginCtx, http.StatusAccepted, nil)
+}
+
+func (n *NotificationSerializer) MarkReadAll(ginCtx *gin.Context) {
+	ctx := ginCtx.Request.Context()
+	req := models.RequestMarkReadAll{}
+	err := json.NewDecoder(ginCtx.Request.Body).Decode(&req)
+	if err != nil {
+		n.Logger.Error("Parse request Mark Read All error", zap.Error(err))
+		ginx.BuildErrorResponse(ginCtx, err, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+	err = n.notificationService.MarkReadAll(ctx, req)
+	if err != nil {
+		n.Logger.Error("Mark read All error", zap.Error(err))
+		ginx.BuildErrorResponse(ginCtx, err, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	ginx.BuildSuccessResponse(ginCtx, http.StatusAccepted, nil)
+}

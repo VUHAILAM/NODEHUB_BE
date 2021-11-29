@@ -34,3 +34,12 @@ type ResponseListNotification struct {
 	Total         int64
 	Notifications []*Notification
 }
+
+type RequestMarkRead struct {
+	NotificationID int64 `json:"notification_id"`
+}
+
+type RequestMarkReadAll struct {
+	AccountID int64 `json:"account_id"`
+	Role      int64 `json:"role"`
+}
