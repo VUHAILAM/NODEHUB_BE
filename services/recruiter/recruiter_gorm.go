@@ -164,7 +164,7 @@ func (r *RecruiterGorm) GetAllRecruiterForAdmin(ctx context.Context, name string
 	limit := size
 	var total int64
 	//search query
-	data, err := db.Raw(`select r.recruiter_id, r.company_name, r.address, r.avartar, r.banner, 
+	data, err := db.Raw(`select r.recruiter_id, r.name, r.address, r.avartar, r.banner, 
 	r.phone, r.website, r.description, r.employee_quantity, r.contacter_name, r.contacter_phone, 
 	r.media, r.premium, r.nodehub_review, a.status, r.created_at, r.updated_at
 	FROM nodehub.recruiter r
