@@ -196,7 +196,7 @@ func (a *Account) Register(ctx context.Context, account *models.RequestRegisterA
 		a.Logger.Error("Cannot gen Verify Email token", zap.Error(err))
 		return err
 	}
-	linkReset := a.Conf.Domain + "verify-email?token=" + token
+	linkReset := a.Conf.Domain + "account/verify-email?token=" + token
 	a.Logger.Info("Link verify email", zap.String("url", linkReset))
 
 	from := "lamvhhe130764@fpt.edu.vn"
@@ -253,7 +253,7 @@ func (a *Account) ForgotPassword(ctx context.Context, email string) error {
 		a.Logger.Error("Cannot gen Reset password token", zap.Error(err))
 		return err
 	}
-	linkReset := a.Conf.Domain + "reset-password?token=" + token
+	linkReset := a.Conf.Domain + "account/reset-password?token=" + token
 	a.Logger.Info("Link reset password", zap.String("url", linkReset))
 
 	from := "lamvhhe130764@fpt.edu.vn"
