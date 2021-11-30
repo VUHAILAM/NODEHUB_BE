@@ -21,7 +21,7 @@ type Config struct {
 	JobESIndex string               `envconfig:"JOB_ES_INDEX" mapstructure:"job_es_index"`
 
 	Origin string `envconfig:"ORIGIN" mapstructure:"origin" default:"*"`
-	Domain string `envconfig:"DOMAIN" mapstructure:"domain"`
+	Domain string `envconfig:"DOMAIN" mapstructure:"domain" default:"http://nodehub-web.s3-website-ap-southeast-1.amazonaws.com/"`
 
 	AccessTokenPrivateKey   string `envconfig:"ACCESS_TOKEN_PRIVATE_KEY" mapstructure:"access_token_private_key"`
 	AccessTokenPublicKey    string `envconfig:"ACCESS_TOKEN_PUBLIC_KEY" mapstructure:"access_token_public_key"`
@@ -45,6 +45,7 @@ func NewConfig() (*Config, error) {
 	viper.SetDefault("VERIFY_EMAIL_EXPIRATION", 5)
 	viper.SetDefault("MAIL_VERIFICATION_TEMPLATE_ID", "d-fb85ced2fa3146c1a72f05f5cde5635c")
 	viper.SetDefault("PASSWORD_RESET_TEMPLATE_ID", "d-8d495f1e9ee84611a63440c52d338f9d")
+	viper.SetDefault("DOMAIN", "http://nodehub-web.s3-website-ap-southeast-1.amazonaws.com/")
 	viper.AddConfigPath(".")
 	viper.SetConfigName("app")
 	viper.SetConfigType("yaml")
