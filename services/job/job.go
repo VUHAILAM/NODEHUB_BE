@@ -2,6 +2,7 @@ package job
 
 import (
 	"context"
+	"encoding/json"
 	"time"
 
 	"gitlab.com/hieuxeko19991/job4e_be/services/follow"
@@ -74,6 +75,14 @@ func (j *Job) CreateNewJob(ctx context.Context, job *models.CreateJobRequest) er
 		Location:    job.Location,
 		HireDate:    time.Time(job.HireDate),
 		Status:      job.Status,
+	}
+	questions, err := json.Marshal(job.Questions)
+	if err != nil {
+		j.Logger.Error("Marshal question error", zap.Error(err))
+		questions = []byte("[]")
+	}
+	if job.Questions != nil {
+		jobData.Questions = string(questions)
 	}
 	newJob, err := j.JobGorm.Create(ctx, jobData)
 	if err != nil {
@@ -176,6 +185,7 @@ func (j *Job) UpdateJob(ctx context.Context, updateRequest *models.RequestUpdate
 		Experience:  updateRequest.Experience,
 		Location:    updateRequest.Location,
 		Status:      updateRequest.Status,
+		Questions:   updateRequest.Questions,
 		HireDate:    time.Time(updateRequest.HireDate).Format("2006-01-02"),
 	}
 	var err error
@@ -226,6 +236,16 @@ func (j *Job) UpdateJob(ctx context.Context, updateRequest *models.RequestUpdate
 	_, ok := updateData["skills"]
 	if ok {
 		delete(updateData, "skills")
+	}
+	_, ok = updateData["questions"]
+	if ok {
+		questions, err := json.Marshal(updateES.Questions)
+		if err != nil {
+			j.Logger.Error("Marshal question error", zap.Error(err))
+			delete(updateData, "questions")
+		} else {
+			updateData["questions"] = string(questions)
+		}
 	}
 	err = j.JobGorm.Update(ctx, updateRequest.JobID, updateData)
 	if err != nil {

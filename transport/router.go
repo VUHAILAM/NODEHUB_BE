@@ -128,8 +128,9 @@ func (g *GinDependencies) InitGinEngine(config *config.Config) *gin.Engine {
 	candidateApplyCtl.POST("/check-applied", g.JobApplySerializer.CheckApplied)
 	candidateApplyCtl.POST("/jobs", g.JobApplySerializer.GetJobAppliedByCandidateID)
 	recruiterApplyCtl := applyCtl.Group("/recruiter").Use(middlewares.AuthorizationMiddleware(g.Auth, auth.RecruiterRole))
-	recruiterApplyCtl.Use(middlewares.AuthorizationMiddleware(g.Auth, auth.RecruiterRole)).POST("/candidates", g.JobApplySerializer.GetCandidatesAppyJob)
-	recruiterApplyCtl.Use(middlewares.AuthorizationMiddleware(g.Auth, auth.RecruiterRole)).PUT("/update", g.JobApplySerializer.UpdateStatus)
+	recruiterApplyCtl.Use().POST("/candidates", g.JobApplySerializer.GetCandidatesAppyJob)
+	recruiterApplyCtl.Use().PUT("/update", g.JobApplySerializer.UpdateStatus)
+	recruiterApplyCtl.Use().POST("get-apply", g.JobApplySerializer.GetApply)
 
 	canCtl := nodehub.Group("/candidate")
 	canCtl.POST("/getAllCandidate", g.CandidateSerializer.GetAllCandidate)
