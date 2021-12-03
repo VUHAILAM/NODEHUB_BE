@@ -113,7 +113,7 @@ func (g *CandidateGorm) GetAllCandidateForAdmin(ctx context.Context, name string
 	var total int64
 	//search query
 	data, err := db.Raw(`select  c.candidate_id, a.email, CONCAT_WS(" ", c.last_name, c.first_name) AS 'fullname', c.first_name, c.last_name, c.birth_day, c.address, c.avatar, c.banner, c.phone, c.find_job, 
-	c.nodehub_review, c.cv_manage,c.education_manage, c.experience_manage, c.social_manage, c.project_manage, 
+	c.nodehub_review, c.nodehub_score, c.cv_manage,c.education_manage, c.experience_manage, c.social_manage, c.project_manage, 
 	c.certificate_manage, c.prize_manage, a.status ,c.created_at, c.updated_at
 		FROM nodehub.candidate c
 		left join nodehub.account a on c.candidate_id = a.id
