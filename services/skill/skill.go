@@ -22,7 +22,7 @@ type ISkillDatabase interface {
 }
 
 type Skill struct {
-	SkillGorm *SkillGorm
+	SkillGorm ISkillDatabase
 	Logger    *zap.Logger
 }
 
