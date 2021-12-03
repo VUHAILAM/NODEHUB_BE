@@ -120,7 +120,7 @@ type RequestGetListCandidateAdmin struct {
 type RequestUpdateReviewCandidateAdmin struct {
 	CandidateID    int64  `json:"candidate_id,omitempty" mapstructure:"candidate_id,omitempty"`
 	Nodehub_review string `json:"nodehub_review,omitempty" mapstructure:"nodehub_review,omitempty"`
-	NodehubScore   string `json:"nodehub_score,omitempty" mapstructure:"nodehub_score,omitempty"`
+	NodehubScore   int64  `json:"nodehub_score,omitempty" mapstructure:"nodehub_score,omitempty"`
 }
 type RequestUpdateStatusCandidate struct {
 	ID     int64 `json:"id,omitempty" mapstructure:"id,omitempty"`

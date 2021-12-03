@@ -129,6 +129,10 @@ func (j *Job) CreateNewJob(ctx context.Context, job *models.CreateJobRequest) er
 		j.Logger.Error(err.Error())
 		return err
 	}
+	if len(candidates) == 0 {
+		j.Logger.Info("recruiter did not have follower", zap.Int64("recruiter_id", job.RecruiterID))
+		return nil
+	}
 	recruiterInfo, err := j.RecruiterGorm.GetProfile(ctx, job.RecruiterID)
 	if err != nil {
 		j.Logger.Error(err.Error())
