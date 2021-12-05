@@ -97,10 +97,12 @@ func (g *GinDependencies) InitGinEngine(config *config.Config) *gin.Engine {
 	recruiterProfile.POST("/public-profile", g.RecruiterSerializer.PublicProfile)
 	recruiterProfile.Use(middlewares.AuthorizationMiddleware(g.Auth, auth.CommonRole)).GET("/getProfile", g.RecruiterSerializer.GetProfileRecruiter)
 	recruiterProfile.Use(middlewares.AuthorizationMiddleware(g.Auth, auth.CommonRole)).POST("/search", g.RecruiterSerializer.SearchRecruiter)
+
 	recruiterProfile.Use(middlewares.AuthorizationMiddleware(g.Auth, auth.RecruiterRole)).PUT("/updateProfile", g.RecruiterSerializer.UpdateProfile)
 	recruiterProfile.Use(middlewares.AuthorizationMiddleware(g.Auth, auth.RecruiterRole)).POST("/addRecruiterSkill", g.RecruiterSerializer.AddRecruiterSkill)
 	recruiterProfile.GET("/getRecruiterSkill", g.RecruiterSerializer.GetRecruiterSkill)
 	recruiterProfile.Use(middlewares.AuthorizationMiddleware(g.Auth, auth.RecruiterRole)).DELETE("/deleteRecruiterSkill", g.RecruiterSerializer.DeleteRecruiterSkill)
+	recruiterProfile.Use(middlewares.AuthorizationMiddleware(g.Auth, auth.RecruiterRole)).GET("premium", g.RecruiterSerializer.CheckPremium)
 
 	recruiterAdmin := nodehub.Group("/private/recruiter").Use(middlewares.AuthorizationMiddleware(g.Auth, auth.AdminRole))
 	recruiterAdmin.POST("/getListRecruiterForAdmin", g.RecruiterSerializer.GetListRecruiterForAdmin)
@@ -123,12 +125,13 @@ func (g *GinDependencies) InitGinEngine(config *config.Config) *gin.Engine {
 
 	applyCtl := nodehub.Group("/job-candidate")
 	applyCtl.POST("/count", g.JobApplySerializer.CountCandidateByStatus)
+	commonApplyCtl := applyCtl.Group("/common").Use(middlewares.AuthorizationMiddleware(g.Auth, auth.CommonRole))
+	commonApplyCtl.POST("/jobs", g.JobApplySerializer.GetJobAppliedByCandidateID)
+	commonApplyCtl.POST("/candidates", g.JobApplySerializer.GetCandidatesAppyJob)
 	candidateApplyCtl := applyCtl.Group("/candidate").Use(middlewares.AuthorizationMiddleware(g.Auth, auth.CandidateRole))
 	candidateApplyCtl.POST("/apply", g.JobApplySerializer.Apply)
 	candidateApplyCtl.POST("/check-applied", g.JobApplySerializer.CheckApplied)
-	candidateApplyCtl.POST("/jobs", g.JobApplySerializer.GetJobAppliedByCandidateID)
 	recruiterApplyCtl := applyCtl.Group("/recruiter").Use(middlewares.AuthorizationMiddleware(g.Auth, auth.RecruiterRole))
-	recruiterApplyCtl.Use(middlewares.AuthorizationMiddleware(g.Auth, auth.RecruiterRole)).POST("/candidates", g.JobApplySerializer.GetCandidatesAppyJob)
 	recruiterApplyCtl.Use(middlewares.AuthorizationMiddleware(g.Auth, auth.RecruiterRole)).PUT("/update", g.JobApplySerializer.UpdateStatus)
 
 	canCtl := nodehub.Group("/candidate")
