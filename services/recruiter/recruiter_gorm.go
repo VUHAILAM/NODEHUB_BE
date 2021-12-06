@@ -38,6 +38,7 @@ type IRecruiterDatabase interface {
 	GetAllRecruiter(ctx context.Context, offset, size int64) ([]*models.Recruiter, int64, error)
 	GetAllSkillByRecruiterID(ctx context.Context, recruiterID int64) ([]*models.Skill, error)
 	Count(ctx context.Context) (int64, error)
+	GetPremiumField(ctx context.Context, recruiterID int64) (bool, error)
 }
 
 type RecruiterGorm struct {
@@ -316,4 +317,15 @@ func (r *RecruiterGorm) Count(ctx context.Context) (int64, error) {
 	}
 
 	return count, nil
+}
+
+func (r *RecruiterGorm) GetPremiumField(ctx context.Context, recruiterID int64) (bool, error) {
+	var premium bool
+	db := r.db.WithContext(ctx)
+	err := db.Table(tableRecruiter).Select("recruiter.premium").Where("recruiter_id=?", recruiterID).Take(&premium).Error
+	if err != nil {
+		r.logger.Error(err.Error(), zap.Error(err))
+		return false, err
+	}
+	return premium, nil
 }

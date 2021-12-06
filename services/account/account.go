@@ -126,7 +126,9 @@ func (a *Account) Register(ctx context.Context, account *models.RequestRegisterA
 	if err != nil {
 		return err
 	}
-
+	if account.Type == auth.AdminRole {
+		return nil
+	}
 	if account.Type == auth.RecruiterRole {
 		recruiterModel := &models.Recruiter{
 			RecruiterID:      accountID,
