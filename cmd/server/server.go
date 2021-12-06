@@ -45,6 +45,12 @@ const mappingJobNodeHub = `
 {
  "mappings" : {
       "properties" : {
+		"avatar" : {
+          "type" : "keyword"
+        },
+		"company_name" : {
+          "type" : "keyword"
+        },
         "description" : {
           "type" : "keyword"
         },
