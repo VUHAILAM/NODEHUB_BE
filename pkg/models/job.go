@@ -11,6 +11,8 @@ type HDate time.Time
 type Job struct {
 	JobID           int64     `json:"job_id" gorm:"primaryKey"`
 	RecruiterID     int64     `json:"recruiter_id"`
+	CompanyName     string    `json:"company_name" gorm:"->"`
+	Avatar          string    `json:"avatar" gorm:"->"`
 	Title           string    `json:"title"`
 	Description     string    `json:"description"`
 	SalaryRange     string    `json:"salary_range"`
@@ -29,6 +31,8 @@ type Job struct {
 type ESJobCreate struct {
 	JobID       int64     `json:"job_id" mapstructure:"job_id"`
 	RecruiterID int64     `json:"recruiter_id" mapstructure:"recruiter_id"`
+	CompanyName string    `json:"company_name" mapstructure:"company_name"`
+	Avatar      string    `json:"avatar" mapstructure:"avatar"`
 	Title       string    `json:"title" mapstructure:"title"`
 	Description string    `json:"description" mapstructure:"description"`
 	SalaryRange string    `json:"salary_range" mapstructure:"salary_range"`
@@ -46,6 +50,8 @@ func ToESJobCreate(job *Job) *ESJobCreate {
 	return &ESJobCreate{
 		JobID:       job.JobID,
 		RecruiterID: job.RecruiterID,
+		CompanyName: job.CompanyName,
+		Avatar:      job.Avatar,
 		Title:       job.Title,
 		Description: job.Description,
 		SalaryRange: job.SalaryRange,
@@ -62,6 +68,8 @@ func ToESJobCreate(job *Job) *ESJobCreate {
 type ESJobUpdate struct {
 	JobID       int64     `json:"job_id,omitempty" mapstructure:"job_id,omitempty"`
 	RecruiterID int64     `json:"recruiter_id,omitempty" mapstructure:"recruiter_id,omitempty"`
+	CompanyName string    `json:"company_name,omitempty" mapstructure:"company_name,omitempty"`
+	Avatar      string    `json:"avatar,omitempty" mapstructure:"avatar,omitempty"`
 	Title       string    `json:"title,omitempty" mapstructure:"title,omitempty"`
 	Description string    `json:"description,omitempty" mapstructure:"description,omitempty"`
 	SalaryRange string    `json:"salary_range,omitempty" mapstructure:"salary_range,omitempty"`
@@ -77,6 +85,8 @@ type ESJobUpdate struct {
 type ESJob struct {
 	JobID       int64     `json:"job_id"`
 	RecruiterID int64     `json:"recruiter_id"`
+	CompanyName string    `json:"company_name"`
+	Avatar      string    `json:"avatar"`
 	Title       string    `json:"title"`
 	Description string    `json:"description"`
 	SalaryRange string    `json:"salary_range"`
@@ -130,6 +140,8 @@ type RequestGetJobDetail struct {
 type RequestUpdateJob struct {
 	JobID       int64   `json:"job_id,omitempty"`
 	RecruiterID int64   `json:"recruiter_id,omitempty"`
+	CompanyName string  `json:"company_name,omitempty"`
+	Avatar      string  `json:"avatar,omitempty"`
 	Title       string  `json:"title,omitempty"`
 	Description string  `json:"description,omitempty"`
 	SalaryRange string  `json:"salary_range,omitempty"`
