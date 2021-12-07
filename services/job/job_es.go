@@ -130,13 +130,22 @@ func (e *JobES) Delete(ctx context.Context, documentID string) error {
 }
 
 func (e *JobES) SearchJobs(ctx context.Context, text, location string, from, size int64) ([]models.ESJob, int64, error) {
-	txtQuery := elastic.NewMultiMatchQuery(text, "description", "title", "role").
-		Type("most_fields").Fuzziness("AUTO")
+	txtQuery := elastic.NewMultiMatchQuery(text, "title", "role", "company_name")
 	locationQuery := elastic.NewMatchQuery("location", location)
 	skillQuery := elastic.NewNestedQuery("skills", elastic.NewMatchQuery("skills.name", text))
-	generalQuery := elastic.NewBoolQuery().Should(skillQuery, txtQuery).Must(locationQuery)
-	searchResult, err := e.ES.Search().Index(e.JobIndex).Query(generalQuery).
-		From(int(from)).Size(int(size)).Sort("_score", false).Do(ctx)
+	generalQuery := elastic.NewBoolQuery().Must(locationQuery, elastic.NewBoolQuery().Should(skillQuery, txtQuery))
+	var searchResult *elastic.SearchResult
+	var err error
+	if location == "" && text != "" {
+		searchResult, err = e.ES.Search().Index(e.JobIndex).Query(elastic.NewBoolQuery().Should(skillQuery, txtQuery)).
+			From(int(from)).Size(int(size)).Sort("_score", false).Do(ctx)
+	} else if text == "" && location != "" {
+		searchResult, err = e.ES.Search().Index(e.JobIndex).Query(locationQuery).
+			From(int(from)).Size(int(size)).Sort("_score", false).Do(ctx)
+	} else {
+		searchResult, err = e.ES.Search().Index(e.JobIndex).Query(generalQuery).
+			From(int(from)).Size(int(size)).Sort("_score", false).Do(ctx)
+	}
 	if err != nil {
 		e.Logger.Error("Job ES: Get Job List error", zap.Error(err))
 		return nil, 0, err

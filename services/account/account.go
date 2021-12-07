@@ -168,6 +168,7 @@ func (a *Account) Register(ctx context.Context, account *models.RequestRegisterA
 			LastName:          account.CandidateInfor.LastName,
 			BirthDay:          account.CandidateInfor.BirthDay,
 			Address:           account.CandidateInfor.Address,
+			NodehubScore:      1,
 			CvManage:          "[]",
 			ExperienceManage:  "[]",
 			EducationManage:   "[]",

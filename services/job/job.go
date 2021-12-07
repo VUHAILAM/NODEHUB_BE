@@ -64,8 +64,15 @@ func NewJobService(jobGorm *JobGorm, jobES *JobES, js *job_skill.JobSkillGorm, s
 }
 
 func (j *Job) CreateNewJob(ctx context.Context, job *models.CreateJobRequest) error {
+	recruiterInfo, err := j.RecruiterGorm.GetProfile(ctx, job.RecruiterID)
+	if err != nil {
+		j.Logger.Error(err.Error())
+		return err
+	}
 	jobData := &models.Job{
 		RecruiterID: job.RecruiterID,
+		CompanyName: recruiterInfo.Name,
+		Avatar:      recruiterInfo.Avartar,
 		Title:       job.Title,
 		Description: job.Description,
 		SalaryRange: job.SalaryRange,
@@ -142,11 +149,7 @@ func (j *Job) CreateNewJob(ctx context.Context, job *models.CreateJobRequest) er
 		j.Logger.Info("recruiter did not have follower", zap.Int64("recruiter_id", job.RecruiterID))
 		return nil
 	}
-	recruiterInfo, err := j.RecruiterGorm.GetProfile(ctx, job.RecruiterID)
-	if err != nil {
-		j.Logger.Error(err.Error())
-		return err
-	}
+
 	notis := make([]*models.Notification, 0)
 	for _, cid := range candidates {
 		noti := &models.Notification{
@@ -181,6 +184,8 @@ func (j *Job) UpdateJob(ctx context.Context, updateRequest *models.RequestUpdate
 	updateES := models.ESJobUpdate{
 		JobID:       updateRequest.JobID,
 		RecruiterID: updateRequest.RecruiterID,
+		CompanyName: updateRequest.CompanyName,
+		Avatar:      updateRequest.Avatar,
 		Title:       updateRequest.Title,
 		Description: updateRequest.Description,
 		SalaryRange: updateRequest.SalaryRange,
@@ -250,6 +255,14 @@ func (j *Job) UpdateJob(ctx context.Context, updateRequest *models.RequestUpdate
 		} else {
 			updateData["questions"] = string(questions)
 		}
+	}
+	_, ok = updateData["company_name"]
+	if ok {
+		delete(updateData, "company_name")
+	}
+	_, ok = updateData["avatar"]
+	if ok {
+		delete(updateData, "avatar")
 	}
 	err = j.JobGorm.Update(ctx, updateRequest.JobID, updateData)
 	if err != nil {
