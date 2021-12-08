@@ -21,6 +21,7 @@ type IRecruiterService interface {
 	SearchRecruiter(ctx context.Context, req models.RequestSearchRecruiter) (*models.ResponseSearchRecruiter, error)
 	GetAllRecruiter(ctx context.Context, req models.RequestSearchRecruiter) (*models.ResponseSearchRecruiter, error)
 	CountRecruiter(ctx context.Context) (int64, error)
+	CheckPremium(ctx context.Context, recruiterID int64) (bool, error)
 }
 
 type Recruiter struct {
@@ -214,4 +215,8 @@ func (r *Recruiter) GetAllRecruiter(ctx context.Context, req models.RequestSearc
 
 func (r *Recruiter) CountRecruiter(ctx context.Context) (int64, error) {
 	return r.RecruiterGorm.Count(ctx)
+}
+
+func (r *Recruiter) CheckPremium(ctx context.Context, recruiterID int64) (bool, error) {
+	return r.RecruiterGorm.GetPremiumField(ctx, recruiterID)
 }

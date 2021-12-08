@@ -5,6 +5,9 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/pkg/errors"
+	"gitlab.com/hieuxeko19991/job4e_be/pkg/auth"
+
 	"github.com/gin-gonic/gin"
 	"gitlab.com/hieuxeko19991/job4e_be/pkg/ginx"
 	"gitlab.com/hieuxeko19991/job4e_be/pkg/models"
@@ -326,4 +329,30 @@ func (r *RecruiterSerializer) PublicProfile(ginCtx *gin.Context) {
 		"data": data,
 	})
 
+}
+
+func (r *RecruiterSerializer) CheckPremium(ginCtx *gin.Context) {
+	ctx := ginCtx.Request.Context()
+	acc, ok := ginCtx.Get(auth.AccountKey)
+	if !ok {
+		r.Logger.Error("Can not get account infor from context")
+		ginx.BuildErrorResponse(ginCtx, errors.New("Can not get account infor from context"), gin.H{
+			"message": "Can not get account infor from context",
+		})
+		return
+	}
+
+	recruiterID := acc.(models.Account).Id
+
+	premium, err := r.recruiterService.CheckPremium(ctx, recruiterID)
+	if err != nil {
+		r.Logger.Error("CheckPremium error", zap.Error(err))
+		ginx.BuildErrorResponse(ginCtx, err, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+	ginx.BuildSuccessResponse(ginCtx, http.StatusAccepted, gin.H{
+		"premium": premium,
+	})
 }
