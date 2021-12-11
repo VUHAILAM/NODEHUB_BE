@@ -72,7 +72,7 @@ func (j *JobGorm) GetAllJobForAdmin(ctx context.Context, name string, page int64
 	limit := size
 	var total int64
 	//search query
-	data, err := db.Raw(`SELECT j.job_id, j.recruiter_id ,r.name as recruiter_name, j.title, j.description, j.salary_range, j.quantity, j.role, j.experience, j.location, j.hire_date, j.status, j.created_at, j.updated_at 
+	data, err := db.Raw(`SELECT j.job_id, j.recruiter_id ,r.name as recruiter_name, j.title, j.description, j.salary_range, j.quantity, j.role, j.experience, j.location, j.hire_date, j.status, j.questions, j.created_at, j.updated_at 
 	FROM nodehub.job j
 	LEFT JOIN nodehub.recruiter r
 	ON j.recruiter_id  = r.recruiter_id
