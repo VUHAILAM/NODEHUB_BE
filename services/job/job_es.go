@@ -130,7 +130,7 @@ func (e *JobES) Delete(ctx context.Context, documentID string) error {
 }
 
 func (e *JobES) SearchJobs(ctx context.Context, text, location string, from, size int64) ([]models.ESJob, int64, error) {
-	txtQuery := elastic.NewMultiMatchQuery(text, "title", "role", "company_name")
+	txtQuery := elastic.NewMultiMatchQuery(text, "title", "role", "company_name").Type("most_fields")
 	locationQuery := elastic.NewMatchQuery("location", location)
 	skillQuery := elastic.NewNestedQuery("skills", elastic.NewMatchQuery("skills.name", text))
 	generalQuery := elastic.NewBoolQuery().Must(locationQuery, elastic.NewBoolQuery().Should(skillQuery, txtQuery))

@@ -283,7 +283,7 @@ func (r *RecruiterGorm) SearchRecruiter(ctx context.Context, text string, offset
 	var recruiters []*models.Recruiter
 	db := r.db.WithContext(ctx).Table(tableRecruiter).Joins("Join "+tableRecruiterSkill+" on recruiter_skill.recruiter_id=recruiter.recruiter_id").
 		Joins("Join "+tableSkill+" on recruiter_skill.skill_id=skill.skill_id").
-		Where("MATCH(recruiter.name, recruiter.description) AGAINST(?) OR MATCH(skill.name) AGAINST(?)", text, text).
+		Where("MATCH(recruiter.name) AGAINST(?) OR MATCH(skill.name) AGAINST(?)", text, text).
 		Group("recruiter.recruiter_id").Find(&recruiters)
 	total := db.RowsAffected
 	recruiters = make([]*models.Recruiter, 0)

@@ -59,6 +59,7 @@ func (g *GinDependencies) InitGinEngine(config *config.Config) *gin.Engine {
 	// blog
 	blogCtlAdmin := nodehub.Group("/private/blog").Use(middlewares.AuthorizationMiddleware(g.Auth, auth.AdminRole))
 	blogCtlUser := nodehub.Group("/public/blog")
+	blogCtlUser.POST("/getDetailBlog", g.BlogSerializer.GetDetail)
 	blogCtlUser.POST("/getList", g.BlogSerializer.GetListBlogUser)
 	blogCtlUser.POST("/getListBlogByCategory", g.BlogSerializer.GetListBlogByCategory)
 	blogCtlAdmin.POST("/getList", g.BlogSerializer.Getlist)

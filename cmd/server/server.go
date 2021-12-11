@@ -4,6 +4,8 @@ import (
 	"context"
 	"net/http"
 
+	"gitlab.com/hieuxeko19991/job4e_be/services/autocomplete"
+
 	"gitlab.com/hieuxeko19991/job4e_be/cmd/config"
 	account2 "gitlab.com/hieuxeko19991/job4e_be/endpoints/account"
 	blog2 "gitlab.com/hieuxeko19991/job4e_be/endpoints/blog"
@@ -134,10 +136,12 @@ func InitServer() *Server {
 	}
 	authHandler := auth.NewAuthHandler(logger, conf)
 	mailService := email.NewSGMailService(logger, conf)
-
+	jobTrie := autocomplete.NewTrie()
+	recruiterTrie := autocomplete.NewTrie()
+	candidateTrie := autocomplete.NewTrie()
 	//init skill service
 	skillGorm := skill.NewSkillGorm(gormDB, logger)
-	skillService := skill.NewSkill(skillGorm, logger)
+	skillService := skill.NewSkill(skillGorm, candidateTrie, recruiterTrie, jobTrie, logger)
 	skillSerializer := skill2.NewSkillSerializer(skillService, logger)
 	//init job skill
 	jobSkillGorm := job_skill.NewJobSkillGorm(gormDB, logger)
