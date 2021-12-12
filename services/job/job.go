@@ -85,16 +85,9 @@ func (j *Job) CreateNewJob(ctx context.Context, job *models.CreateJobRequest) er
 		Role:        job.Role,
 		Experience:  job.Experience,
 		Location:    job.Location,
+		Questions:   job.Questions,
 		HireDate:    time.Time(job.HireDate),
 		Status:      job.Status,
-	}
-	questions, err := json.Marshal(job.Questions)
-	if err != nil {
-		j.Logger.Error("Marshal question error", zap.Error(err))
-		questions = []byte("[]")
-	}
-	if job.Questions != nil {
-		jobData.Questions = string(questions)
 	}
 	newJob, err := j.JobGorm.Create(ctx, jobData)
 	if err != nil {

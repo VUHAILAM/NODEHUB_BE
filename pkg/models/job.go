@@ -44,16 +44,11 @@ type ESJobCreate struct {
 	HireDate    string    `json:"hire_date" mapstructure:"hire_date"`
 	CreateAt    string    `json:"created_at" mapstructure:"created_at"`
 	Status      int       `json:"status" mapstructure:"status"`
-	Questions   []string  `json:"questions" mapstructure:"questions"`
+	Questions   string    `json:"questions" mapstructure:"questions"`
 	Skills      []ESSkill `json:"skills" mapstructure:"skills"`
 }
 
 func ToESJobCreate(job *Job) *ESJobCreate {
-	var questions []string
-	err := json.Unmarshal([]byte(job.Questions), &questions)
-	if err != nil {
-		questions = []string{}
-	}
 	return &ESJobCreate{
 		JobID:       job.JobID,
 		RecruiterID: job.RecruiterID,
@@ -68,7 +63,7 @@ func ToESJobCreate(job *Job) *ESJobCreate {
 		Location:    job.Location,
 		HireDate:    job.HireDate.Format("2006-01-02"),
 		CreateAt:    job.CreatedAt.Format("2006-01-02"),
-		Questions:   questions,
+		Questions:   job.Questions,
 		Status:      job.Status,
 	}
 }
@@ -87,7 +82,7 @@ type ESJobUpdate struct {
 	Location    string    `json:"location,omitempty" mapstructure:"location,omitempty"`
 	HireDate    string    `json:"hire_date,omitempty" mapstructure:"hire_date,omitempty"`
 	Status      int       `json:"status,omitempty" mapstructure:"status,omitempty"`
-	Questions   []string  `json:"questions,omitempty" mapstructure:"questions,omitempty"`
+	Questions   string    `json:"questions,omitempty" mapstructure:"questions,omitempty"`
 	Skills      []ESSkill `json:"skills,omitempty" mapstructure:"skills,omitempty"`
 }
 
@@ -105,24 +100,24 @@ type ESJob struct {
 	Location    string    `json:"location"`
 	HireDate    HDate     `json:"hire_date"`
 	Status      int       `json:"status"`
-	Questions   []string  `json:"questions"`
+	Questions   string    `json:"questions"`
 	Skills      []ESSkill `json:"skills"`
 	CreatedAt   HDate     `json:"created_at"`
 }
 
 type CreateJobRequest struct {
-	RecruiterID int64    `json:"recruiter_id"`
-	Title       string   `json:"title"`
-	Description string   `json:"description"`
-	SalaryRange string   `json:"salary_range"`
-	Quantity    int64    `json:"quantity"`
-	Role        string   `json:"role"`
-	Experience  string   `json:"experience"`
-	Location    string   `json:"location"`
-	HireDate    HDate    `json:"hire_date"`
-	Status      int      `json:"status"`
-	Questions   []string `json:"questions"`
-	SkillIDs    []int64  `json:"skill_ids"`
+	RecruiterID int64   `json:"recruiter_id"`
+	Title       string  `json:"title"`
+	Description string  `json:"description"`
+	SalaryRange string  `json:"salary_range"`
+	Quantity    int64   `json:"quantity"`
+	Role        string  `json:"role"`
+	Experience  string  `json:"experience"`
+	Location    string  `json:"location"`
+	HireDate    HDate   `json:"hire_date"`
+	Status      int     `json:"status"`
+	Questions   string  `json:"questions"`
+	SkillIDs    []int64 `json:"skill_ids"`
 }
 
 func (j *HDate) UnmarshalJSON(b []byte) error {
@@ -149,21 +144,21 @@ type RequestGetJobDetail struct {
 }
 
 type RequestUpdateJob struct {
-	JobID       int64    `json:"job_id,omitempty"`
-	RecruiterID int64    `json:"recruiter_id,omitempty"`
-	CompanyName string   `json:"company_name,omitempty"`
-	Avatar      string   `json:"avatar,omitempty"`
-	Title       string   `json:"title,omitempty"`
-	Description string   `json:"description,omitempty"`
-	SalaryRange string   `json:"salary_range,omitempty"`
-	Quantity    int64    `json:"quantity,omitempty"`
-	Role        string   `json:"role,omitempty"`
-	Experience  string   `json:"experience,omitempty"`
-	Location    string   `json:"location,omitempty"`
-	Status      int      `json:"status,omitempty"`
-	Questions   []string `json:"questions,omitempty"`
-	HireDate    HDate    `json:"hire_date,omitempty"`
-	SkillIDs    []int64  `json:"skill_ids,omitempty"`
+	JobID       int64   `json:"job_id,omitempty"`
+	RecruiterID int64   `json:"recruiter_id,omitempty"`
+	CompanyName string  `json:"company_name,omitempty"`
+	Avatar      string  `json:"avatar,omitempty"`
+	Title       string  `json:"title,omitempty"`
+	Description string  `json:"description,omitempty"`
+	SalaryRange string  `json:"salary_range,omitempty"`
+	Quantity    int64   `json:"quantity,omitempty"`
+	Role        string  `json:"role,omitempty"`
+	Experience  string  `json:"experience,omitempty"`
+	Location    string  `json:"location,omitempty"`
+	Status      int     `json:"status,omitempty"`
+	Questions   string  `json:"questions,omitempty"`
+	HireDate    HDate   `json:"hire_date,omitempty"`
+	SkillIDs    []int64 `json:"skill_ids,omitempty"`
 }
 
 type RequestGetAllJob struct {

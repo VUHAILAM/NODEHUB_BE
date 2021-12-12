@@ -89,7 +89,7 @@ const mappingJobNodeHub = `
           "type" : "long"
         },
 		"questions" : {
-			"type" : "array"
+			"type" : "keyword"
 		},
         "title" : {
           "type" : "keyword"
