@@ -10,7 +10,16 @@ import (
 	"gorm.io/gorm"
 )
 
-const tableAccount = "blog"
+const tableBlog = "blog"
+
+type IBlogDatabase interface {
+	GetDetailBlog(ctx context.Context, blogID int64) (*models.Blog, error)
+	GetListBlog(ctx context.Context, title string, page int64, size int64) (*models.ResponsetListBlog, error)
+	GetListBlogUser(ctx context.Context, title string, category_id int64, page int64, size int64) (*models.ResponsetListBlog, error)
+	Create(ctx context.Context, blog *models.Blog) error
+	Update(ctx context.Context, blog *models.RequestUpdateBlog, Blog_id int64) error
+	GetListBlogByCategory(ctx context.Context, category_id int64, page int64, size int64) (*models.ResponsetListBlog, error)
+}
 
 type BlogGorm struct {
 	db     *gorm.DB
@@ -22,6 +31,23 @@ func NewBlogGorm(db *gorm.DB, logger *zap.Logger) *BlogGorm {
 		db:     db,
 		logger: logger,
 	}
+}
+
+func (g *BlogGorm) GetDetailBlog(ctx context.Context, blogID int64) (*models.Blog, error) {
+	db := g.db.WithContext(ctx)
+	blog := models.Blog{}
+	err := db.Table(tableBlog).Where("blog_id=?", blogID).Take(&blog).Error
+	if err != nil {
+		g.logger.Error(err.Error())
+		return nil, err
+	}
+	var name string
+	err = db.Table("setting").Select("name").Where("type='blog' && setting_id=?", blog.Category_id).Take(&name).Error
+	if err != nil {
+		g.logger.Error(err.Error())
+	}
+	blog.CategoryName = name
+	return &blog, nil
 }
 
 func (g *BlogGorm) GetListBlog(ctx context.Context, title string, page int64, size int64) (*models.ResponsetListBlog, error) {
@@ -56,7 +82,7 @@ func (g *BlogGorm) GetListBlog(ctx context.Context, title string, page int64, si
 
 func (g *BlogGorm) Create(ctx context.Context, blog *models.Blog) error {
 	db := g.db.WithContext(ctx)
-	err := db.Table(tableAccount).Create(blog).Error
+	err := db.Table(tableBlog).Create(blog).Error
 	if err != nil {
 		g.logger.Error("BlogGorm: Create blog error", zap.Error(err))
 		return err
@@ -65,7 +91,7 @@ func (g *BlogGorm) Create(ctx context.Context, blog *models.Blog) error {
 }
 func (g *BlogGorm) Update(ctx context.Context, blog *models.RequestUpdateBlog, Blog_id int64) error {
 	db := g.db.WithContext(ctx)
-	err := db.Table(tableAccount).Where("blog_id = ?", Blog_id).Updates(map[string]interface{}{
+	err := db.Table(tableBlog).Where("blog_id = ?", Blog_id).Updates(map[string]interface{}{
 		"category_id": blog.Category_id,
 		"title":       blog.Title,
 		"icon":        blog.Icon,

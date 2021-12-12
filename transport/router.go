@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"net/http"
 
+	autocomplete2 "gitlab.com/hieuxeko19991/job4e_be/endpoints/autocomplete"
+
 	"github.com/gin-gonic/gin"
 	"gitlab.com/hieuxeko19991/job4e_be/cmd/config"
 	"gitlab.com/hieuxeko19991/job4e_be/endpoints/account"
@@ -37,6 +39,7 @@ type GinDependencies struct {
 	JobSkillSerializer     *job_skill.JobSkillSerializer
 	NotificationSerializer *notification.NotificationSerializer
 	FollowSerializer       *follow.FollowSerializer
+	AUtoSerializer         *autocomplete2.AutocompleteSerialize
 }
 
 func (g *GinDependencies) InitGinEngine(config *config.Config) *gin.Engine {
@@ -59,6 +62,7 @@ func (g *GinDependencies) InitGinEngine(config *config.Config) *gin.Engine {
 	// blog
 	blogCtlAdmin := nodehub.Group("/private/blog").Use(middlewares.AuthorizationMiddleware(g.Auth, auth.AdminRole))
 	blogCtlUser := nodehub.Group("/public/blog")
+	blogCtlUser.POST("/getDetailBlog", g.BlogSerializer.GetDetail)
 	blogCtlUser.POST("/getList", g.BlogSerializer.GetListBlogUser)
 	blogCtlUser.POST("/getListBlogByCategory", g.BlogSerializer.GetListBlogByCategory)
 	blogCtlAdmin.POST("/getList", g.BlogSerializer.Getlist)
@@ -175,6 +179,11 @@ func (g *GinDependencies) InitGinEngine(config *config.Config) *gin.Engine {
 	followCandidate.POST("/get-follow-recruiter", g.FollowSerializer.GetListRecruiter)
 	followRecruiter := followCtl.Group("/recruiter").Use(middlewares.AuthorizationMiddleware(g.Auth, auth.RecruiterRole))
 	followRecruiter.POST("/get-follow-candidate", g.FollowSerializer.GetListCandidate)
+
+	autoCtl := nodehub.Group("/autocomplete")
+	autoCtl.POST("/job", g.AUtoSerializer.AutocompleteJob)
+	autoCtl.POST("/candidate", g.AUtoSerializer.AutocompleteCan)
+	autoCtl.POST("/recruiter", g.AUtoSerializer.AutocompleteRec)
 	return engine
 }
 

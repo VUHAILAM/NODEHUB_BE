@@ -24,6 +24,29 @@ func NewBlogSerializer(blogService blog.IBlogService, logger *zap.Logger) *BlogS
 	}
 }
 
+func (bl *BlogSerializer) GetDetail(ginCtx *gin.Context) {
+	ctx := ginCtx.Request.Context()
+	req := models.RequestGetDetailBlog{}
+	err := json.NewDecoder(ginCtx.Request.Body).Decode(&req)
+	if err != nil {
+		bl.Logger.Error("Parse request get detail blog error", zap.Error(err))
+		ginx.BuildErrorResponse(ginCtx, err, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+	blog, err := bl.blogService.GetDetailBlog(ctx, req.BlogID)
+	if err != nil {
+		bl.Logger.Error("Get detail blog error", zap.Error(err))
+		ginx.BuildErrorResponse(ginCtx, err, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	ginx.BuildSuccessResponse(ginCtx, http.StatusAccepted, blog)
+}
+
 func (bl *BlogSerializer) Getlist(ginCtx *gin.Context) {
 	ctx := ginCtx.Request.Context()
 	req := models.RequestGetListBlog{}

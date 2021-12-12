@@ -8,18 +8,11 @@ import (
 )
 
 type IBlogService interface {
+	GetDetailBlog(ctx context.Context, blogID int64) (*models.Blog, error)
 	GetListBlog(ctx context.Context, title string, page int64, size int64) (*models.ResponsetListBlog, error)
 	GetListBlogUser(ctx context.Context, title string, category_id int64, page int64, size int64) (*models.ResponsetListBlog, error)
 	CreateBlog(ctx context.Context, blog *models.RequestCreateBlog) error
 	UpdateBlog(ctx context.Context, blog *models.RequestCreateBlog, Blog_id int64) error
-	GetListBlogByCategory(ctx context.Context, category_id int64, page int64, size int64) (*models.ResponsetListBlog, error)
-}
-
-type IBlogDatabase interface {
-	GetListBlog(ctx context.Context, title string, page int64, size int64) (*models.ResponsetListBlog, error)
-	GetListBlogUser(ctx context.Context, title string, category_id int64, page int64, size int64) (*models.ResponsetListBlog, error)
-	Create(ctx context.Context, blog *models.Blog) error
-	Update(ctx context.Context, blog *models.RequestUpdateBlog, Blog_id int64) error
 	GetListBlogByCategory(ctx context.Context, category_id int64, page int64, size int64) (*models.ResponsetListBlog, error)
 }
 
@@ -33,6 +26,10 @@ func NewBlog(blogGorm *BlogGorm, logger *zap.Logger) *Blog {
 		BlogGorm: blogGorm,
 		Logger:   logger,
 	}
+}
+
+func (b *Blog) GetDetailBlog(ctx context.Context, blogID int64) (*models.Blog, error) {
+	return b.BlogGorm.GetDetailBlog(ctx, blogID)
 }
 
 func (b *Blog) GetListBlog(ctx context.Context, title string, page int64, size int64) (*models.ResponsetListBlog, error) {
