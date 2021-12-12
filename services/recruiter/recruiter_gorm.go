@@ -25,6 +25,7 @@ const (
 
 type IRecruiterDatabase interface {
 	Create(ctx context.Context, recruiter *models.Recruiter) (int64, error)
+	GetAllRecruiterName(ctx context.Context) ([]string, error)
 	AddRecruiterSkill(ctx context.Context, recruiterSkill *models.RecruiterSkill) error
 	UpdateProfile(ctx context.Context, recruiter *models.RequestUpdateRecruiter, recruiter_id int64) error
 	GetRecruiterSkill(ctx context.Context, recruiter_id int64) ([]models.ResponseRecruiterSkill, error)
@@ -61,6 +62,22 @@ func (r *RecruiterGorm) Create(ctx context.Context, recruiter *models.Recruiter)
 		return 0, err
 	}
 	return recruiter.RecruiterID, nil
+}
+func (r *RecruiterGorm) GetAllRecruiterName(ctx context.Context) ([]string, error) {
+	db := r.db.WithContext(ctx)
+	var names []struct {
+		Name string
+	}
+	err := db.Table(tableRecruiter).Select("name").Find(&names).Error
+	if err != nil {
+		r.logger.Error(err.Error())
+		return nil, err
+	}
+	res := make([]string, 0)
+	for _, n := range names {
+		res = append(res, n.Name)
+	}
+	return res, nil
 }
 
 func (r *RecruiterGorm) GetProfile(ctx context.Context, id int64) (*models.Recruiter, error) {

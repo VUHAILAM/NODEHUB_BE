@@ -4,6 +4,8 @@ import (
 	"context"
 	"time"
 
+	"gitlab.com/hieuxeko19991/job4e_be/services/autocomplete"
+
 	"github.com/dgrijalva/jwt-go"
 	"github.com/pkg/errors"
 	"gitlab.com/hieuxeko19991/job4e_be/cmd/config"
@@ -34,17 +36,22 @@ type Account struct {
 	CandidateGorm candidate.ICandidateDatabase
 	Auth          *auth.AuthHandler
 	MailService   *email2.SGMailService
-	Conf          *config.Config
-	Logger        *zap.Logger
+
+	CanTrie *autocomplete.Trie
+	RecTrie *autocomplete.Trie
+	Conf    *config.Config
+	Logger  *zap.Logger
 }
 
-func NewAccount(accountGorm *AccountGorm, recruiterGorm *recruiter.RecruiterGorm, candidateGorm *candidate.CandidateGorm, auth *auth.AuthHandler, conf *config.Config, mailSV *email2.SGMailService, logger *zap.Logger) *Account {
+func NewAccount(accountGorm *AccountGorm, recruiterGorm *recruiter.RecruiterGorm, candidateGorm *candidate.CandidateGorm, auth *auth.AuthHandler, conf *config.Config, mailSV *email2.SGMailService, logger *zap.Logger, canTrie *autocomplete.Trie, recTrie *autocomplete.Trie) *Account {
 	return &Account{
 		AccountGorm:   accountGorm,
 		RecruiterGorm: recruiterGorm,
 		CandidateGorm: candidateGorm,
 		Auth:          auth,
 		Conf:          conf,
+		CanTrie:       canTrie,
+		RecTrie:       recTrie,
 		MailService:   mailSV,
 		Logger:        logger,
 	}
@@ -160,6 +167,7 @@ func (a *Account) Register(ctx context.Context, account *models.RequestRegisterA
 			a.Logger.Error("Create Recruiter error", zap.Error(err))
 			return err
 		}
+		a.RecTrie.Insert(recruiterModel.Name)
 	}
 	if account.Type == auth.CandidateRole {
 		candidateModel := &models.Candidate{
@@ -192,6 +200,8 @@ func (a *Account) Register(ctx context.Context, account *models.RequestRegisterA
 			a.Logger.Error("Create Candidate error", zap.Error(err))
 			return err
 		}
+		a.CanTrie.Insert(candidateModel.FirstName + " " + candidateModel.LastName)
+		a.CanTrie.Insert(candidateModel.LastName + " " + candidateModel.FirstName)
 	}
 
 	token, err := a.generateVerifyToken(ctx, account.Email)

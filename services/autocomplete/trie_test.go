@@ -38,12 +38,11 @@ func TestTrie_Search(t *testing.T) {
 		},
 		{
 			Name:  "Happy case with utf8",
-			input: []string{"vũ hải lâm", "vũ lâm hải"},
+			input: []string{"vũ hải lâm", "vũ hải lâm"},
 			trie:  NewTrie(),
 			text:  "vu",
 			expected: []string{
 				"vũ hải lâm",
-				"vũ lâm hải",
 			},
 		},
 		{

@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"time"
 
+	"gitlab.com/hieuxeko19991/job4e_be/services/autocomplete"
+
 	"gitlab.com/hieuxeko19991/job4e_be/services/follow"
 
 	"gitlab.com/hieuxeko19991/job4e_be/services/recruiter"
@@ -44,11 +46,13 @@ type Job struct {
 	RecruiterGorm recruiter.IRecruiterDatabase
 	FollowGorm    follow.IFollowDatabase
 
+	jobTrie *autocomplete.Trie
+
 	Conf   *config.Config
 	Logger *zap.Logger
 }
 
-func NewJobService(jobGorm *JobGorm, jobES *JobES, js *job_skill.JobSkillGorm, skillgorm *skill.SkillGorm, notiGorm *notification.NotificationGorm, recruiterGorm *recruiter.RecruiterGorm, followGorm *follow.FollowGorm, conf *config.Config, logger *zap.Logger) *Job {
+func NewJobService(jobGorm *JobGorm, jobES *JobES, js *job_skill.JobSkillGorm, skillgorm *skill.SkillGorm, notiGorm *notification.NotificationGorm, recruiterGorm *recruiter.RecruiterGorm, followGorm *follow.FollowGorm, conf *config.Config, logger *zap.Logger, jobTrie *autocomplete.Trie) *Job {
 	return &Job{
 		JobGorm:       jobGorm,
 		JobES:         jobES,
@@ -57,6 +61,7 @@ func NewJobService(jobGorm *JobGorm, jobES *JobES, js *job_skill.JobSkillGorm, s
 		NotiGorm:      notiGorm,
 		RecruiterGorm: recruiterGorm,
 		FollowGorm:    followGorm,
+		jobTrie:       jobTrie,
 
 		Conf:   conf,
 		Logger: logger,
@@ -167,6 +172,9 @@ func (j *Job) CreateNewJob(ctx context.Context, job *models.CreateJobRequest) er
 		j.Logger.Error(err.Error())
 		return err
 	}
+
+	j.jobTrie.Insert(job.Title)
+	j.jobTrie.Insert(recruiterInfo.Name)
 	return nil
 }
 
@@ -269,6 +277,9 @@ func (j *Job) UpdateJob(ctx context.Context, updateRequest *models.RequestUpdate
 		j.Logger.Error("Can not Update to MySQL", zap.Error(err))
 		return err
 	}
+
+	j.jobTrie.Insert(updateRequest.Title)
+	j.jobTrie.Insert(updateRequest.CompanyName)
 	return nil
 }
 

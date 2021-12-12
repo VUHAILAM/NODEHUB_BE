@@ -28,7 +28,7 @@ type Trie struct {
 
 	LevenshteinScheme    map[int]int
 	LevenshteinIntervals []int
-	OriginalDict         map[string][]string
+	OriginalDict         map[string]map[string]bool
 	Logger               *zap.Logger
 }
 
@@ -43,7 +43,7 @@ func NewTrie() *Trie {
 	trie := new(Trie)
 	trie.Root = new(Node)
 	trie.Root.Children = make(map[rune]*Node)
-	trie.OriginalDict = make(map[string][]string)
+	trie.OriginalDict = make(map[string]map[string]bool)
 	trie.DefaultLevenshtein()
 
 	return trie
@@ -75,7 +75,11 @@ func (t *Trie) insert(text string, transformer transform.Transformer) {
 		return
 	}
 	normal = strings.ToLower(normal)
-	t.OriginalDict[normal] = append(t.OriginalDict[normal], text)
+	_, ok := t.OriginalDict[normal]
+	if !ok {
+		t.OriginalDict[normal] = make(map[string]bool)
+	}
+	t.OriginalDict[normal][text] = true
 	text = normal
 	currentNode := t.Root
 	for i, c := range text {
@@ -119,7 +123,8 @@ func (t *Trie) Search(text string) []string {
 	}
 
 	hits := make([]string, 0, len(collections))
-	for key := range collections {
+	for key, val := range collections {
+		fmt.Println("Map: " + key + " " + fmt.Sprint(val))
 		hits = append(hits, key)
 	}
 	sort.Slice(hits, func(i, j int) bool {
@@ -130,10 +135,12 @@ func (t *Trie) Search(text string) []string {
 			return hits[i] < hits[j]
 		}
 	})
-
-	originals := make([]string, 0, len(hits)*2)
+	fmt.Println("Len hits: " + fmt.Sprint(len(hits)))
+	originals := make([]string, 0, len(hits))
 	for _, hit := range hits {
-		originals = append(originals, t.OriginalDict[hit]...)
+		for o, _ := range t.OriginalDict[hit] {
+			originals = append(originals, o)
+		}
 	}
 	return originals
 }

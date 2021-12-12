@@ -49,6 +49,7 @@ func (s *CandidateService) CreateCandidateProfile(ctx context.Context, req model
 		s.Logger.Error(err.Error())
 		return 0, err
 	}
+
 	return canID, nil
 }
 
@@ -64,6 +65,7 @@ func (s *CandidateService) UpdateCandidateProfile(ctx context.Context, req model
 		s.Logger.Error(err.Error())
 		return err
 	}
+
 	return nil
 }
 
