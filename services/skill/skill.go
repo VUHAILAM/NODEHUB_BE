@@ -24,7 +24,7 @@ type ISkillDatabase interface {
 }
 
 type Skill struct {
-	SkillGorm     *SkillGorm
+	SkillGorm     ISkillDatabase
 	CandidateTrie *autocomplete.Trie
 	RecruiterTrie *autocomplete.Trie
 	JobTrie       *autocomplete.Trie

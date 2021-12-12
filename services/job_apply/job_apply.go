@@ -2,6 +2,7 @@ package job_apply
 
 import (
 	"context"
+	"encoding/json"
 
 	"gitlab.com/hieuxeko19991/job4e_be/services/job_skill"
 
@@ -18,6 +19,7 @@ type IJobApplyService interface {
 	UpdateStatusJobApplied(ctx context.Context, req models.RequestUpdateStatusJobApplied) error
 	CountCandidateByStatus(ctx context.Context, req models.RequestCountStatus) (int64, error)
 	CheckApplied(ctx context.Context, req models.RequestCheckApply) (*models.JobApply, error)
+	GetApply(ctx context.Context, req models.RequestCheckApply) (*models.JobApply, error)
 }
 
 type JobApply struct {
@@ -44,8 +46,17 @@ func (ja *JobApply) CreateJobApply(ctx context.Context, req models.RequestApply)
 		JobID:       req.JobID,
 		CandidateID: req.CandidateID,
 		Status:      req.Status,
+		Media:       req.Media,
 	}
-	_, err := ja.JobApplyGorm.Create(ctx, &jobApply)
+	answers, err := json.Marshal(req.Answers)
+	if err != nil {
+		ja.Logger.Error("Marshal answers error", zap.Error(err))
+		answers = []byte("[]")
+	}
+	if req.Answers != nil {
+		jobApply.Answers = string(answers)
+	}
+	_, err = ja.JobApplyGorm.Create(ctx, &jobApply)
 	if err != nil {
 		ja.Logger.Error("Can not create apply candidate", zap.Error(err), zap.Reflect("request", req))
 		return err
@@ -152,4 +163,8 @@ func (ja *JobApply) CountCandidateByStatus(ctx context.Context, req models.Reque
 }
 func (ja *JobApply) CheckApplied(ctx context.Context, req models.RequestCheckApply) (*models.JobApply, error) {
 	return ja.JobApplyGorm.CheckApplied(ctx, req.JobID, req.CandidateID)
+}
+
+func (ja *JobApply) GetApply(ctx context.Context, req models.RequestCheckApply) (*models.JobApply, error) {
+	return ja.JobApplyGorm.GetApply(ctx, req.JobID, req.CandidateID)
 }
