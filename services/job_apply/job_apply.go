@@ -2,7 +2,6 @@ package job_apply
 
 import (
 	"context"
-	"encoding/json"
 
 	"gitlab.com/hieuxeko19991/job4e_be/services/job_skill"
 
@@ -46,17 +45,11 @@ func (ja *JobApply) CreateJobApply(ctx context.Context, req models.RequestApply)
 		JobID:       req.JobID,
 		CandidateID: req.CandidateID,
 		Status:      req.Status,
+		Answers:     req.Answers,
 		Media:       req.Media,
 	}
-	answers, err := json.Marshal(req.Answers)
-	if err != nil {
-		ja.Logger.Error("Marshal answers error", zap.Error(err))
-		answers = []byte("[]")
-	}
-	if req.Answers != nil {
-		jobApply.Answers = string(answers)
-	}
-	_, err = ja.JobApplyGorm.Create(ctx, &jobApply)
+
+	_, err := ja.JobApplyGorm.Create(ctx, &jobApply)
 	if err != nil {
 		ja.Logger.Error("Can not create apply candidate", zap.Error(err), zap.Reflect("request", req))
 		return err

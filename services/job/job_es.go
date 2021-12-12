@@ -130,10 +130,11 @@ func (e *JobES) Delete(ctx context.Context, documentID string) error {
 }
 
 func (e *JobES) SearchJobs(ctx context.Context, text, location string, from, size int64) ([]models.ESJob, int64, error) {
-	txtQuery := elastic.NewMultiMatchQuery(text, "title", "role", "company_name").Type("most_fields")
+	txtQuery := elastic.NewMultiMatchQuery(text, "title", "title.keyword", "company_name", "company_name.keyword", "role", "role.keyword").Type("most_fields")
 	locationQuery := elastic.NewMatchQuery("location", location)
 	skillQuery := elastic.NewNestedQuery("skills", elastic.NewMatchQuery("skills.name", text))
-	generalQuery := elastic.NewBoolQuery().Must(locationQuery, elastic.NewBoolQuery().Should(skillQuery, txtQuery))
+	skill2Query := elastic.NewNestedQuery("skills", elastic.NewMatchQuery("skills.name.keyword", text))
+	generalQuery := elastic.NewBoolQuery().Must(locationQuery, elastic.NewBoolQuery().Should(skillQuery, skill2Query, txtQuery))
 	var searchResult *elastic.SearchResult
 	var err error
 	if location == "" && text != "" {
