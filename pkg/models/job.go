@@ -22,6 +22,7 @@ type Job struct {
 	Location        string    `json:"location"`
 	HireDate        time.Time `json:"hire_date"`
 	Status          int       `json:"status"`
+	Questions       string    `json:"questions"`
 	CandidateStatus string    `json:"candidate_status" gorm:"->"`
 	Skills          []ESSkill `json:"skills" gorm:"-"`
 	CreatedAt       time.Time `json:"created_at"`
@@ -43,6 +44,7 @@ type ESJobCreate struct {
 	HireDate    string    `json:"hire_date" mapstructure:"hire_date"`
 	CreateAt    string    `json:"created_at" mapstructure:"created_at"`
 	Status      int       `json:"status" mapstructure:"status"`
+	Questions   string    `json:"questions" mapstructure:"questions"`
 	Skills      []ESSkill `json:"skills" mapstructure:"skills"`
 }
 
@@ -61,6 +63,7 @@ func ToESJobCreate(job *Job) *ESJobCreate {
 		Location:    job.Location,
 		HireDate:    job.HireDate.Format("2006-01-02"),
 		CreateAt:    job.CreatedAt.Format("2006-01-02"),
+		Questions:   job.Questions,
 		Status:      job.Status,
 	}
 }
@@ -79,6 +82,7 @@ type ESJobUpdate struct {
 	Location    string    `json:"location,omitempty" mapstructure:"location,omitempty"`
 	HireDate    string    `json:"hire_date,omitempty" mapstructure:"hire_date,omitempty"`
 	Status      int       `json:"status,omitempty" mapstructure:"status,omitempty"`
+	Questions   string    `json:"questions,omitempty" mapstructure:"questions,omitempty"`
 	Skills      []ESSkill `json:"skills,omitempty" mapstructure:"skills,omitempty"`
 }
 
@@ -96,6 +100,7 @@ type ESJob struct {
 	Location    string    `json:"location"`
 	HireDate    HDate     `json:"hire_date"`
 	Status      int       `json:"status"`
+	Questions   string    `json:"questions"`
 	Skills      []ESSkill `json:"skills"`
 	CreatedAt   HDate     `json:"created_at"`
 }
@@ -111,6 +116,7 @@ type CreateJobRequest struct {
 	Location    string  `json:"location"`
 	HireDate    HDate   `json:"hire_date"`
 	Status      int     `json:"status"`
+	Questions   string  `json:"questions"`
 	SkillIDs    []int64 `json:"skill_ids"`
 }
 
@@ -150,6 +156,7 @@ type RequestUpdateJob struct {
 	Experience  string  `json:"experience,omitempty"`
 	Location    string  `json:"location,omitempty"`
 	Status      int     `json:"status,omitempty"`
+	Questions   string  `json:"questions,omitempty"`
 	HireDate    HDate   `json:"hire_date,omitempty"`
 	SkillIDs    []int64 `json:"skill_ids,omitempty"`
 }
@@ -183,6 +190,7 @@ type JobForAdmin struct {
 	Location      string    `json:"location"`
 	HireDate      time.Time `json:"hire_date"`
 	Status        int64     `json:"status"`
+	Questions     string    `json:"questions"`
 	CreatedAt     time.Time `json:"created_at"`
 	UpdatedAt     time.Time `json:"updated_at"`
 }

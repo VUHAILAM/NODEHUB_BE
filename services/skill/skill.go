@@ -3,6 +3,8 @@ package skill
 import (
 	"context"
 
+	"gitlab.com/hieuxeko19991/job4e_be/services/autocomplete"
+
 	"gitlab.com/hieuxeko19991/job4e_be/pkg/models"
 	"go.uber.org/zap"
 )
@@ -22,14 +24,20 @@ type ISkillDatabase interface {
 }
 
 type Skill struct {
-	SkillGorm ISkillDatabase
-	Logger    *zap.Logger
+	SkillGorm     ISkillDatabase
+	CandidateTrie *autocomplete.Trie
+	RecruiterTrie *autocomplete.Trie
+	JobTrie       *autocomplete.Trie
+	Logger        *zap.Logger
 }
 
-func NewSkill(skillGorm *SkillGorm, logger *zap.Logger) *Skill {
+func NewSkill(skillGorm *SkillGorm, canTrie *autocomplete.Trie, recTrie *autocomplete.Trie, jobTrie *autocomplete.Trie, logger *zap.Logger) *Skill {
 	return &Skill{
-		SkillGorm: skillGorm,
-		Logger:    logger,
+		SkillGorm:     skillGorm,
+		CandidateTrie: canTrie,
+		RecruiterTrie: recTrie,
+		JobTrie:       jobTrie,
+		Logger:        logger,
 	}
 }
 
@@ -45,6 +53,9 @@ func (s *Skill) CreateSkill(ctx context.Context, skill *models.RequestCreateSkil
 	if err != nil {
 		return err
 	}
+	s.CandidateTrie.Insert(skillModels.Name)
+	s.RecruiterTrie.Insert(skillModels.Name)
+	s.JobTrie.Insert(skillModels.Name)
 	return nil
 }
 
@@ -60,6 +71,9 @@ func (s *Skill) UpdateSkill(ctx context.Context, skill *models.RequestCreateSkil
 	if err != nil {
 		return err
 	}
+	s.CandidateTrie.Insert(skillModels.Name)
+	s.RecruiterTrie.Insert(skillModels.Name)
+	s.JobTrie.Insert(skillModels.Name)
 	return nil
 }
 

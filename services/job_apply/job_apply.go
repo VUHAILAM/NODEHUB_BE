@@ -18,6 +18,7 @@ type IJobApplyService interface {
 	UpdateStatusJobApplied(ctx context.Context, req models.RequestUpdateStatusJobApplied) error
 	CountCandidateByStatus(ctx context.Context, req models.RequestCountStatus) (int64, error)
 	CheckApplied(ctx context.Context, req models.RequestCheckApply) (*models.JobApply, error)
+	GetApply(ctx context.Context, req models.RequestCheckApply) (*models.JobApply, error)
 }
 
 type JobApply struct {
@@ -44,7 +45,10 @@ func (ja *JobApply) CreateJobApply(ctx context.Context, req models.RequestApply)
 		JobID:       req.JobID,
 		CandidateID: req.CandidateID,
 		Status:      req.Status,
+		Answers:     req.Answers,
+		Media:       req.Media,
 	}
+
 	_, err := ja.JobApplyGorm.Create(ctx, &jobApply)
 	if err != nil {
 		ja.Logger.Error("Can not create apply candidate", zap.Error(err), zap.Reflect("request", req))
@@ -152,4 +156,8 @@ func (ja *JobApply) CountCandidateByStatus(ctx context.Context, req models.Reque
 }
 func (ja *JobApply) CheckApplied(ctx context.Context, req models.RequestCheckApply) (*models.JobApply, error) {
 	return ja.JobApplyGorm.CheckApplied(ctx, req.JobID, req.CandidateID)
+}
+
+func (ja *JobApply) GetApply(ctx context.Context, req models.RequestCheckApply) (*models.JobApply, error) {
+	return ja.JobApplyGorm.GetApply(ctx, req.JobID, req.CandidateID)
 }

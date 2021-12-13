@@ -26,6 +26,7 @@ type ICandidateDatabase interface {
 	Create(ctx context.Context, createData *models.Candidate) (int64, error)
 	Update(ctx context.Context, candidateID int64, updateData *models.Candidate) error
 	GetByCandidateID(ctx context.Context, candidateID int64) (*models.Candidate, error)
+	GetAllName(ctx context.Context) ([]string, error)
 	GetAllCandidateForAdmin(ctx context.Context, name string, page int64, size int64) (*models.ResponsetListCandidateAdmin, error)
 	UpdateReviewCandidateByAdmin(ctx context.Context, candidate_id int64, data map[string]interface{}) error
 	UpdateStatusCandidate(ctx context.Context, candidate *models.RequestUpdateStatusCandidate, candidate_id int64) error
@@ -86,6 +87,26 @@ func (g *CandidateGorm) GetByCandidateID(ctx context.Context, candidateID int64)
 	}
 	candidate.Email = acc.Email
 	return &candidate, nil
+}
+
+func (g *CandidateGorm) GetAllName(ctx context.Context) ([]string, error) {
+	db := g.DB.WithContext(ctx)
+	var cans []struct {
+		FirstName string
+		LastName  string
+	}
+	err := db.Table(candidateTable).Select("first_name, last_name").Find(&cans).Error
+	if err != nil {
+		g.Logger.Error(err.Error())
+		return nil, err
+	}
+	res := make([]string, 0)
+	for _, can := range cans {
+		name1 := can.FirstName + " " + can.LastName
+		name2 := can.LastName + " " + can.FirstName
+		res = append(res, name2, name1)
+	}
+	return res, nil
 }
 
 func (g *CandidateGorm) GetAllCandidate(ctx context.Context, offset, size int64) ([]*models.Candidate, int64, error) {

@@ -5,7 +5,6 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/mock"
-
 	"gitlab.com/hieuxeko19991/job4e_be/pkg/models"
 )
 

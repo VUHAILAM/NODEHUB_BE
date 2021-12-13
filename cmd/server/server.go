@@ -4,6 +4,10 @@ import (
 	"context"
 	"net/http"
 
+	autocomplete2 "gitlab.com/hieuxeko19991/job4e_be/endpoints/autocomplete"
+
+	"gitlab.com/hieuxeko19991/job4e_be/services/autocomplete"
+
 	"gitlab.com/hieuxeko19991/job4e_be/cmd/config"
 	account2 "gitlab.com/hieuxeko19991/job4e_be/endpoints/account"
 	blog2 "gitlab.com/hieuxeko19991/job4e_be/endpoints/blog"
@@ -84,6 +88,9 @@ const mappingJobNodeHub = `
         "status" : {
           "type" : "long"
         },
+		"questions" : {
+			"type" : "keyword"
+		},
         "title" : {
           "type" : "keyword"
         },
@@ -135,9 +142,12 @@ func InitServer() *Server {
 	authHandler := auth.NewAuthHandler(logger, conf)
 	mailService := email.NewSGMailService(logger, conf)
 
+	jobTrie := autocomplete.NewTrie()
+	recruiterTrie := autocomplete.NewTrie()
+	candidateTrie := autocomplete.NewTrie()
 	//init skill service
 	skillGorm := skill.NewSkillGorm(gormDB, logger)
-	skillService := skill.NewSkill(skillGorm, logger)
+	skillService := skill.NewSkill(skillGorm, candidateTrie, recruiterTrie, jobTrie, logger)
 	skillSerializer := skill2.NewSkillSerializer(skillService, logger)
 	//init job skill
 	jobSkillGorm := job_skill.NewJobSkillGorm(gormDB, logger)
@@ -158,14 +168,14 @@ func InitServer() *Server {
 	// init job service
 	jobES := job.NewJobES(esClient, conf.JobESIndex, logger)
 	jobGorm := job.NewJobGorm(gormDB, logger)
-	jobService := job.NewJobService(jobGorm, jobES, jobSkillGorm, skillGorm, notificationGorm, recruiterGorm, followGorm, conf, logger)
+	jobService := job.NewJobService(jobGorm, jobES, jobSkillGorm, skillGorm, notificationGorm, recruiterGorm, followGorm, conf, logger, jobTrie)
 	jobSerializer := job2.NewJobSerializer(jobService, logger)
 
 	jobApplyGorm := job_apply.NewJobApplyGorm(gormDB, logger)
 	jobApplyService := job_apply.NewJobApplyService(jobApplyGorm, jobGorm, notificationGorm, jobSkillGorm, logger)
 	jobApplySerializer := job_apply2.NewJobApplySerializer(jobApplyService, logger)
 	accountGorm := account.NewAccountGorm(gormDB, logger)
-	accountService := account.NewAccount(accountGorm, recruiterGorm, candidateGorm, authHandler, conf, mailService, logger)
+	accountService := account.NewAccount(accountGorm, recruiterGorm, candidateGorm, authHandler, conf, mailService, logger, candidateTrie, recruiterTrie)
 	accountSerializer := account2.NewAccountSerializer(accountService, logger)
 	//init candidate profile
 
@@ -192,6 +202,39 @@ func InitServer() *Server {
 	mediaService := media.NewMediaCategory(mediaGorm, logger)
 	mediaSerializer := media2.NewMediaSerializer(mediaService, logger)
 
+	recNames, err := recruiterGorm.GetAllRecruiterName(context.Background())
+	if err != nil {
+		logger.Error(err.Error())
+	}
+	canNames, err := candidateGorm.GetAllName(context.Background())
+	if err != nil {
+		logger.Error(err.Error())
+	}
+	skills, err := skillGorm.GetAll(context.Background(), "")
+	if err != nil {
+		logger.Error(err.Error())
+	}
+	jobs, _, err := jobES.GetAllJob(context.Background(), 0, 10000)
+	if err != nil {
+		logger.Error(err.Error())
+	}
+	recruiterTrie.Insert(recNames...)
+	candidateTrie.Insert(canNames...)
+	jobTrie.Insert(recNames...)
+	for _, s := range skills {
+		recruiterTrie.Insert(s.Name)
+		candidateTrie.Insert(s.Name)
+		jobTrie.Insert(s.Name)
+	}
+	for _, j := range jobs {
+		jobTrie.Insert(j.CompanyName, j.Role, j.Title)
+	}
+	Autocom := autocomplete2.AutocompleteSerialize{
+		JobTrie: jobTrie,
+		CanTrie: candidateTrie,
+		RecTrie: recruiterTrie,
+		Logger:  logger,
+	}
 	ginDepen := transport.GinDependencies{
 		AccountSerializer:      accountSerializer,
 		Auth:                   authHandler,
@@ -206,6 +249,7 @@ func InitServer() *Server {
 		JobSkillSerializer:     jobSkillSerializer,
 		NotificationSerializer: notificationSerializer,
 		FollowSerializer:       followSerializer,
+		AUtoSerializer:         &Autocom,
 	}
 	ginHandler := ginDepen.InitGinEngine(conf)
 	return &Server{
