@@ -20,7 +20,7 @@ type INotificationService interface {
 }
 
 type NotificationService struct {
-	NotificationGorm *NotificationGorm
+	NotificationGorm INotificationDatabase
 	Logger           *zap.Logger
 }
 
