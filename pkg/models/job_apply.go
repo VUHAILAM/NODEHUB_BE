@@ -6,7 +6,7 @@ type JobApply struct {
 	ID          int64     `json:"id"`
 	CandidateID int64     `json:"candidate_id"`
 	JobID       int64     `json:"job_id"`
-	Questions   string    `json:"questions"`
+	Questions   string    `json:"questions" gorm:"->"`
 	Answers     string    `json:"answers"`
 	Media       string    `json:"media"`
 	Status      string    `json:"status"`
