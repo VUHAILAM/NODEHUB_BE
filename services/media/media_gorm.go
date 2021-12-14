@@ -12,6 +12,13 @@ import (
 
 const tableAccount = "media"
 
+type IMediaDatabase interface {
+	Create(ctx context.Context, media *models.Media) error
+	Update(ctx context.Context, media *models.RequestUpdateMedia, media_id int64) error
+	Get(ctx context.Context, name string, page int64, size int64) (*models.ResponsetListMedia, error)
+	GetSlide(ctx context.Context) ([]models.Media, error)
+}
+
 type MediaGorm struct {
 	db     *gorm.DB
 	logger *zap.Logger

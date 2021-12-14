@@ -18,7 +18,7 @@ type ISkillService interface {
 
 type ISkillDatabase interface {
 	Create(ctx context.Context, skill *models.Skill) error
-	Update(ctx context.Context, skill *models.RequestUpdateSkill, Blog_id int64) error
+	Update(ctx context.Context, skill *models.RequestUpdateSkill, skillID int64) error
 	Get(ctx context.Context, name string, page int64, size int64) (*models.ResponsetListSkill, error)
 	GetAll(ctx context.Context, name string) ([]models.Skill, error)
 }
