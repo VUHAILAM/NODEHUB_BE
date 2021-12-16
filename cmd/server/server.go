@@ -53,7 +53,13 @@ const mappingJobNodeHub = `
           "type" : "keyword"
         },
 		"company_name" : {
-          "type" : "keyword"
+          "type": "text",
+		  "fields": {
+      		"keyword": {
+        		"type": "keyword",
+        		"ignore_above": 256
+      			}
+    		}
         },
         "description" : {
           "type" : "keyword"
@@ -80,7 +86,13 @@ const mappingJobNodeHub = `
           "type" : "long"
         },
         "role" : {
-          "type" : "keyword"
+          "type": "text",
+		  "fields": {
+      		"keyword": {
+        		"type": "keyword",
+        		"ignore_above": 256
+      			}
+    		}
         },
         "salary_range" : {
           "type" : "keyword"
@@ -92,13 +104,27 @@ const mappingJobNodeHub = `
 			"type" : "keyword"
 		},
         "title" : {
-          "type" : "keyword"
+          "type": "text",
+		  "fields": {
+      		"keyword": {
+        		"type": "keyword",
+        		"ignore_above": 256
+      			}
+    		}
         },
 		"skills" : {
 			"type": "nested",
 			"properties": {
 				"skill_id":{"type":"keyword"},
-				"name":{"type":"keyword"},
+				"name":{
+					"type": "text",
+		  			"fields": {
+      					"keyword": {
+        					"type": "keyword",
+        					"ignore_above": 256
+      					}
+    				}
+				},
 				"description":{"type":"keyword"},
 				"questions":{"type":"keyword"},
 				"icon":{"type":"keyword"},
