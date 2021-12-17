@@ -17,7 +17,7 @@ type IBlogService interface {
 }
 
 type Blog struct {
-	BlogGorm *BlogGorm
+	BlogGorm IBlogDatabase
 	Logger   *zap.Logger
 }
 
