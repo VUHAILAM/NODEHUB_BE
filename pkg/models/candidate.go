@@ -9,6 +9,7 @@ type CandidateRequest struct {
 	CandidateID       int64         `json:"candidate_id"`
 	FirstName         string        `json:"first_name,omitempty"`
 	LastName          string        `json:"last_name,omitempty"`
+	Gender            string        `json:"gender,omitempty"`
 	BirthDay          string        `json:"birth_day,omitempty"`
 	Address           string        `json:"address,omitempty"`
 	Avatar            string        `json:"avatar,omitempty"`
@@ -33,6 +34,7 @@ type CandidateResponse struct {
 	Email             string        `json:"email"`
 	FirstName         string        `json:"first_name"`
 	LastName          string        `json:"last_name"`
+	Gender            string        `json:"gender"`
 	BirthDay          string        `json:"birth_day"`
 	Address           string        `json:"address"`
 	Avatar            string        `json:"avatar"`
@@ -58,6 +60,7 @@ type CandidateRequestAdmin struct {
 	Fullname          string        `json:"full_name"`
 	FirstName         string        `json:"first_name"`
 	LastName          string        `json:"last_name"`
+	Gender            string        `json:"gender"`
 	BirthDay          string        `json:"birth_day"`
 	Address           string        `json:"address"`
 	Avatar            string        `json:"avatar"`
@@ -84,6 +87,7 @@ type CandidateAdmin struct {
 	Fullname          string    `json:"full_name"`
 	FirstName         string    `json:"first_name"`
 	LastName          string    `json:"last_name"`
+	Gender            string    `json:"gender"`
 	BirthDay          string    `json:"birth_day"`
 	Address           string    `json:"address"`
 	Avatar            string    `json:"avatar"`
@@ -132,6 +136,7 @@ type Candidate struct {
 	Email             string    `json:"email" gorm:"-"`
 	FirstName         string    `json:"first_name,omitempty"`
 	LastName          string    `json:"last_name,omitempty"`
+	Gender            string    `json:"gender,omitempty"`
 	BirthDay          string    `json:"birth_day,omitempty"`
 	Address           string    `json:"address,omitempty"`
 	Avatar            string    `json:"avatar,omitempty"`
@@ -272,6 +277,7 @@ func (req *CandidateRequest) ToCandidate() (Candidate, error) {
 		CandidateID:   req.CandidateID,
 		FirstName:     req.FirstName,
 		LastName:      req.LastName,
+		Gender:        req.Gender,
 		BirthDay:      req.BirthDay,
 		Address:       req.Address,
 		Avatar:        req.Avatar,
@@ -346,6 +352,7 @@ func (c *Candidate) ToCandidateRequest() (CandidateRequest, error) {
 		CandidateID:       c.CandidateID,
 		FirstName:         c.FirstName,
 		LastName:          c.LastName,
+		Gender:            c.Gender,
 		BirthDay:          c.BirthDay,
 		Address:           c.Address,
 		Avatar:            c.Avatar,
@@ -409,6 +416,7 @@ func (c *Candidate) ToCandidateResponse() (CandidateResponse, error) {
 		Email:             c.Email,
 		FirstName:         c.FirstName,
 		LastName:          c.LastName,
+		Gender:            c.Gender,
 		BirthDay:          c.BirthDay,
 		Address:           c.Address,
 		Avatar:            c.Avatar,
@@ -473,6 +481,7 @@ func (c *CandidateAdmin) ToCandidateRequestAdmin() (CandidateRequestAdmin, error
 		CandidateID:       c.CandidateID,
 		FirstName:         c.FirstName,
 		LastName:          c.LastName,
+		Gender:            c.Gender,
 		BirthDay:          c.BirthDay,
 		Address:           c.Address,
 		Avatar:            c.Avatar,
