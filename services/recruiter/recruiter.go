@@ -25,9 +25,8 @@ type IRecruiterService interface {
 }
 
 type Recruiter struct {
-	RecruiterGorm *RecruiterGorm
-
-	Logger *zap.Logger
+	RecruiterGorm IRecruiterDatabase
+	Logger        *zap.Logger
 }
 
 func NewRecruiterCategory(recruiterGorm *RecruiterGorm, logger *zap.Logger) *Recruiter {

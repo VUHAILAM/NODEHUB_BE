@@ -36,6 +36,11 @@ func (g *MockJobSkillGorm) Delete(ctx context.Context, jobID int64) error {
 	return args.Error(0)
 }
 
+func TestNewJobSkill(t *testing.T) {
+	jobSkill := NewJobSkill(&JobSkillGorm{}, zap.L())
+	assert.NotNil(t, jobSkill)
+}
+
 func TestJobSkill_GetJobBySkill(t *testing.T) {
 	testcases := []struct {
 		Name        string

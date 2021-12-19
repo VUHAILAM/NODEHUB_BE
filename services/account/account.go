@@ -2,6 +2,7 @@ package account
 
 import (
 	"context"
+	"strconv"
 	"time"
 
 	"gitlab.com/hieuxeko19991/job4e_be/services/autocomplete"
@@ -377,7 +378,7 @@ func (a *Account) GetAccessToken(ctx context.Context, accountID int64, customKey
 		a.Logger.Error("Can not use AccountID to get", zap.Error(err), zap.Int64("account_id", accountID))
 		return "", err
 	}
-	actualCustomKey := a.Auth.GenerateCustomKey(string(account.Id), account.TokenHash)
+	actualCustomKey := a.Auth.GenerateCustomKey(strconv.FormatInt(account.Id, 10), account.TokenHash)
 	if customKey != actualCustomKey {
 		a.Logger.Error("Wrong token: Authentication failed", zap.String("customKey", customKey), zap.String("actual", actualCustomKey))
 		return "", errors.New("Authentication failed. Invalid token")

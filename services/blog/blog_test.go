@@ -46,6 +46,11 @@ func (g *MockBlogGorm) GetListBlogByCategory(ctx context.Context, category_id in
 	return args.Get(0).(*models.ResponsetListBlog), args.Error(1)
 }
 
+func TestNewBlog(t *testing.T) {
+	blog := NewBlog(&BlogGorm{}, zap.L())
+	assert.NotNil(t, blog)
+}
+
 func TestBlog_GetDetailBlog(t *testing.T) {
 	testcases := []struct {
 		Name        string
@@ -131,6 +136,205 @@ func TestBlog_GetListBlog(t *testing.T) {
 			test.TestObj.BlogGorm = mockObj
 			resp, err := test.TestObj.GetListBlog(context.Background(), test.Title, test.Page, test.Size)
 			assert.Equal(t, test.ExpectedRes, resp)
+			assert.Nil(t, err)
+		})
+	}
+}
+
+func TestBlog_GetListBlogUser(t *testing.T) {
+	testcases := []struct {
+		Name        string
+		TestObj     Blog
+		Title       string
+		CategoryID  int64
+		Page        int64
+		Size        int64
+		ExpectedRes *models.ResponsetListBlog
+		ExpectedErr error
+	}{
+		{
+			Name: "Happy Case",
+			TestObj: Blog{
+				BlogGorm: &MockBlogGorm{},
+				Logger:   zap.L(),
+			},
+			Title:      "Blog",
+			CategoryID: 1,
+			Page:       1,
+			Size:       5,
+			ExpectedRes: &models.ResponsetListBlog{
+				TotalBlog:   1,
+				TotalPage:   1,
+				CurrentPage: 1,
+				Data: []models.ResponseBlog{
+					{
+						Blog_id:     1,
+						Title:       "Blog",
+						Category_id: 1,
+					},
+				},
+			},
+		},
+	}
+
+	for _, test := range testcases {
+		t.Run(test.Name, func(t *testing.T) {
+			mockObj := new(MockBlogGorm)
+			mockObj.On("GetListBlogUser", context.Background(), test.Title, test.CategoryID, test.Page, test.Size).
+				Return(&models.ResponsetListBlog{
+					TotalBlog:   1,
+					TotalPage:   1,
+					CurrentPage: 1,
+					Data: []models.ResponseBlog{
+						{
+							Blog_id:     1,
+							Title:       "Blog",
+							Category_id: 1,
+						},
+					},
+				}, nil)
+			test.TestObj.BlogGorm = mockObj
+			resp, err := test.TestObj.GetListBlogUser(context.Background(), test.Title, test.CategoryID, test.Page, test.Size)
+			assert.Equal(t, test.ExpectedRes, resp)
+			assert.Nil(t, err)
+		})
+	}
+}
+
+func TestBlog_GetListBlogByCategory(t *testing.T) {
+	testcases := []struct {
+		Name        string
+		TestObj     Blog
+		Title       string
+		CategoryID  int64
+		Page        int64
+		Size        int64
+		ExpectedRes *models.ResponsetListBlog
+		ExpectedErr error
+	}{
+		{
+			Name: "Happy Case",
+			TestObj: Blog{
+				BlogGorm: &MockBlogGorm{},
+				Logger:   zap.L(),
+			},
+			Title:      "Blog",
+			CategoryID: 1,
+			Page:       1,
+			Size:       5,
+			ExpectedRes: &models.ResponsetListBlog{
+				TotalBlog:   1,
+				TotalPage:   1,
+				CurrentPage: 1,
+				Data: []models.ResponseBlog{
+					{
+						Blog_id:     1,
+						Title:       "Blog",
+						Category_id: 1,
+					},
+				},
+			},
+		},
+	}
+
+	for _, test := range testcases {
+		t.Run(test.Name, func(t *testing.T) {
+			mockObj := new(MockBlogGorm)
+			mockObj.On("GetListBlogByCategory", context.Background(), test.CategoryID, test.Page, test.Size).
+				Return(&models.ResponsetListBlog{
+					TotalBlog:   1,
+					TotalPage:   1,
+					CurrentPage: 1,
+					Data: []models.ResponseBlog{
+						{
+							Blog_id:     1,
+							Title:       "Blog",
+							Category_id: 1,
+						},
+					},
+				}, nil)
+			test.TestObj.BlogGorm = mockObj
+			resp, err := test.TestObj.GetListBlogByCategory(context.Background(), test.CategoryID, test.Page, test.Size)
+			assert.Equal(t, test.ExpectedRes, resp)
+			assert.Nil(t, err)
+		})
+	}
+}
+
+func TestBlog_CreateBlog(t *testing.T) {
+	testcases := []struct {
+		Name        string
+		TestObj     Blog
+		Req         *models.RequestCreateBlog
+		ExpectedErr error
+	}{
+		{
+			Name: "Happy case",
+			TestObj: Blog{
+				BlogGorm: &MockBlogGorm{},
+				Logger:   zap.L(),
+			},
+			Req: &models.RequestCreateBlog{
+				Category_id: 2,
+				Title:       "Blog",
+			},
+			ExpectedErr: nil,
+		},
+	}
+	for _, test := range testcases {
+		t.Run(test.Name, func(t *testing.T) {
+			mockObj := new(MockBlogGorm)
+			mockObj.On("Create", context.Background(), &models.Blog{
+				Title:       test.Req.Title,
+				Category_id: test.Req.Category_id,
+				Icon:        test.Req.Icon,
+				Description: test.Req.Description,
+				Excerpts:    test.Req.Excerpts,
+				Status:      test.Req.Status,
+			}).Return(nil)
+			test.TestObj.BlogGorm = mockObj
+			err := test.TestObj.CreateBlog(context.Background(), test.Req)
+			assert.Nil(t, err)
+		})
+	}
+}
+
+func TestBlog_UpdateBlog(t *testing.T) {
+	testcases := []struct {
+		Name        string
+		TestObj     Blog
+		Req         *models.RequestCreateBlog
+		BlogID      int64
+		ExpectedErr error
+	}{
+		{
+			Name: "Happy case",
+			TestObj: Blog{
+				BlogGorm: &MockBlogGorm{},
+				Logger:   zap.L(),
+			},
+			Req: &models.RequestCreateBlog{
+				Category_id: 2,
+				Title:       "Blog",
+			},
+			BlogID:      1,
+			ExpectedErr: nil,
+		},
+	}
+
+	for _, test := range testcases {
+		t.Run(test.Name, func(t *testing.T) {
+			mockObj := new(MockBlogGorm)
+			mockObj.On("Update", context.Background(), &models.RequestUpdateBlog{
+				Title:       test.Req.Title,
+				Category_id: test.Req.Category_id,
+				Icon:        test.Req.Icon,
+				Description: test.Req.Description,
+				Excerpts:    test.Req.Excerpts,
+				Status:      test.Req.Status,
+			}, test.BlogID).Return(nil)
+			test.TestObj.BlogGorm = mockObj
+			err := test.TestObj.UpdateBlog(context.Background(), test.Req, test.BlogID)
 			assert.Nil(t, err)
 		})
 	}

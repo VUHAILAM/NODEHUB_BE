@@ -3,6 +3,7 @@ package job
 import (
 	"context"
 	"encoding/json"
+	"strconv"
 	"time"
 
 	"gitlab.com/hieuxeko19991/job4e_be/services/autocomplete"
@@ -132,7 +133,7 @@ func (j *Job) CreateNewJob(ctx context.Context, job *models.CreateJobRequest) er
 		return err
 	}
 	j.Logger.Info("Data input", zap.Reflect("Input", jobInput))
-	err = j.JobES.Create(ctx, string(jobData.JobID), jobInput)
+	err = j.JobES.Create(ctx, strconv.FormatInt(jobData.JobID, 10), jobInput)
 	if err != nil {
 		j.Logger.Error("Create job to ES error", zap.Error(err))
 		return err
@@ -154,7 +155,7 @@ func (j *Job) CreateNewJob(ctx context.Context, job *models.CreateJobRequest) er
 			CandidateID: cid.CandidateID,
 			Title:       recruiterInfo.Name + " has a new job maybe fit to you. Let check it!!",
 			Content:     recruiterInfo.Name + " has a new job maybe fit to you. Let check it!!",
-			Key:         "job",
+			Key:         "/public/job/getJob?jobID=" + strconv.FormatInt(jobData.JobID, 10),
 			CheckRead:   false,
 		}
 		notis = append(notis, noti)
@@ -172,7 +173,7 @@ func (j *Job) CreateNewJob(ctx context.Context, job *models.CreateJobRequest) er
 }
 
 func (j *Job) GetDetailJob(ctx context.Context, jobID int64) (*models.ESJob, error) {
-	job, err := j.JobES.GetJobByID(ctx, string(jobID))
+	job, err := j.JobES.GetJobByID(ctx, strconv.FormatInt(jobID, 10))
 	if err != nil {
 		j.Logger.Error("Can not get Job from ES", zap.Error(err), zap.Int64("job_id", jobID))
 		return nil, err
@@ -238,7 +239,7 @@ func (j *Job) UpdateJob(ctx context.Context, updateRequest *models.RequestUpdate
 		return err
 	}
 	j.Logger.Info("updateData", zap.Reflect("DATA", updateData))
-	err = j.JobES.Update(ctx, string(updateRequest.JobID), updateData)
+	err = j.JobES.Update(ctx, strconv.FormatInt(updateRequest.JobID, 10), updateData)
 	if err != nil {
 		j.Logger.Error("Can not Update to ES", zap.Error(err))
 		return err
@@ -341,7 +342,7 @@ func (j *Job) UpdateStatusJob(ctx context.Context, updateRequest *models.Request
 		j.Logger.Error("Can not convert to map", zap.Error(err))
 		return err
 	}
-	err = j.JobES.Update(ctx, string(updateRequest.JobID), updateData)
+	err = j.JobES.Update(ctx, strconv.FormatInt(updateRequest.JobID, 10), updateData)
 	if err != nil {
 		return err
 	}
@@ -353,7 +354,7 @@ func (j *Job) DeleteJob(ctx context.Context, job_id int64) error {
 		j.Logger.Error("Can not delete to MySQL", zap.Error(err))
 		return err
 	}
-	err = j.JobES.Delete(ctx, string(job_id))
+	err = j.JobES.Delete(ctx, strconv.FormatInt(job_id, 10))
 	if err != nil {
 		return err
 	}
