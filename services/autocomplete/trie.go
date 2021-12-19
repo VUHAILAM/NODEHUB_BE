@@ -1,7 +1,6 @@
 package autocomplete
 
 import (
-	"fmt"
 	"sort"
 	"strings"
 	"unicode"
@@ -123,8 +122,7 @@ func (t *Trie) Search(text string) []string {
 	}
 
 	hits := make([]string, 0, len(collections))
-	for key, val := range collections {
-		fmt.Println("Map: " + key + " " + fmt.Sprint(val))
+	for key, _ := range collections {
 		hits = append(hits, key)
 	}
 	sort.Slice(hits, func(i, j int) bool {
@@ -135,7 +133,7 @@ func (t *Trie) Search(text string) []string {
 			return hits[i] < hits[j]
 		}
 	})
-	fmt.Println("Len hits: " + fmt.Sprint(len(hits)))
+
 	originals := make([]string, 0, len(hits))
 	for _, hit := range hits {
 		for o, _ := range t.OriginalDict[hit] {
@@ -146,7 +144,6 @@ func (t *Trie) Search(text string) []string {
 }
 
 func (node *Node) recursiveLevenshteinDistance(collection map[string]score, letter rune, text string, previousRow []int, maxDist int) {
-	fmt.Println("Letter: " + string(letter))
 	columns := len(text)
 	currRow := make([]int, 0, len(previousRow))
 	currRow = append(currRow, previousRow[0]+1)
@@ -184,7 +181,7 @@ func (node *Node) recursiveLevenshteinDistance(collection map[string]score, lett
 
 	if minVal <= maxDist {
 		for l, n := range node.Children {
-			fmt.Println("l: "+string(l), n.Word)
+
 			n.recursiveLevenshteinDistance(collection, l, text, currRow, maxDist)
 		}
 	}
@@ -195,7 +192,6 @@ func (node *Node) collectAllDescendentWords(collection map[string]score, distanc
 		if n.Word != "" {
 			previousScore, ok := collection[n.Word]
 			if !ok || distance < int(previousScore) {
-				fmt.Println(n.Word, distance)
 				collection[n.Word] = score(distance)
 			}
 

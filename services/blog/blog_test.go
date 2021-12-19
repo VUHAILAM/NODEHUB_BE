@@ -71,12 +71,120 @@ func TestBlog_GetDetailBlog(t *testing.T) {
 			},
 			ExpectedErr: nil,
 		},
+		{
+			Name: "Happy case",
+			TestObj: Blog{
+				BlogGorm: &MockBlogGorm{},
+				Logger:   zap.L(),
+			},
+			BlogID: 2,
+			ExpectedRes: &models.Blog{
+				Blog_id: 2,
+			},
+			ExpectedErr: nil,
+		},
+		{
+			Name: "Happy case",
+			TestObj: Blog{
+				BlogGorm: &MockBlogGorm{},
+				Logger:   zap.L(),
+			},
+			BlogID: 3,
+			ExpectedRes: &models.Blog{
+				Blog_id: 3,
+			},
+			ExpectedErr: nil,
+		},
+		{
+			Name: "Happy case",
+			TestObj: Blog{
+				BlogGorm: &MockBlogGorm{},
+				Logger:   zap.L(),
+			},
+			BlogID: 4,
+			ExpectedRes: &models.Blog{
+				Blog_id: 4,
+			},
+			ExpectedErr: nil,
+		},
+		{
+			Name: "Happy case",
+			TestObj: Blog{
+				BlogGorm: &MockBlogGorm{},
+				Logger:   zap.L(),
+			},
+			BlogID: 5,
+			ExpectedRes: &models.Blog{
+				Blog_id: 5,
+			},
+			ExpectedErr: nil,
+		},
+		{
+			Name: "Happy case",
+			TestObj: Blog{
+				BlogGorm: &MockBlogGorm{},
+				Logger:   zap.L(),
+			},
+			BlogID: 6,
+			ExpectedRes: &models.Blog{
+				Blog_id: 6,
+			},
+			ExpectedErr: nil,
+		},
+		{
+			Name: "Happy case",
+			TestObj: Blog{
+				BlogGorm: &MockBlogGorm{},
+				Logger:   zap.L(),
+			},
+			BlogID: 7,
+			ExpectedRes: &models.Blog{
+				Blog_id: 7,
+			},
+			ExpectedErr: nil,
+		},
+		{
+			Name: "Happy case",
+			TestObj: Blog{
+				BlogGorm: &MockBlogGorm{},
+				Logger:   zap.L(),
+			},
+			BlogID: 8,
+			ExpectedRes: &models.Blog{
+				Blog_id: 8,
+			},
+			ExpectedErr: nil,
+		},
+		{
+			Name: "Happy case",
+			TestObj: Blog{
+				BlogGorm: &MockBlogGorm{},
+				Logger:   zap.L(),
+			},
+			BlogID: 9,
+			ExpectedRes: &models.Blog{
+				Blog_id: 9,
+			},
+			ExpectedErr: nil,
+		},
+		{
+			Name: "Happy case",
+			TestObj: Blog{
+				BlogGorm: &MockBlogGorm{},
+				Logger:   zap.L(),
+			},
+			BlogID: 10,
+			ExpectedRes: &models.Blog{
+				Blog_id: 10,
+			},
+			ExpectedErr: nil,
+		},
 	}
 	for _, test := range testcases {
 		t.Run(test.Name, func(t *testing.T) {
 			mockObj := new(MockBlogGorm)
 			mockObj.On("GetDetailBlog", context.Background(), test.BlogID).Return(&models.Blog{
-				Blog_id: 1,
+				Blog_id: test.BlogID,
 			}, nil)
 			test.TestObj.BlogGorm = mockObj
 			blog, err := test.TestObj.GetDetailBlog(context.Background(), test.BlogID)
@@ -276,6 +384,142 @@ func TestBlog_CreateBlog(t *testing.T) {
 			},
 			Req: &models.RequestCreateBlog{
 				Category_id: 2,
+				Title:       "Blog",
+			},
+			ExpectedErr: nil,
+		},
+		{
+			Name: "Happy case",
+			TestObj: Blog{
+				BlogGorm: &MockBlogGorm{},
+				Logger:   zap.L(),
+			},
+			Req: &models.RequestCreateBlog{
+				Category_id: 1,
+				Title:       "Blog",
+			},
+			ExpectedErr: nil,
+		},
+		{
+			Name: "Happy case",
+			TestObj: Blog{
+				BlogGorm: &MockBlogGorm{},
+				Logger:   zap.L(),
+			},
+			Req: &models.RequestCreateBlog{
+				Category_id: 3,
+				Title:       "Blog",
+			},
+			ExpectedErr: nil,
+		},
+		{
+			Name: "Happy case",
+			TestObj: Blog{
+				BlogGorm: &MockBlogGorm{},
+				Logger:   zap.L(),
+			},
+			Req: &models.RequestCreateBlog{
+				Category_id: 4,
+				Title:       "Blog",
+			},
+			ExpectedErr: nil,
+		},
+		{
+			Name: "Happy case",
+			TestObj: Blog{
+				BlogGorm: &MockBlogGorm{},
+				Logger:   zap.L(),
+			},
+			Req: &models.RequestCreateBlog{
+				Category_id: 5,
+				Title:       "Blog",
+			},
+			ExpectedErr: nil,
+		}, {
+			Name: "Happy case",
+			TestObj: Blog{
+				BlogGorm: &MockBlogGorm{},
+				Logger:   zap.L(),
+			},
+			Req: &models.RequestCreateBlog{
+				Category_id: 6,
+				Title:       "Blog",
+			},
+			ExpectedErr: nil,
+		}, {
+			Name: "Happy case",
+			TestObj: Blog{
+				BlogGorm: &MockBlogGorm{},
+				Logger:   zap.L(),
+			},
+			Req: &models.RequestCreateBlog{
+				Category_id: 7,
+				Title:       "Blog",
+			},
+			ExpectedErr: nil,
+		}, {
+			Name: "Happy case",
+			TestObj: Blog{
+				BlogGorm: &MockBlogGorm{},
+				Logger:   zap.L(),
+			},
+			Req: &models.RequestCreateBlog{
+				Category_id: 8,
+				Title:       "Blog",
+			},
+			ExpectedErr: nil,
+		}, {
+			Name: "Happy case",
+			TestObj: Blog{
+				BlogGorm: &MockBlogGorm{},
+				Logger:   zap.L(),
+			},
+			Req: &models.RequestCreateBlog{
+				Category_id: 9,
+				Title:       "Blog",
+			},
+			ExpectedErr: nil,
+		}, {
+			Name: "Happy case",
+			TestObj: Blog{
+				BlogGorm: &MockBlogGorm{},
+				Logger:   zap.L(),
+			},
+			Req: &models.RequestCreateBlog{
+				Category_id: 10,
+				Title:       "Blog",
+			},
+			ExpectedErr: nil,
+		}, {
+			Name: "Happy case",
+			TestObj: Blog{
+				BlogGorm: &MockBlogGorm{},
+				Logger:   zap.L(),
+			},
+			Req: &models.RequestCreateBlog{
+				Category_id: 21,
+				Title:       "Blog",
+			},
+			ExpectedErr: nil,
+		}, {
+			Name: "Happy case",
+			TestObj: Blog{
+				BlogGorm: &MockBlogGorm{},
+				Logger:   zap.L(),
+			},
+			Req: &models.RequestCreateBlog{
+				Category_id: 12,
+				Title:       "Blog",
+			},
+			ExpectedErr: nil,
+		}, {
+			Name: "Happy case",
+			TestObj: Blog{
+				BlogGorm: &MockBlogGorm{},
+				Logger:   zap.L(),
+			},
+			Req: &models.RequestCreateBlog{
+				Category_id: 25,
 				Title:       "Blog",
 			},
 			ExpectedErr: nil,

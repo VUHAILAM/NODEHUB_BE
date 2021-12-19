@@ -55,6 +55,66 @@ func TestTrie_Search(t *testing.T) {
 				"Vũ Lâm Hải",
 			},
 		},
+		{
+			Name:  "Happy case",
+			input: []string{"hello", "helloo", "helllloo", "hela", "abcd", "cdef"},
+			trie:  NewTrie(),
+			text:  "bel",
+			expected: []string{
+				"hela",
+				"helllloo",
+				"hello",
+				"helloo",
+			},
+		},
+		{
+			Name:  "Happy case",
+			input: []string{"hello", "helloo", "helllloo", "hela", "abcd", "cdef"},
+			trie:  NewTrie(),
+			text:  "bel",
+			expected: []string{
+				"hela",
+				"helllloo",
+				"hello",
+				"helloo",
+			},
+		},
+		{
+			Name:  "Happy case",
+			input: []string{"hello", "helloo", "helllloo", "hela", "abcd", "cdef"},
+			trie:  NewTrie(),
+			text:  "bel",
+			expected: []string{
+				"hela",
+				"helllloo",
+				"hello",
+				"helloo",
+			},
+		},
+		{
+			Name:  "Happy case",
+			input: []string{"hello", "helloo", "helllloo", "hela", "abcd", "cdef"},
+			trie:  NewTrie(),
+			text:  "bel",
+			expected: []string{
+				"hela",
+				"helllloo",
+				"hello",
+				"helloo",
+			},
+		},
+		{
+			Name:  "Happy case",
+			input: []string{"hello", "helloo", "helllloo", "hela", "abcd", "cdef"},
+			trie:  NewTrie(),
+			text:  "bel",
+			expected: []string{
+				"hela",
+				"helllloo",
+				"hello",
+				"helloo",
+			},
+		},
 	}
 	for _, test := range testcases {
 		t.Run(test.Name, func(t *testing.T) {
