@@ -13,6 +13,7 @@ const (
 	jobApplyTable  = "job_candidate"
 	jobTable       = "job"
 	candidateTable = "candidate"
+	recruiterTable = "recruiter"
 )
 
 type IJobApplyDatabase interface {
@@ -71,8 +72,8 @@ func (g *JobApplyGorm) GetAppliedJobByJobID(ctx context.Context, jobID int64, of
 
 func (g *JobApplyGorm) GetAppliedJobByCandidateID(ctx context.Context, candidateID int64, offset, size int64) ([]*models.Job, int64, error) {
 	var jobs []*models.Job
-	db := g.DB.WithContext(ctx).Table(jobTable).Select("job.*, job_candidate.status as candidate_status").
-		Joins("JOIN "+jobApplyTable+" ON job.job_id=job_candidate.job_id").
+	db := g.DB.WithContext(ctx).Table(jobTable).Select("job.*, recruiter.name as company_name, recruiter.avartar as avartar, job_candidate.status as candidate_status").
+		Joins("JOIN "+recruiterTable+" ON job.recruiter_id=recruiter.recruiter_id").Joins("JOIN "+jobApplyTable+" ON job.job_id=job_candidate.job_id").
 		Where("job_candidate.candidate_id=?", candidateID).Find(&jobs)
 	total := db.RowsAffected
 	jobs = make([]*models.Job, 0)
