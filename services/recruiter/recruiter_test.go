@@ -120,6 +120,18 @@ func TestRecruiter_AddRecruiterSkill(t *testing.T) {
 			},
 			ExpectedErr: nil,
 		},
+		{
+			Name: "Happy case",
+			TestObj: Recruiter{
+				RecruiterGorm: &MockRecruiterGorm{},
+				Logger:        zap.L(),
+			},
+			Req: &models.RecruiterSkill{
+				RecruiterId: 1,
+				SkillId:     2,
+			},
+			ExpectedErr: nil,
+		},
 	}
 
 	for _, test := range testcases {
