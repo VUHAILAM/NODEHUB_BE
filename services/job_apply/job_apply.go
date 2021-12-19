@@ -2,6 +2,7 @@ package job_apply
 
 import (
 	"context"
+	"strconv"
 
 	"gitlab.com/hieuxeko19991/job4e_be/services/job_skill"
 
@@ -63,14 +64,14 @@ func (ja *JobApply) CreateJobApply(ctx context.Context, req models.RequestApply)
 		CandidateID: req.CandidateID,
 		Title:       "Apply job " + job.Title + " successful",
 		Content:     "The recruiter has received your CV!! Good luck!!",
-		Key:         "job",
+		Key:         "/job-candidate/common/jobs?candidateID=" + strconv.FormatInt(req.CandidateID, 10),
 		CheckRead:   false,
 	}
 	notiRecruiter := models.Notification{
 		RecruiterID: job.RecruiterID,
 		Title:       "A candidate apply to your job",
 		Content:     job.Title + ":This job has a new candidate. Let check it!!",
-		Key:         "job-apply",
+		Key:         "/job-candidate/common/candidates?jobID=" + strconv.FormatInt(req.JobID, 10),
 		CheckRead:   false,
 	}
 	notis := make([]*models.Notification, 0)
@@ -139,7 +140,7 @@ func (ja *JobApply) UpdateStatusJobApplied(ctx context.Context, req models.Reque
 		CandidateID: req.CandidateID,
 		Title:       "Your apply to " + job.Title + " has new!!",
 		Content:     "The recruiter has update status your application!! Let check it!!",
-		Key:         "job-apply",
+		Key:         "/job-candidate/common/jobs?candidateID=" + strconv.FormatInt(req.CandidateID, 10),
 		CheckRead:   false,
 	}
 	notis := make([]*models.Notification, 0)

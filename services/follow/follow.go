@@ -2,6 +2,7 @@ package follow
 
 import (
 	"context"
+	"strconv"
 
 	"gitlab.com/hieuxeko19991/job4e_be/services/candidate"
 	"gitlab.com/hieuxeko19991/job4e_be/services/recruiter"
@@ -66,9 +67,9 @@ func (s *FollowService) Follow(ctx context.Context, req models.RequestFollow) er
 
 	notiCandidate := &models.Notification{
 		CandidateID: req.CandidateID,
-		Title:       recruiterInfor.Name + " is following you",
-		Content:     recruiterInfor.Name + " is following you",
-		Key:         "recruiter",
+		Title:       "You followed " + recruiterInfor.Name,
+		Content:     "You followed " + recruiterInfor.Name,
+		Key:         "/public/recruiter/getProfile?recruiterID=" + strconv.FormatInt(recruiterInfor.RecruiterID, 10),
 		CheckRead:   false,
 	}
 
@@ -76,7 +77,7 @@ func (s *FollowService) Follow(ctx context.Context, req models.RequestFollow) er
 		RecruiterID: recruiterInfor.RecruiterID,
 		Title:       candidateInfor.FirstName + " is following you",
 		Content:     candidateInfor.FirstName + " is following you",
-		Key:         "candidate",
+		Key:         "/candidate/profile?candidateID=" + strconv.FormatInt(req.CandidateID, 10),
 		CheckRead:   false,
 	}
 	notis := make([]*models.Notification, 0)

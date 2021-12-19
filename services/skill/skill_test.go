@@ -37,6 +37,11 @@ func (m *MockSkillGorm) GetAll(ctx context.Context, name string) ([]models.Skill
 	return args.Get(0).([]models.Skill), args.Error(1)
 }
 
+func TestNewSkill(t *testing.T) {
+	skill := NewSkill(&SkillGorm{}, &autocomplete.Trie{}, &autocomplete.Trie{}, &autocomplete.Trie{}, zap.L())
+	assert.NotNil(t, skill)
+}
+
 func TestSkill_CreateSkill(t *testing.T) {
 	testcases := []struct {
 		Name          string

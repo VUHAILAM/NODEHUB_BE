@@ -45,6 +45,11 @@ func (g *MockNotificationGorm) UpdateCheckReadByAccountID(ctx context.Context, f
 	return args.Error(0)
 }
 
+func TestNewNotification(t *testing.T) {
+	noti := NewNotification(&NotificationGorm{}, zap.L())
+	assert.NotNil(t, noti)
+}
+
 func TestNotificationService_CreateNotification(t *testing.T) {
 	testcases := []struct {
 		Name        string
@@ -54,7 +59,12 @@ func TestNotificationService_CreateNotification(t *testing.T) {
 	}{
 		{
 			Name: "Happy case",
-			Req:  []*models.RequestCreateNotification{},
+			Req: []*models.RequestCreateNotification{
+				{
+					RecruiterID: 1,
+					CandidateID: 2,
+				},
+			},
 			MockObj: NotificationService{
 				NotificationGorm: &MockNotificationGorm{},
 				Logger:           zap.L(),
@@ -66,7 +76,12 @@ func TestNotificationService_CreateNotification(t *testing.T) {
 	for _, test := range testcases {
 		t.Run(test.Name, func(t *testing.T) {
 			gMock := new(MockNotificationGorm)
-			gMock.On("Create", context.Background(), []*models.Notification{}).Return(nil)
+			gMock.On("Create", context.Background(), []*models.Notification{
+				{
+					RecruiterID: 1,
+					CandidateID: 2,
+				},
+			}).Return(nil)
 			test.MockObj.NotificationGorm = gMock
 			err := test.MockObj.CreateNotification(context.Background(), test.Req)
 			assert.Nil(t, err)
