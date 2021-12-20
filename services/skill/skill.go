@@ -53,9 +53,9 @@ func (s *Skill) CreateSkill(ctx context.Context, skill *models.RequestCreateSkil
 	if err != nil {
 		return err
 	}
-	s.CandidateTrie.Insert(skillModels.Name)
-	s.RecruiterTrie.Insert(skillModels.Name)
-	s.JobTrie.Insert(skillModels.Name)
+	//s.CandidateTrie.Insert(skillModels.Name)
+	//s.RecruiterTrie.Insert(skillModels.Name)
+	//s.JobTrie.Insert(skillModels.Name)
 	return nil
 }
 
@@ -71,9 +71,9 @@ func (s *Skill) UpdateSkill(ctx context.Context, skill *models.RequestCreateSkil
 	if err != nil {
 		return err
 	}
-	s.CandidateTrie.Insert(skillModels.Name)
-	s.RecruiterTrie.Insert(skillModels.Name)
-	s.JobTrie.Insert(skillModels.Name)
+	//s.CandidateTrie.Insert(skillModels.Name)
+	//s.RecruiterTrie.Insert(skillModels.Name)
+	//s.JobTrie.Insert(skillModels.Name)
 	return nil
 }
 

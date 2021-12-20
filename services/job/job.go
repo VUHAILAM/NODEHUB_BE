@@ -123,6 +123,7 @@ func (j *Job) CreateNewJob(ctx context.Context, job *models.CreateJobRequest) er
 	for _, skill := range skillList {
 		esSk := models.ToESSkill(&skill)
 		esSkill = append(esSkill, esSk)
+		j.jobTrie.Insert(esSk.Name)
 	}
 	esJob.Skills = esSkill
 	j.Logger.Info("EsJob", zap.Reflect("es_job", esJob))
@@ -210,6 +211,7 @@ func (j *Job) UpdateJob(ctx context.Context, updateRequest *models.RequestUpdate
 		for _, skill := range skillList {
 			esSk := models.ToESSkill(&skill)
 			esSkill = append(esSkill, esSk)
+			j.jobTrie.Insert(esSk.Name)
 		}
 		updateES.Skills = esSkill
 
