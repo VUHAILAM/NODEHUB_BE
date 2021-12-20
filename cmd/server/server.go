@@ -250,10 +250,12 @@ func InitServer() *Server {
 	for _, s := range skills {
 		recruiterTrie.Insert(s.Name)
 		candidateTrie.Insert(s.Name)
-		jobTrie.Insert(s.Name)
 	}
 	for _, j := range jobs {
 		jobTrie.Insert(j.CompanyName, j.Role, j.Title)
+		for _, s := range j.Skills {
+			jobTrie.Insert(s.Name)
+		}
 	}
 	Autocom := autocomplete2.AutocompleteSerialize{
 		JobTrie: jobTrie,
