@@ -17,6 +17,7 @@ type INotificationDatabase interface {
 	GetListNotificationByRecruiter(ctx context.Context, recruiterID int64, offset int64, size int64) ([]*models.Notification, int64, error)
 	UpdateCheckRead(ctx context.Context, notificationID int64) error
 	UpdateCheckReadByAccountID(ctx context.Context, field string, accountID int64) error
+	CountUnread(ctx context.Context, field string, accountID int64) (int64, error)
 }
 
 type NotificationGorm struct {
@@ -89,4 +90,15 @@ func (n *NotificationGorm) UpdateCheckReadByAccountID(ctx context.Context, field
 		return err
 	}
 	return nil
+}
+
+func (n *NotificationGorm) CountUnread(ctx context.Context, field string, accountID int64) (int64, error) {
+	db := n.db.WithContext(ctx)
+	var count int64
+	err := db.Table(tableNotification).Where(field+"=? && check_read=false", accountID).Count(&count).Error
+	if err != nil {
+		n.logger.Error(err.Error())
+		return 0, err
+	}
+	return 0, nil
 }

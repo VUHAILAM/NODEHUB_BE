@@ -166,6 +166,7 @@ func (g *GinDependencies) InitGinEngine(config *config.Config) *gin.Engine {
 	notificationUser.POST("/getListNotificationByRecruiter", g.NotificationSerializer.GetListNotificationByRecruiter)
 	notificationUser.PUT("/markRead", g.NotificationSerializer.MarkRead)
 	notificationUser.PUT("/markReadAll", g.NotificationSerializer.MarkReadAll)
+	notificationUser.POST("/countUnread", g.NotificationSerializer.CountUnread)
 
 	//follow
 	followCtl := nodehub.Group("/follow")

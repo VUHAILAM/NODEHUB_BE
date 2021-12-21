@@ -17,6 +17,7 @@ type INotificationService interface {
 	GetListNotificationByRecruiter(ctx context.Context, recruiterID int64, page int64, size int64) (*models.ResponseListNotification, error)
 	MarkRead(ctx context.Context, req models.RequestMarkRead) error
 	MarkReadAll(ctx context.Context, req models.RequestMarkReadAll) error
+	CountUnread(ctx context.Context, req models.RequestCountUnread) (int64, error)
 }
 
 type NotificationService struct {
@@ -92,4 +93,14 @@ func (n *NotificationService) MarkReadAll(ctx context.Context, req models.Reques
 		return n.NotificationGorm.UpdateCheckReadByAccountID(ctx, "recruiter_id", req.AccountID)
 	}
 	return errors.New("Role not found")
+}
+
+func (n *NotificationService) CountUnread(ctx context.Context, req models.RequestCountUnread) (int64, error) {
+	switch req.Role {
+	case auth.CandidateRole:
+		return n.NotificationGorm.CountUnread(ctx, "candidate_id", req.AccountID)
+	case auth.RecruiterRole:
+		return n.NotificationGorm.CountUnread(ctx, "recruiter_id", req.AccountID)
+	}
+	return 0, errors.New("Role not found")
 }
