@@ -49,7 +49,7 @@ func (n *NotificationGorm) GetListNotificationByCandidate(ctx context.Context, c
 	db := n.db.WithContext(ctx).Table(tableNotification).Where("candidate_id=?", candidateID).Find(&notifications)
 	total := db.RowsAffected
 	notifications = make([]*models.Notification, 0)
-	err := db.Offset(int(offset)).Limit(int(size)).Find(&notifications).Order("created_at desc").Error
+	err := db.Offset(int(offset)).Limit(int(size)).Find(&notifications).Order("DATE(created_at) desc").Error
 
 	if err != nil {
 		n.logger.Error(err.Error())
@@ -63,7 +63,7 @@ func (n *NotificationGorm) GetListNotificationByRecruiter(ctx context.Context, r
 	db := n.db.WithContext(ctx).Table(tableNotification).Where("recruiter_id=?", recruiterID).Find(&notifications)
 	total := db.RowsAffected
 	notifications = make([]*models.Notification, 0)
-	err := db.Offset(int(offset)).Limit(int(size)).Find(&notifications).Order("created_at desc").Error
+	err := db.Offset(int(offset)).Limit(int(size)).Find(&notifications).Order("DATE(created_at) desc").Error
 
 	if err != nil {
 		n.logger.Error(err.Error())
