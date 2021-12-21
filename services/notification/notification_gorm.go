@@ -46,7 +46,7 @@ func (n *NotificationGorm) Create(ctx context.Context, notification []*models.No
 /*Get NotificationService*/
 func (n *NotificationGorm) GetListNotificationByCandidate(ctx context.Context, candidateID int64, offset int64, size int64) ([]*models.Notification, int64, error) {
 	var notifications []*models.Notification
-	db := n.db.WithContext(ctx).Table(tableNotification).Where("candidate_id=?", candidateID).Find(&notifications)
+	db := n.db.WithContext(ctx).Table(tableNotification).Where("candidate_id=?", candidateID).Find(&notifications).Order("DATE(created_at) desc")
 	total := db.RowsAffected
 	notifications = make([]*models.Notification, 0)
 	err := db.Offset(int(offset)).Limit(int(size)).Find(&notifications).Order("DATE(created_at) desc").Error
@@ -60,7 +60,7 @@ func (n *NotificationGorm) GetListNotificationByCandidate(ctx context.Context, c
 
 func (n *NotificationGorm) GetListNotificationByRecruiter(ctx context.Context, recruiterID int64, offset int64, size int64) ([]*models.Notification, int64, error) {
 	var notifications []*models.Notification
-	db := n.db.WithContext(ctx).Table(tableNotification).Where("recruiter_id=?", recruiterID).Find(&notifications)
+	db := n.db.WithContext(ctx).Table(tableNotification).Where("recruiter_id=?", recruiterID).Find(&notifications).Order("DATE(created_at) desc")
 	total := db.RowsAffected
 	notifications = make([]*models.Notification, 0)
 	err := db.Offset(int(offset)).Limit(int(size)).Find(&notifications).Order("DATE(created_at) desc").Error
