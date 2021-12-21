@@ -45,6 +45,11 @@ func (g *MockNotificationGorm) UpdateCheckReadByAccountID(ctx context.Context, f
 	return args.Error(0)
 }
 
+func (g *MockNotificationGorm) CountUnread(ctx context.Context, field string, accountID int64) (int64, error) {
+	args := g.Called(ctx, field, accountID)
+	return int64(args.Int(0)), args.Error(1)
+}
+
 func TestNewNotification(t *testing.T) {
 	noti := NewNotification(&NotificationGorm{}, zap.L())
 	assert.NotNil(t, noti)
@@ -254,6 +259,75 @@ func TestNotificationService_MarkReadAll(t *testing.T) {
 			if err != nil {
 				assert.Equal(t, test.ExpectedErr.Error(), err.Error())
 			} else {
+				assert.Nil(t, err)
+			}
+		})
+	}
+}
+
+func TestNotificationService_CountUnread(t *testing.T) {
+	testcases := []struct {
+		Name          string
+		Req           models.RequestCountUnread
+		MockObj       NotificationService
+		ExpectedCount int64
+		ExpectedErr   error
+	}{
+		{
+			Name: "Happy case for candidate role",
+			Req: models.RequestCountUnread{
+				AccountID: 1,
+				Role:      auth.CandidateRole,
+			},
+			MockObj: NotificationService{
+				NotificationGorm: &MockNotificationGorm{},
+				Logger:           zap.L(),
+			},
+			ExpectedCount: 10,
+			ExpectedErr:   nil,
+		},
+		{
+			Name: "Happy case for recruiter role",
+			Req: models.RequestCountUnread{
+				AccountID: 1,
+				Role:      auth.RecruiterRole,
+			},
+			MockObj: NotificationService{
+				NotificationGorm: &MockNotificationGorm{},
+				Logger:           zap.L(),
+			},
+			ExpectedCount: 10,
+			ExpectedErr:   nil,
+		},
+		{
+			Name: "Error case",
+			Req: models.RequestCountUnread{
+				AccountID: 1,
+				Role:      auth.CommonRole,
+			},
+			MockObj: NotificationService{
+				NotificationGorm: &MockNotificationGorm{},
+				Logger:           zap.L(),
+			},
+			ExpectedCount: 10,
+			ExpectedErr:   errors.New("Role not found"),
+		},
+	}
+
+	for _, test := range testcases {
+		t.Run(test.Name, func(t *testing.T) {
+			gMock := new(MockNotificationGorm)
+			if test.Req.Role == auth.CandidateRole {
+				gMock.On("CountUnread", context.Background(), "candidate_id", test.Req.AccountID).Return(10, nil)
+			} else if test.Req.Role == auth.RecruiterRole {
+				gMock.On("CountUnread", context.Background(), "recruiter_id", test.Req.AccountID).Return(10, nil)
+			}
+			test.MockObj.NotificationGorm = gMock
+			count, err := test.MockObj.CountUnread(context.Background(), test.Req)
+			if err != nil {
+				assert.Equal(t, test.ExpectedErr.Error(), err.Error())
+			} else {
+				assert.Equal(t, test.ExpectedCount, count)
 				assert.Nil(t, err)
 			}
 		})

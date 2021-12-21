@@ -43,3 +43,8 @@ type RequestMarkReadAll struct {
 	AccountID int64 `json:"account_id"`
 	Role      int64 `json:"role"`
 }
+
+type RequestCountUnread struct {
+	AccountID int64 `json:"account_id"`
+	Role      int64 `json:"role"`
+}
