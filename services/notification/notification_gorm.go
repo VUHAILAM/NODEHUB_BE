@@ -100,5 +100,5 @@ func (n *NotificationGorm) CountUnread(ctx context.Context, field string, accoun
 		n.logger.Error(err.Error())
 		return 0, err
 	}
-	return 0, nil
+	return count, nil
 }
