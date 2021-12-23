@@ -3,7 +3,8 @@ package account
 import (
 	"context"
 
-	"gitlab.com/hieuxeko19991/job4e_be/pkg/models"
+	models2 "gitlab.com/hieuxeko19991/job4e_be/models"
+
 	"go.uber.org/zap"
 	"gorm.io/gorm"
 )
@@ -14,9 +15,9 @@ const (
 )
 
 type IAccountDatabase interface {
-	Create(ctx context.Context, account *models.Account) (int64, error)
-	GetAccountByEmail(ctx context.Context, email string) (*models.Account, error)
-	GetAccountByID(ctx context.Context, id int64) (*models.Account, error)
+	Create(ctx context.Context, account *models2.Account) (int64, error)
+	GetAccountByEmail(ctx context.Context, email string) (*models2.Account, error)
+	GetAccountByID(ctx context.Context, id int64) (*models2.Account, error)
 	UpdatePassword(ctx context.Context, email, password, tokenHash string) error
 	UpdateVerifyEmail(ctx context.Context, email string) error
 }
@@ -33,7 +34,7 @@ func NewAccountGorm(db *gorm.DB, logger *zap.Logger) *AccountGorm {
 	}
 }
 
-func (g *AccountGorm) Create(ctx context.Context, account *models.Account) (int64, error) {
+func (g *AccountGorm) Create(ctx context.Context, account *models2.Account) (int64, error) {
 	db := g.db.WithContext(ctx)
 	err := db.Table(tableAccount).Create(account).Error
 	if err != nil {
@@ -43,15 +44,15 @@ func (g *AccountGorm) Create(ctx context.Context, account *models.Account) (int6
 	return account.Id, nil
 }
 
-func (g *AccountGorm) GetAccountByEmail(ctx context.Context, email string) (*models.Account, error) {
+func (g *AccountGorm) GetAccountByEmail(ctx context.Context, email string) (*models2.Account, error) {
 	db := g.db.WithContext(ctx)
-	acc := models.Account{}
+	acc := models2.Account{}
 	err := db.Table(tableAccount).Where("email=?", email).First(&acc).Error
 	if err != nil {
 		g.logger.Error("AccountGorm: Get account error", zap.Error(err))
 		return nil, err
 	}
-	setting := models.Setting{}
+	setting := models2.Setting{}
 	err = db.Table(tableSetting).Where("setting_id=?", acc.Type).First(&setting).Error
 	if err != nil {
 		g.logger.Error("AccountGorm: Get setting error", zap.Error(err))
@@ -61,15 +62,15 @@ func (g *AccountGorm) GetAccountByEmail(ctx context.Context, email string) (*mod
 	return &acc, nil
 }
 
-func (g *AccountGorm) GetAccountByID(ctx context.Context, id int64) (*models.Account, error) {
+func (g *AccountGorm) GetAccountByID(ctx context.Context, id int64) (*models2.Account, error) {
 	db := g.db.WithContext(ctx)
-	acc := models.Account{}
+	acc := models2.Account{}
 	err := db.Table(tableAccount).Where("id=?", id).First(&acc).Error
 	if err != nil {
 		g.logger.Error("AccountGorm: Get account error", zap.Error(err))
 		return nil, err
 	}
-	setting := models.Setting{}
+	setting := models2.Setting{}
 	err = db.Table(tableSetting).Where("setting_id=?", acc.Type).First(&setting).Error
 	if err != nil {
 		g.logger.Error("AccountGorm: Get setting error", zap.Error(err))

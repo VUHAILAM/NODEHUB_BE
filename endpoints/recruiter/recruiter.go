@@ -5,12 +5,13 @@ import (
 	"net/http"
 	"strconv"
 
+	models2 "gitlab.com/hieuxeko19991/job4e_be/models"
+
 	"github.com/pkg/errors"
 	"gitlab.com/hieuxeko19991/job4e_be/pkg/auth"
 
 	"github.com/gin-gonic/gin"
 	"gitlab.com/hieuxeko19991/job4e_be/pkg/ginx"
-	"gitlab.com/hieuxeko19991/job4e_be/pkg/models"
 	"gitlab.com/hieuxeko19991/job4e_be/services/recruiter"
 
 	"go.uber.org/zap"
@@ -55,7 +56,7 @@ func (r *RecruiterSerializer) GetProfileRecruiter(ginCtx *gin.Context) {
 
 func (r *RecruiterSerializer) UpdateProfile(ginCtx *gin.Context) {
 	ctx := ginCtx.Request.Context()
-	req := models.RequestUpdateRecruiter{}
+	req := models2.RequestUpdateRecruiter{}
 	err := json.NewDecoder(ginCtx.Request.Body).Decode(&req)
 
 	if err != nil {
@@ -81,7 +82,7 @@ func (r *RecruiterSerializer) UpdateProfile(ginCtx *gin.Context) {
 // RecruiterSkill
 func (r *RecruiterSerializer) AddRecruiterSkill(ginCtx *gin.Context) {
 	ctx := ginCtx.Request.Context()
-	req := models.RecruiterSkill{}
+	req := models2.RecruiterSkill{}
 	err := json.NewDecoder(ginCtx.Request.Body).Decode(&req)
 
 	if err != nil {
@@ -154,7 +155,7 @@ func (r *RecruiterSerializer) DeleteRecruiterSkill(ginCtx *gin.Context) {
 //recruiter admin
 func (r *RecruiterSerializer) GetListRecruiterForAdmin(ginCtx *gin.Context) {
 	ctx := ginCtx.Request.Context()
-	req := models.RequestGetListRecruiter{}
+	req := models2.RequestGetListRecruiter{}
 	err := json.NewDecoder(ginCtx.Request.Body).Decode(&req)
 	if err != nil {
 		r.Logger.Error("Parse request get list error", zap.Error(err))
@@ -179,7 +180,7 @@ func (r *RecruiterSerializer) GetListRecruiterForAdmin(ginCtx *gin.Context) {
 
 func (r *RecruiterSerializer) UpdateReciuterByAdmin(ginCtx *gin.Context) {
 	ctx := ginCtx.Request.Context()
-	req := models.RequestUpdateRecruiterAdmin{}
+	req := models2.RequestUpdateRecruiterAdmin{}
 	err := json.NewDecoder(ginCtx.Request.Body).Decode(&req)
 	if err != nil {
 		r.Logger.Error("Parse request Update Recruiter error", zap.Error(err))
@@ -200,7 +201,7 @@ func (r *RecruiterSerializer) UpdateReciuterByAdmin(ginCtx *gin.Context) {
 }
 func (r *RecruiterSerializer) UpdateStatusReciuter(ginCtx *gin.Context) {
 	ctx := ginCtx.Request.Context()
-	req := models.RequestUpdateStatusRecruiter{}
+	req := models2.RequestUpdateStatusRecruiter{}
 	err := json.NewDecoder(ginCtx.Request.Body).Decode(&req)
 	if err != nil {
 		r.Logger.Error("Parse request Update status Recruiter error", zap.Error(err))
@@ -222,7 +223,7 @@ func (r *RecruiterSerializer) UpdateStatusReciuter(ginCtx *gin.Context) {
 
 func (r *RecruiterSerializer) GetAllRecruiterForCandidate(ginCtx *gin.Context) {
 	ctx := ginCtx.Request.Context()
-	req := models.RequestGetListRecruiterForCandidate{}
+	req := models2.RequestGetListRecruiterForCandidate{}
 	err := json.NewDecoder(ginCtx.Request.Body).Decode(&req)
 	if err != nil {
 		r.Logger.Error("Parse request get list error", zap.Error(err))
@@ -247,7 +248,7 @@ func (r *RecruiterSerializer) GetAllRecruiterForCandidate(ginCtx *gin.Context) {
 
 func (r *RecruiterSerializer) SearchRecruiter(ginCtx *gin.Context) {
 	ctx := ginCtx.Request.Context()
-	req := models.RequestSearchRecruiter{}
+	req := models2.RequestSearchRecruiter{}
 	err := json.NewDecoder(ginCtx.Request.Body).Decode(&req)
 	if err != nil {
 		r.Logger.Error("Parse request Search Recruiter error", zap.Error(err))
@@ -270,7 +271,7 @@ func (r *RecruiterSerializer) SearchRecruiter(ginCtx *gin.Context) {
 
 func (r *RecruiterSerializer) GetAllRecruiter(ginCtx *gin.Context) {
 	ctx := ginCtx.Request.Context()
-	req := models.RequestSearchRecruiter{}
+	req := models2.RequestSearchRecruiter{}
 	err := json.NewDecoder(ginCtx.Request.Body).Decode(&req)
 	if err != nil {
 		r.Logger.Error("Parse request Search Recruiter error", zap.Error(err))
@@ -307,7 +308,7 @@ func (r *RecruiterSerializer) CountRecruiter(ginCtx *gin.Context) {
 
 func (r *RecruiterSerializer) PublicProfile(ginCtx *gin.Context) {
 	ctx := ginCtx.Request.Context()
-	req := models.RequestPublicProfile{}
+	req := models2.RequestPublicProfile{}
 	err := json.NewDecoder(ginCtx.Request.Body).Decode(&req)
 	if err != nil {
 		r.Logger.Error("Parse request PublicProfile error", zap.Error(err))
@@ -342,7 +343,7 @@ func (r *RecruiterSerializer) CheckPremium(ginCtx *gin.Context) {
 		return
 	}
 
-	recruiterID := acc.(models.Account).Id
+	recruiterID := acc.(models2.Account).Id
 
 	premium, err := r.recruiterService.CheckPremium(ctx, recruiterID)
 	if err != nil {

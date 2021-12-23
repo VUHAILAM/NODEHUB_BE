@@ -3,8 +3,12 @@ package recruiter
 import (
 	"context"
 
+	"gitlab.com/hieuxeko19991/job4e_be/cmd/config"
+	"gitlab.com/hieuxeko19991/job4e_be/services/email"
+
+	"gitlab.com/hieuxeko19991/job4e_be/models"
+
 	"github.com/mitchellh/mapstructure"
-	"gitlab.com/hieuxeko19991/job4e_be/pkg/models"
 	"go.uber.org/zap"
 )
 
@@ -26,12 +30,16 @@ type IRecruiterService interface {
 
 type Recruiter struct {
 	RecruiterGorm IRecruiterDatabase
-	Logger        *zap.Logger
+	Email         email.IMailService
+
+	Conf   *config.Config
+	Logger *zap.Logger
 }
 
-func NewRecruiterCategory(recruiterGorm *RecruiterGorm, logger *zap.Logger) *Recruiter {
+func NewRecruiterCategory(recruiterGorm *RecruiterGorm, emailSV *email.SGMailService, logger *zap.Logger) *Recruiter {
 	return &Recruiter{
 		RecruiterGorm: recruiterGorm,
+		Email:         emailSV,
 		Logger:        logger,
 	}
 }
@@ -127,6 +135,26 @@ func (r *Recruiter) UpdateStatusReciuter(ctx context.Context, updateRequest *mod
 	if err != nil {
 		return err
 	}
+	if recruiterModels.Status == true {
+		recruiter, err := r.RecruiterGorm.GetProfile(ctx, recruiter_id)
+		linkReset := r.Conf.Domain + "recruiter/login"
+
+		from := "lamvhhe130764@fpt.edu.vn"
+		to := []string{recruiter.Email}
+		subject := "Approved your Company on NodeHub"
+		mailType := email.Approve
+		mailData := models.MailData{
+			Link: linkReset,
+		}
+
+		mailReq := r.Email.NewMail(from, to, subject, mailType, &mailData)
+		err = r.Email.SendMail(mailReq)
+		if err != nil {
+			r.Logger.Error("Cannot send email", zap.Error(err))
+			return err
+		}
+	}
+
 	return nil
 }
 

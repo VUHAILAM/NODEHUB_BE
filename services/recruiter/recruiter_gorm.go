@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"math"
 
+	models2 "gitlab.com/hieuxeko19991/job4e_be/models"
+
 	"go.uber.org/zap"
 	"gorm.io/gorm"
-
-	"gitlab.com/hieuxeko19991/job4e_be/pkg/models"
 )
 
 const (
@@ -24,20 +24,20 @@ const (
 )
 
 type IRecruiterDatabase interface {
-	Create(ctx context.Context, recruiter *models.Recruiter) (int64, error)
+	Create(ctx context.Context, recruiter *models2.Recruiter) (int64, error)
 	GetAllRecruiterName(ctx context.Context) ([]string, error)
-	AddRecruiterSkill(ctx context.Context, recruiterSkill *models.RecruiterSkill) error
-	UpdateProfile(ctx context.Context, recruiter *models.RequestUpdateRecruiter, recruiter_id int64) error
-	GetRecruiterSkill(ctx context.Context, recruiter_id int64) ([]models.ResponseRecruiterSkill, error)
-	GetProfile(ctx context.Context, id int64) (*models.Recruiter, error)
-	GetAllRecruiterForAdmin(ctx context.Context, name string, page int64, size int64) (*models.ResponsetListRecruiter, error)
+	AddRecruiterSkill(ctx context.Context, recruiterSkill *models2.RecruiterSkill) error
+	UpdateProfile(ctx context.Context, recruiter *models2.RequestUpdateRecruiter, recruiter_id int64) error
+	GetRecruiterSkill(ctx context.Context, recruiter_id int64) ([]models2.ResponseRecruiterSkill, error)
+	GetProfile(ctx context.Context, id int64) (*models2.Recruiter, error)
+	GetAllRecruiterForAdmin(ctx context.Context, name string, page int64, size int64) (*models2.ResponsetListRecruiter, error)
 	UpdateRecruiterByAdmin(ctx context.Context, recruiter_id int64, data map[string]interface{}) error
-	UpdateStatusRecruiter(ctx context.Context, updateRequest *models.RequestUpdateStatusRecruiter, recruiter_id int64) error
-	GetAllRecruiterForCandidate(ctx context.Context, recruiterName string, skillName string, address string, page int64, size int64) (*models.ResponsetListRecruiterForCandidate, error)
+	UpdateStatusRecruiter(ctx context.Context, updateRequest *models2.RequestUpdateStatusRecruiter, recruiter_id int64) error
+	GetAllRecruiterForCandidate(ctx context.Context, recruiterName string, skillName string, address string, page int64, size int64) (*models2.ResponsetListRecruiterForCandidate, error)
 	DeleteRecruiterSkill(ctx context.Context, recruiter_skill_id int64) error
-	SearchRecruiter(ctx context.Context, text string, offset, size int64) ([]*models.Recruiter, int64, error)
-	GetAllRecruiter(ctx context.Context, offset, size int64) ([]*models.Recruiter, int64, error)
-	GetAllSkillByRecruiterID(ctx context.Context, recruiterID int64) ([]*models.Skill, error)
+	SearchRecruiter(ctx context.Context, text string, offset, size int64) ([]*models2.Recruiter, int64, error)
+	GetAllRecruiter(ctx context.Context, offset, size int64) ([]*models2.Recruiter, int64, error)
+	GetAllSkillByRecruiterID(ctx context.Context, recruiterID int64) ([]*models2.Skill, error)
 	Count(ctx context.Context) (int64, error)
 	GetPremiumField(ctx context.Context, recruiterID int64) (bool, error)
 }
@@ -54,7 +54,7 @@ func NewRecruiterGorm(db *gorm.DB, logger *zap.Logger) *RecruiterGorm {
 	}
 }
 
-func (r *RecruiterGorm) Create(ctx context.Context, recruiter *models.Recruiter) (int64, error) {
+func (r *RecruiterGorm) Create(ctx context.Context, recruiter *models2.Recruiter) (int64, error) {
 	db := r.db.WithContext(ctx)
 	err := db.Table(tableRecruiter).Create(recruiter).Error
 	if err != nil {
@@ -80,15 +80,15 @@ func (r *RecruiterGorm) GetAllRecruiterName(ctx context.Context) ([]string, erro
 	return res, nil
 }
 
-func (r *RecruiterGorm) GetProfile(ctx context.Context, id int64) (*models.Recruiter, error) {
+func (r *RecruiterGorm) GetProfile(ctx context.Context, id int64) (*models2.Recruiter, error) {
 	db := r.db.WithContext(ctx)
-	rec := models.Recruiter{}
+	rec := models2.Recruiter{}
 	err := db.Table(tableRecruiter).Where("recruiter_id=?", id).First(&rec).Error
 	if err != nil {
 		r.logger.Error("RecruiterGorm: Get recruiter error", zap.Error(err))
 		return nil, err
 	}
-	acc := models.Account{}
+	acc := models2.Account{}
 	err = db.Table(tableAccount).Where("id=?", id).Take(&acc).Error
 	if err != nil {
 		r.logger.Error(err.Error())
@@ -97,11 +97,11 @@ func (r *RecruiterGorm) GetProfile(ctx context.Context, id int64) (*models.Recru
 	return &rec, nil
 }
 
-func (r *RecruiterGorm) GetAllRecruiter(ctx context.Context, offset, size int64) ([]*models.Recruiter, int64, error) {
-	var recruiters []*models.Recruiter
+func (r *RecruiterGorm) GetAllRecruiter(ctx context.Context, offset, size int64) ([]*models2.Recruiter, int64, error) {
+	var recruiters []*models2.Recruiter
 	db := r.db.WithContext(ctx).Table(tableRecruiter).Select("recruiter.*").Find(&recruiters)
 	total := db.RowsAffected
-	recruiters = make([]*models.Recruiter, 0)
+	recruiters = make([]*models2.Recruiter, 0)
 	err := db.Offset(int(offset)).Limit(int(size)).Order("updated_at desc").Find(&recruiters).Error
 	if err != nil {
 		r.logger.Error(err.Error())
@@ -111,7 +111,7 @@ func (r *RecruiterGorm) GetAllRecruiter(ctx context.Context, offset, size int64)
 	return recruiters, total, nil
 }
 
-func (r *RecruiterGorm) UpdateProfile(ctx context.Context, recruiter *models.RequestUpdateRecruiter, recruiter_id int64) error {
+func (r *RecruiterGorm) UpdateProfile(ctx context.Context, recruiter *models2.RequestUpdateRecruiter, recruiter_id int64) error {
 	db := r.db.WithContext(ctx)
 	err := db.Table(tableRecruiter).Where("recruiter_id = ?", recruiter_id).Updates(map[string]interface{}{
 		"name":              recruiter.Name,
@@ -133,7 +133,7 @@ func (r *RecruiterGorm) UpdateProfile(ctx context.Context, recruiter *models.Req
 }
 
 //recruiter skill
-func (r *RecruiterGorm) AddRecruiterSkill(ctx context.Context, recruiterSkill *models.RecruiterSkill) error {
+func (r *RecruiterGorm) AddRecruiterSkill(ctx context.Context, recruiterSkill *models2.RecruiterSkill) error {
 	db := r.db.WithContext(ctx)
 	err := db.Table(tableRecruiterSkill).Create(recruiterSkill).Error
 	if err != nil {
@@ -145,7 +145,7 @@ func (r *RecruiterGorm) AddRecruiterSkill(ctx context.Context, recruiterSkill *m
 
 func (r *RecruiterGorm) DeleteRecruiterSkill(ctx context.Context, recruiter_skill_id int64) error {
 	db := r.db.WithContext(ctx)
-	recruiter_skill := models.RecruiterSkill{}
+	recruiter_skill := models2.RecruiterSkill{}
 	err := db.Table(tableRecruiterSkill).Delete(&recruiter_skill, recruiter_skill_id).Error
 	if err != nil {
 		r.logger.Error("RecruiterGorm: Delete skill error", zap.Error(err), zap.Int64("recruiter_skill_id", recruiter_skill_id))
@@ -154,9 +154,9 @@ func (r *RecruiterGorm) DeleteRecruiterSkill(ctx context.Context, recruiter_skil
 	return nil
 }
 
-func (r *RecruiterGorm) GetRecruiterSkill(ctx context.Context, recruiter_id int64) ([]models.ResponseRecruiterSkill, error) {
+func (r *RecruiterGorm) GetRecruiterSkill(ctx context.Context, recruiter_id int64) ([]models2.ResponseRecruiterSkill, error) {
 	db := r.db.WithContext(ctx)
-	arr := []models.ResponseRecruiterSkill{}
+	arr := []models2.ResponseRecruiterSkill{}
 	data, err := db.Raw(`SELECT rs.id , rs.recruiter_id , rs.skill_id , s.name , s.description , s.questions , s.icon , s.status , rs.created_at ,rs.updated_at 
 	FROM nodehub.recruiter_skill rs
 	LEFT JOIN nodehub.skill s
@@ -174,10 +174,10 @@ func (r *RecruiterGorm) GetRecruiterSkill(ctx context.Context, recruiter_id int6
 }
 
 /*Get list recruiter for admin*/
-func (r *RecruiterGorm) GetAllRecruiterForAdmin(ctx context.Context, name string, page int64, size int64) (*models.ResponsetListRecruiter, error) {
+func (r *RecruiterGorm) GetAllRecruiterForAdmin(ctx context.Context, name string, page int64, size int64) (*models2.ResponsetListRecruiter, error) {
 	db := r.db.WithContext(ctx)
-	arr := []models.RecruiterForAdmin{}
-	resutl := models.ResponsetListRecruiter{}
+	arr := []models2.RecruiterForAdmin{}
+	resutl := models2.ResponsetListRecruiter{}
 	offset := (page - 1) * size
 	limit := size
 	var total int64
@@ -218,7 +218,7 @@ func (r *RecruiterGorm) UpdateRecruiterByAdmin(ctx context.Context, recruiter_id
 	return nil
 }
 
-func (r *RecruiterGorm) UpdateStatusRecruiter(ctx context.Context, recruiter *models.RequestUpdateStatusRecruiter, recruiter_id int64) error {
+func (r *RecruiterGorm) UpdateStatusRecruiter(ctx context.Context, recruiter *models2.RequestUpdateStatusRecruiter, recruiter_id int64) error {
 	db := r.db.WithContext(ctx)
 	err := db.Table(tableAccount).Where("id = ?", recruiter_id).Updates(map[string]interface{}{
 		"status": recruiter.Status}).Error
@@ -230,10 +230,10 @@ func (r *RecruiterGorm) UpdateStatusRecruiter(ctx context.Context, recruiter *mo
 }
 
 /*Get list recruiter for candidate*/
-func (r *RecruiterGorm) GetAllRecruiterForCandidate(ctx context.Context, recruiterName string, skillName string, address string, page int64, size int64) (*models.ResponsetListRecruiterForCandidate, error) {
+func (r *RecruiterGorm) GetAllRecruiterForCandidate(ctx context.Context, recruiterName string, skillName string, address string, page int64, size int64) (*models2.ResponsetListRecruiterForCandidate, error) {
 	db := r.db.WithContext(ctx)
-	arr := []models.RecruiterForCandidateCheck{}
-	resutl := models.ResponsetListRecruiterForCandidate{}
+	arr := []models2.RecruiterForCandidateCheck{}
+	resutl := models2.ResponsetListRecruiterForCandidate{}
 	offset := (page - 1) * size
 	limit := size
 
@@ -296,14 +296,14 @@ func (r *RecruiterGorm) GetAllRecruiterForCandidate(ctx context.Context, recruit
 	return &resutl, nil
 }
 
-func (r *RecruiterGorm) SearchRecruiter(ctx context.Context, text string, offset, size int64) ([]*models.Recruiter, int64, error) {
-	var recruiters []*models.Recruiter
+func (r *RecruiterGorm) SearchRecruiter(ctx context.Context, text string, offset, size int64) ([]*models2.Recruiter, int64, error) {
+	var recruiters []*models2.Recruiter
 	db := r.db.WithContext(ctx).Table(tableRecruiter).Joins("Join "+tableRecruiterSkill+" on recruiter_skill.recruiter_id=recruiter.recruiter_id").
 		Joins("Join "+tableSkill+" on recruiter_skill.skill_id=skill.skill_id").
 		Where("MATCH(recruiter.name) AGAINST(?) OR MATCH(skill.name) AGAINST(?)", text, text).
 		Group("recruiter.recruiter_id").Find(&recruiters)
 	total := db.RowsAffected
-	recruiters = make([]*models.Recruiter, 0)
+	recruiters = make([]*models2.Recruiter, 0)
 	res := db.Offset(int(offset)).Limit(int(size)).Find(&recruiters)
 	err := res.Error
 	if err != nil {
@@ -313,8 +313,8 @@ func (r *RecruiterGorm) SearchRecruiter(ctx context.Context, text string, offset
 	return recruiters, total, nil
 }
 
-func (r *RecruiterGorm) GetAllSkillByRecruiterID(ctx context.Context, recruiterID int64) ([]*models.Skill, error) {
-	var skills []*models.Skill
+func (r *RecruiterGorm) GetAllSkillByRecruiterID(ctx context.Context, recruiterID int64) ([]*models2.Skill, error) {
+	var skills []*models2.Skill
 	db := r.db.WithContext(ctx).Table(tableSkill).Joins("Join "+tableRecruiterSkill+" on recruiter_skill.skill_id=skill.skill_id").
 		Where("recruiter_skill.recruiter_id=?", recruiterID).Find(&skills)
 	if db.Error != nil {

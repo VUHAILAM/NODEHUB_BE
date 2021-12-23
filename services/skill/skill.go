@@ -3,9 +3,10 @@ package skill
 import (
 	"context"
 
+	"gitlab.com/hieuxeko19991/job4e_be/models"
+
 	"gitlab.com/hieuxeko19991/job4e_be/services/autocomplete"
 
-	"gitlab.com/hieuxeko19991/job4e_be/pkg/models"
 	"go.uber.org/zap"
 )
 

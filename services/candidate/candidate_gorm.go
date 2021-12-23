@@ -4,7 +4,8 @@ import (
 	"context"
 	"math"
 
-	"gitlab.com/hieuxeko19991/job4e_be/pkg/models"
+	models2 "gitlab.com/hieuxeko19991/job4e_be/models"
+
 	"go.uber.org/zap"
 	"gorm.io/gorm"
 )
@@ -23,20 +24,20 @@ const (
 )
 
 type ICandidateDatabase interface {
-	Create(ctx context.Context, createData *models.Candidate) (int64, error)
-	Update(ctx context.Context, candidateID int64, updateData *models.Candidate) error
-	GetByCandidateID(ctx context.Context, candidateID int64) (*models.Candidate, error)
+	Create(ctx context.Context, createData *models2.Candidate) (int64, error)
+	Update(ctx context.Context, candidateID int64, updateData *models2.Candidate) error
+	GetByCandidateID(ctx context.Context, candidateID int64) (*models2.Candidate, error)
 	GetAllName(ctx context.Context) ([]string, error)
-	GetAllCandidateForAdmin(ctx context.Context, name string, page int64, size int64) (*models.ResponsetListCandidateAdmin, error)
+	GetAllCandidateForAdmin(ctx context.Context, name string, page int64, size int64) (*models2.ResponsetListCandidateAdmin, error)
 	UpdateReviewCandidateByAdmin(ctx context.Context, candidate_id int64, data map[string]interface{}) error
-	UpdateStatusCandidate(ctx context.Context, candidate *models.RequestUpdateStatusCandidate, candidate_id int64) error
-	AddCandidateSkill(ctx context.Context, candidateSkill *models.CandidateSkill) error
+	UpdateStatusCandidate(ctx context.Context, candidate *models2.RequestUpdateStatusCandidate, candidate_id int64) error
+	AddCandidateSkill(ctx context.Context, candidateSkill *models2.CandidateSkill) error
 	DeleteCandidateSkill(ctx context.Context, candidate_skill_id int64) error
 	UpdateCandidateSkill(ctx context.Context, candidate_skill_id int64, data map[string]interface{}) error
-	GetCandidateSkill(ctx context.Context, candidate_id int64) ([]models.ResponseCandidateSkill, error)
-	SearchCandidate(ctx context.Context, text string, offset, page int64) ([]*models.Candidate, int64, error)
-	GetAllCandidate(ctx context.Context, offset, size int64) ([]*models.Candidate, int64, error)
-	GetAllSkillByCandidateID(ctx context.Context, candidateID int64) ([]*models.Skill, error)
+	GetCandidateSkill(ctx context.Context, candidate_id int64) ([]models2.ResponseCandidateSkill, error)
+	SearchCandidate(ctx context.Context, text string, offset, page int64) ([]*models2.Candidate, int64, error)
+	GetAllCandidate(ctx context.Context, offset, size int64) ([]*models2.Candidate, int64, error)
+	GetAllSkillByCandidateID(ctx context.Context, candidateID int64) ([]*models2.Skill, error)
 	Count(ctx context.Context) (int64, error)
 }
 
@@ -52,7 +53,7 @@ func NewCandidateGorm(db *gorm.DB, logger *zap.Logger) *CandidateGorm {
 	}
 }
 
-func (g *CandidateGorm) Create(ctx context.Context, createData *models.Candidate) (int64, error) {
+func (g *CandidateGorm) Create(ctx context.Context, createData *models2.Candidate) (int64, error) {
 	db := g.DB.WithContext(ctx)
 	err := db.Table(candidateTable).Create(createData).Error
 	if err != nil {
@@ -62,7 +63,7 @@ func (g *CandidateGorm) Create(ctx context.Context, createData *models.Candidate
 	return createData.CandidateID, nil
 }
 
-func (g *CandidateGorm) Update(ctx context.Context, candidateID int64, updateData *models.Candidate) error {
+func (g *CandidateGorm) Update(ctx context.Context, candidateID int64, updateData *models2.Candidate) error {
 	db := g.DB.WithContext(ctx)
 	err := db.Table(candidateTable).Where("candidate_id=?", candidateID).Updates(updateData).Error
 	if err != nil {
@@ -72,15 +73,15 @@ func (g *CandidateGorm) Update(ctx context.Context, candidateID int64, updateDat
 	return nil
 }
 
-func (g *CandidateGorm) GetByCandidateID(ctx context.Context, candidateID int64) (*models.Candidate, error) {
+func (g *CandidateGorm) GetByCandidateID(ctx context.Context, candidateID int64) (*models2.Candidate, error) {
 	db := g.DB.WithContext(ctx)
-	candidate := models.Candidate{}
+	candidate := models2.Candidate{}
 	err := db.Table(candidateTable).Select("candidate.*").Where("candidate_id=?", candidateID).Take(&candidate).Error
 	if err != nil {
 		g.Logger.Error(err.Error())
 		return nil, err
 	}
-	acc := models.Account{}
+	acc := models2.Account{}
 	err = db.Table(tableAccount).Where("id=?", candidateID).Take(&acc).Error
 	if err != nil {
 		g.Logger.Error(err.Error())
@@ -109,11 +110,11 @@ func (g *CandidateGorm) GetAllName(ctx context.Context) ([]string, error) {
 	return res, nil
 }
 
-func (g *CandidateGorm) GetAllCandidate(ctx context.Context, offset, size int64) ([]*models.Candidate, int64, error) {
-	var candidates []*models.Candidate
+func (g *CandidateGorm) GetAllCandidate(ctx context.Context, offset, size int64) ([]*models2.Candidate, int64, error) {
+	var candidates []*models2.Candidate
 	db := g.DB.WithContext(ctx).Table(candidateTable).Select("candidate.*").Find(&candidates)
 	total := db.RowsAffected
-	candidates = make([]*models.Candidate, 0)
+	candidates = make([]*models2.Candidate, 0)
 	err := db.Offset(int(offset)).Limit(int(size)).Order("updated_at desc").Find(&candidates).Error
 	if err != nil {
 		g.Logger.Error(err.Error())
@@ -124,11 +125,11 @@ func (g *CandidateGorm) GetAllCandidate(ctx context.Context, offset, size int64)
 }
 
 /*Get list candidate for admin*/
-func (g *CandidateGorm) GetAllCandidateForAdmin(ctx context.Context, name string, page int64, size int64) (*models.ResponsetListCandidateAdmin, error) {
+func (g *CandidateGorm) GetAllCandidateForAdmin(ctx context.Context, name string, page int64, size int64) (*models2.ResponsetListCandidateAdmin, error) {
 	db := g.DB.WithContext(ctx)
-	arr := []models.CandidateAdmin{}
-	arr2 := []models.CandidateRequestAdmin{}
-	resutl := models.ResponsetListCandidateAdmin{}
+	arr := []models2.CandidateAdmin{}
+	arr2 := []models2.CandidateRequestAdmin{}
+	resutl := models2.ResponsetListCandidateAdmin{}
 	offset := (page - 1) * size
 	limit := size
 	var total int64
@@ -180,7 +181,7 @@ func (g *CandidateGorm) UpdateReviewCandidateByAdmin(ctx context.Context, candid
 	return nil
 }
 
-func (g *CandidateGorm) UpdateStatusCandidate(ctx context.Context, candidate *models.RequestUpdateStatusCandidate, candidate_id int64) error {
+func (g *CandidateGorm) UpdateStatusCandidate(ctx context.Context, candidate *models2.RequestUpdateStatusCandidate, candidate_id int64) error {
 	db := g.DB.WithContext(ctx)
 	err := db.Table(tableAccount).Where("id = ?", candidate_id).Updates(map[string]interface{}{
 		"status": candidate.Status}).Error
@@ -192,7 +193,7 @@ func (g *CandidateGorm) UpdateStatusCandidate(ctx context.Context, candidate *mo
 }
 
 //candidate skill
-func (g *CandidateGorm) AddCandidateSkill(ctx context.Context, candidateSkill *models.CandidateSkill) error {
+func (g *CandidateGorm) AddCandidateSkill(ctx context.Context, candidateSkill *models2.CandidateSkill) error {
 	db := g.DB.WithContext(ctx)
 	err := db.Table(tableCandidateSkill).Create(candidateSkill).Error
 	if err != nil {
@@ -204,7 +205,7 @@ func (g *CandidateGorm) AddCandidateSkill(ctx context.Context, candidateSkill *m
 
 func (g *CandidateGorm) DeleteCandidateSkill(ctx context.Context, candidate_skill_id int64) error {
 	db := g.DB.WithContext(ctx)
-	CandidateSkill := models.CandidateSkill{}
+	CandidateSkill := models2.CandidateSkill{}
 	err := db.Table(tableCandidateSkill).Delete(&CandidateSkill, candidate_skill_id).Error
 	if err != nil {
 		g.Logger.Error("RecruiterGorm: Delete skill error", zap.Error(err), zap.Int64("candidate_skill_id", candidate_skill_id))
@@ -223,9 +224,9 @@ func (g *CandidateGorm) UpdateCandidateSkill(ctx context.Context, candidate_skil
 	return nil
 }
 
-func (g *CandidateGorm) GetCandidateSkill(ctx context.Context, candidate_id int64) ([]models.ResponseCandidateSkill, error) {
+func (g *CandidateGorm) GetCandidateSkill(ctx context.Context, candidate_id int64) ([]models2.ResponseCandidateSkill, error) {
 	db := g.DB.WithContext(ctx)
-	arr := []models.ResponseCandidateSkill{}
+	arr := []models2.ResponseCandidateSkill{}
 	data, err := db.Raw(`SELECT cs.id , cs.candidate_id , cs.skill_id , s.name , s.description , s.questions , s.icon , cs.media ,s.status , cs.created_at ,cs.updated_at
 	FROM nodehub.candidate_skill cs 
 	LEFT JOIN nodehub.skill s
@@ -242,14 +243,14 @@ func (g *CandidateGorm) GetCandidateSkill(ctx context.Context, candidate_id int6
 	return arr, nil
 }
 
-func (g *CandidateGorm) SearchCandidate(ctx context.Context, text string, offset, page int64) ([]*models.Candidate, int64, error) {
-	var candidates []*models.Candidate
+func (g *CandidateGorm) SearchCandidate(ctx context.Context, text string, offset, page int64) ([]*models2.Candidate, int64, error) {
+	var candidates []*models2.Candidate
 	db := g.DB.WithContext(ctx).Table(candidateTable).Select("candidate.*").Joins("Join "+tableCandidateSkill+" on candidate_skill.candidate_id=candidate.candidate_id").
 		Joins("Join "+tableSkill+" on candidate_skill.skill_id=skill.skill_id").
 		Where("MATCH(candidate.first_name, candidate.last_name) AGAINST(?) OR MATCH(skill.name) AGAINST(?)", text, text).
 		Group("candidate.candidate_id").Find(&candidates)
 	total := db.RowsAffected
-	candidates = make([]*models.Candidate, 0)
+	candidates = make([]*models2.Candidate, 0)
 	err := db.Offset(int(offset)).Limit(int(page)).Find(&candidates).Error
 	if err != nil {
 		g.Logger.Error(err.Error())
@@ -258,8 +259,8 @@ func (g *CandidateGorm) SearchCandidate(ctx context.Context, text string, offset
 	return candidates, total, nil
 }
 
-func (g *CandidateGorm) GetAllSkillByCandidateID(ctx context.Context, candidateID int64) ([]*models.Skill, error) {
-	var skills []*models.Skill
+func (g *CandidateGorm) GetAllSkillByCandidateID(ctx context.Context, candidateID int64) ([]*models2.Skill, error) {
+	var skills []*models2.Skill
 	db := g.DB.WithContext(ctx).Table(tableSkill).Joins("Join "+tableCandidateSkill+" on candidate_skill.skill_id=skill.skill_id").
 		Where("candidate_skill.candidate_id=?", candidateID).Find(&skills)
 	if db.Error != nil {

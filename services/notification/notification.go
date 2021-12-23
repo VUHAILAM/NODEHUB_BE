@@ -3,11 +3,12 @@ package notification
 import (
 	"context"
 
+	"gitlab.com/hieuxeko19991/job4e_be/models"
+
 	"github.com/pkg/errors"
 
 	"gitlab.com/hieuxeko19991/job4e_be/pkg/auth"
 
-	"gitlab.com/hieuxeko19991/job4e_be/pkg/models"
 	"go.uber.org/zap"
 )
 

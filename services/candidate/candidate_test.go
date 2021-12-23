@@ -4,47 +4,48 @@ import (
 	"context"
 	"testing"
 
+	models2 "gitlab.com/hieuxeko19991/job4e_be/models"
+
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/zap"
 
 	"github.com/stretchr/testify/mock"
-	"gitlab.com/hieuxeko19991/job4e_be/pkg/models"
 )
 
 type MockCandidateGorm struct {
 	mock.Mock
 }
 
-func (g *MockCandidateGorm) Create(ctx context.Context, createData *models.Candidate) (int64, error) {
+func (g *MockCandidateGorm) Create(ctx context.Context, createData *models2.Candidate) (int64, error) {
 	args := g.Called(ctx, createData)
 	return int64(args.Int(0)), args.Error(1)
 }
 
-func (g *MockCandidateGorm) Update(ctx context.Context, candidateID int64, updateData *models.Candidate) error {
+func (g *MockCandidateGorm) Update(ctx context.Context, candidateID int64, updateData *models2.Candidate) error {
 	args := g.Called(ctx, candidateID, updateData)
 	return args.Error(0)
 }
-func (g *MockCandidateGorm) GetByCandidateID(ctx context.Context, candidateID int64) (*models.Candidate, error) {
+func (g *MockCandidateGorm) GetByCandidateID(ctx context.Context, candidateID int64) (*models2.Candidate, error) {
 	args := g.Called(ctx, candidateID)
-	return args.Get(0).(*models.Candidate), args.Error(1)
+	return args.Get(0).(*models2.Candidate), args.Error(1)
 }
 func (g *MockCandidateGorm) GetAllName(ctx context.Context) ([]string, error) {
 	args := g.Called(ctx)
 	return args.Get(0).([]string), args.Error(1)
 }
-func (g *MockCandidateGorm) GetAllCandidateForAdmin(ctx context.Context, name string, page int64, size int64) (*models.ResponsetListCandidateAdmin, error) {
+func (g *MockCandidateGorm) GetAllCandidateForAdmin(ctx context.Context, name string, page int64, size int64) (*models2.ResponsetListCandidateAdmin, error) {
 	args := g.Called(ctx, name, page, size)
-	return args.Get(0).(*models.ResponsetListCandidateAdmin), args.Error(1)
+	return args.Get(0).(*models2.ResponsetListCandidateAdmin), args.Error(1)
 }
 func (g *MockCandidateGorm) UpdateReviewCandidateByAdmin(ctx context.Context, candidate_id int64, data map[string]interface{}) error {
 	args := g.Called(ctx, candidate_id, data)
 	return args.Error(0)
 }
-func (g *MockCandidateGorm) UpdateStatusCandidate(ctx context.Context, candidate *models.RequestUpdateStatusCandidate, candidate_id int64) error {
+func (g *MockCandidateGorm) UpdateStatusCandidate(ctx context.Context, candidate *models2.RequestUpdateStatusCandidate, candidate_id int64) error {
 	args := g.Called(ctx, candidate, candidate_id)
 	return args.Error(0)
 }
-func (g *MockCandidateGorm) AddCandidateSkill(ctx context.Context, candidateSkill *models.CandidateSkill) error {
+func (g *MockCandidateGorm) AddCandidateSkill(ctx context.Context, candidateSkill *models2.CandidateSkill) error {
 	args := g.Called(ctx, candidateSkill)
 	return args.Error(0)
 }
@@ -56,21 +57,21 @@ func (g *MockCandidateGorm) UpdateCandidateSkill(ctx context.Context, candidate_
 	args := g.Called(ctx, candidate_skill_id, data)
 	return args.Error(0)
 }
-func (g *MockCandidateGorm) GetCandidateSkill(ctx context.Context, candidate_id int64) ([]models.ResponseCandidateSkill, error) {
+func (g *MockCandidateGorm) GetCandidateSkill(ctx context.Context, candidate_id int64) ([]models2.ResponseCandidateSkill, error) {
 	args := g.Called(ctx, candidate_id)
-	return args.Get(0).([]models.ResponseCandidateSkill), args.Error(1)
+	return args.Get(0).([]models2.ResponseCandidateSkill), args.Error(1)
 }
-func (g *MockCandidateGorm) SearchCandidate(ctx context.Context, text string, offset, page int64) ([]*models.Candidate, int64, error) {
+func (g *MockCandidateGorm) SearchCandidate(ctx context.Context, text string, offset, page int64) ([]*models2.Candidate, int64, error) {
 	args := g.Called(ctx, text, offset, page)
-	return args.Get(0).([]*models.Candidate), int64(args.Int(1)), args.Error(2)
+	return args.Get(0).([]*models2.Candidate), int64(args.Int(1)), args.Error(2)
 }
-func (g *MockCandidateGorm) GetAllCandidate(ctx context.Context, offset, size int64) ([]*models.Candidate, int64, error) {
+func (g *MockCandidateGorm) GetAllCandidate(ctx context.Context, offset, size int64) ([]*models2.Candidate, int64, error) {
 	args := g.Called(ctx, offset, size)
-	return args.Get(0).([]*models.Candidate), int64(args.Int(1)), args.Error(2)
+	return args.Get(0).([]*models2.Candidate), int64(args.Int(1)), args.Error(2)
 }
-func (g *MockCandidateGorm) GetAllSkillByCandidateID(ctx context.Context, candidateID int64) ([]*models.Skill, error) {
+func (g *MockCandidateGorm) GetAllSkillByCandidateID(ctx context.Context, candidateID int64) ([]*models2.Skill, error) {
 	args := g.Called(ctx, candidateID)
-	return args.Get(0).([]*models.Skill), args.Error(1)
+	return args.Get(0).([]*models2.Skill), args.Error(1)
 }
 func (g *MockCandidateGorm) Count(ctx context.Context) (int64, error) {
 	args := g.Called(ctx)
@@ -85,14 +86,14 @@ func TestNewCandidateService(t *testing.T) {
 func TestCandidateService_CreateCandidateProfile(t *testing.T) {
 	testcases := []struct {
 		Name        string
-		Req         models.CandidateRequest
+		Req         models2.CandidateRequest
 		TestObj     CandidateService
 		ExpectedRes int64
 		ExpectedErr error
 	}{
 		{
 			Name: "Happy case",
-			Req: models.CandidateRequest{
+			Req: models2.CandidateRequest{
 				CandidateID: 1,
 			},
 			TestObj: CandidateService{
@@ -120,13 +121,13 @@ func TestCandidateService_CreateCandidateProfile(t *testing.T) {
 func TestCandidateService_UpdateCandidateProfile(t *testing.T) {
 	testcases := []struct {
 		Name        string
-		Req         models.CandidateRequest
+		Req         models2.CandidateRequest
 		TestObj     CandidateService
 		ExpectedErr error
 	}{
 		{
 			Name: "Happy case",
-			Req: models.CandidateRequest{
+			Req: models2.CandidateRequest{
 				CandidateID: 1,
 				FirstName:   "Hai Lam",
 			},
@@ -155,7 +156,7 @@ func TestCandidateService_GetCandidateProfile(t *testing.T) {
 		Name        string
 		TestObj     CandidateService
 		CandidateID int64
-		ExpectedRes *models.CandidateResponse
+		ExpectedRes *models2.CandidateResponse
 		ExpectedErr error
 	}{
 		{
@@ -165,16 +166,16 @@ func TestCandidateService_GetCandidateProfile(t *testing.T) {
 				Logger:  zap.L(),
 			},
 			CandidateID: 1,
-			ExpectedRes: &models.CandidateResponse{
+			ExpectedRes: &models2.CandidateResponse{
 				CandidateID:       1,
 				LastName:          "Hai Lam",
-				CVManage:          []models.CV{},
-				ExperienceManage:  []models.Experience{},
-				EducationManage:   []models.Education{},
-				SocialManage:      []models.Social{},
-				ProjectManage:     []models.Project{},
-				CertificateManage: []models.Certificate{},
-				PrizeManage:       []models.Prize{},
+				CVManage:          []models2.CV{},
+				ExperienceManage:  []models2.Experience{},
+				EducationManage:   []models2.Education{},
+				SocialManage:      []models2.Social{},
+				ProjectManage:     []models2.Project{},
+				CertificateManage: []models2.Certificate{},
+				PrizeManage:       []models2.Prize{},
 			},
 			ExpectedErr: nil,
 		},
@@ -184,7 +185,7 @@ func TestCandidateService_GetCandidateProfile(t *testing.T) {
 			mockObj := new(MockCandidateGorm)
 
 			mockObj.On("GetByCandidateID", context.Background(), test.CandidateID).
-				Return(&models.Candidate{
+				Return(&models2.Candidate{
 					CandidateID:       1,
 					LastName:          "Hai Lam",
 					CvManage:          "[]",
@@ -211,7 +212,7 @@ func TestCandidateService_GetAllCandidateForAdmin(t *testing.T) {
 		Name        string
 		Page        int64
 		Size        int64
-		ExpectedRes *models.ResponsetListCandidateAdmin
+		ExpectedRes *models2.ResponsetListCandidateAdmin
 		ExpectedErr error
 	}{
 		{
@@ -223,11 +224,11 @@ func TestCandidateService_GetAllCandidateForAdmin(t *testing.T) {
 			Name: "Lam",
 			Page: 1,
 			Size: 5,
-			ExpectedRes: &models.ResponsetListCandidateAdmin{
+			ExpectedRes: &models2.ResponsetListCandidateAdmin{
 				Total:       0,
 				TotalPage:   1,
 				CurrentPage: 1,
-				Data:        []models.CandidateRequestAdmin{},
+				Data:        []models2.CandidateRequestAdmin{},
 			},
 			ExpectedErr: nil,
 		},
@@ -236,11 +237,11 @@ func TestCandidateService_GetAllCandidateForAdmin(t *testing.T) {
 	for _, test := range testcases {
 		t.Run(test.TestName, func(t *testing.T) {
 			mockObj := new(MockCandidateGorm)
-			mockObj.On("GetAllCandidateForAdmin", context.Background(), test.Name, test.Page, test.Size).Return(&models.ResponsetListCandidateAdmin{
+			mockObj.On("GetAllCandidateForAdmin", context.Background(), test.Name, test.Page, test.Size).Return(&models2.ResponsetListCandidateAdmin{
 				Total:       0,
 				TotalPage:   1,
 				CurrentPage: 1,
-				Data:        []models.CandidateRequestAdmin{},
+				Data:        []models2.CandidateRequestAdmin{},
 			}, nil)
 			test.TestObj.CanGorm = mockObj
 			resp, err := test.TestObj.GetAllCandidateForAdmin(context.Background(), test.Name, test.Page, test.Size)
@@ -254,7 +255,7 @@ func TestCandidateService_UpdateReviewCandidateByAdmin(t *testing.T) {
 	testcases := []struct {
 		Name        string
 		TestObj     CandidateService
-		Req         *models.RequestUpdateReviewCandidateAdmin
+		Req         *models2.RequestUpdateReviewCandidateAdmin
 		ExpectedErr error
 	}{
 		{
@@ -263,7 +264,7 @@ func TestCandidateService_UpdateReviewCandidateByAdmin(t *testing.T) {
 				CanGorm: &MockCandidateGorm{},
 				Logger:  zap.L(),
 			},
-			Req: &models.RequestUpdateReviewCandidateAdmin{
+			Req: &models2.RequestUpdateReviewCandidateAdmin{
 				CandidateID:    1,
 				Nodehub_review: "Good",
 				NodehubScore:   5,
@@ -290,7 +291,7 @@ func TestCandidateService_UpdateStatusCandidate(t *testing.T) {
 		Name        string
 		TestObj     CandidateService
 		CandidateId int64
-		Req         *models.RequestUpdateStatusCandidate
+		Req         *models2.RequestUpdateStatusCandidate
 		ExpectedErr error
 	}{
 		{
@@ -300,7 +301,7 @@ func TestCandidateService_UpdateStatusCandidate(t *testing.T) {
 				Logger:  zap.L(),
 			},
 			CandidateId: 1,
-			Req: &models.RequestUpdateStatusCandidate{
+			Req: &models2.RequestUpdateStatusCandidate{
 				Status: true,
 			},
 			ExpectedErr: nil,
@@ -322,7 +323,7 @@ func TestCandidateService_AddCandidateSkill(t *testing.T) {
 	testcases := []struct {
 		Name        string
 		TestObj     CandidateService
-		Req         *models.CandidateSkill
+		Req         *models2.CandidateSkill
 		ExpectedErr error
 	}{
 		{
@@ -331,7 +332,7 @@ func TestCandidateService_AddCandidateSkill(t *testing.T) {
 				CanGorm: &MockCandidateGorm{},
 				Logger:  zap.L(),
 			},
-			Req: &models.CandidateSkill{
+			Req: &models2.CandidateSkill{
 				Id:          1,
 				CandidateId: 1,
 				SkillId:     1,
@@ -383,7 +384,7 @@ func TestCandidateService_UpdateCandidateSkill(t *testing.T) {
 	testcases := []struct {
 		Name        string
 		TestObj     CandidateService
-		Req         *models.RequestUpdateCandidateSkill
+		Req         *models2.RequestUpdateCandidateSkill
 		ExpectedErr error
 	}{
 		{
@@ -392,7 +393,7 @@ func TestCandidateService_UpdateCandidateSkill(t *testing.T) {
 				CanGorm: &MockCandidateGorm{},
 				Logger:  zap.L(),
 			},
-			Req: &models.RequestUpdateCandidateSkill{
+			Req: &models2.RequestUpdateCandidateSkill{
 				ID:    1,
 				Media: "def",
 			},
@@ -418,7 +419,7 @@ func TestCandidateService_GetCandidateSkill(t *testing.T) {
 		Name        string
 		TestObj     CandidateService
 		CandidateId int64
-		ExpectedRes []models.ResponseCandidateSkill
+		ExpectedRes []models2.ResponseCandidateSkill
 		ExpectedErr error
 	}{
 		{
@@ -428,7 +429,7 @@ func TestCandidateService_GetCandidateSkill(t *testing.T) {
 				Logger:  zap.L(),
 			},
 			CandidateId: 1,
-			ExpectedRes: []models.ResponseCandidateSkill{},
+			ExpectedRes: []models2.ResponseCandidateSkill{},
 			ExpectedErr: nil,
 		},
 	}
@@ -436,7 +437,7 @@ func TestCandidateService_GetCandidateSkill(t *testing.T) {
 	for _, test := range testcases {
 		t.Run(test.Name, func(t *testing.T) {
 			mockObj := new(MockCandidateGorm)
-			mockObj.On("GetCandidateSkill", context.Background(), test.CandidateId).Return([]models.ResponseCandidateSkill{}, nil)
+			mockObj.On("GetCandidateSkill", context.Background(), test.CandidateId).Return([]models2.ResponseCandidateSkill{}, nil)
 			test.TestObj.CanGorm = mockObj
 			resp, err := test.TestObj.GetCandidateSkill(context.Background(), test.CandidateId)
 			assert.Equal(t, test.ExpectedRes, resp)

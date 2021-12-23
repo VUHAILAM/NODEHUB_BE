@@ -4,9 +4,10 @@ import (
 	"context"
 	"math"
 
+	"gitlab.com/hieuxeko19991/job4e_be/models"
+
 	"go.uber.org/zap"
 
-	"gitlab.com/hieuxeko19991/job4e_be/pkg/models"
 	"gorm.io/gorm"
 )
 

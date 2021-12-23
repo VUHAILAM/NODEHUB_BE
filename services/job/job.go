@@ -6,6 +6,8 @@ import (
 	"strconv"
 	"time"
 
+	models2 "gitlab.com/hieuxeko19991/job4e_be/models"
+
 	"gitlab.com/hieuxeko19991/job4e_be/services/autocomplete"
 
 	"gitlab.com/hieuxeko19991/job4e_be/services/follow"
@@ -21,20 +23,19 @@ import (
 	"github.com/mitchellh/mapstructure"
 
 	"gitlab.com/hieuxeko19991/job4e_be/cmd/config"
-	"gitlab.com/hieuxeko19991/job4e_be/pkg/models"
 	"go.uber.org/zap"
 )
 
 type IJobService interface {
-	CreateNewJob(ctx context.Context, job *models.CreateJobRequest) error
-	GetDetailJob(ctx context.Context, jobID int64) (*models.ESJob, error)
-	UpdateJob(ctx context.Context, updateRequest *models.RequestUpdateJob) error
-	GetAllJob(ctx context.Context, getRequest *models.RequestGetAllJob) (*models.ResponseGetJob, error)
-	GetJobsByRecruiterID(ctx context.Context, req *models.RequestGetJobsByRecruiter) (*models.ResponseGetJob, error)
-	GetAllJobForAdmin(ctx context.Context, name string, page int64, size int64) (*models.ResponsetListJobAdmin, error)
-	UpdateStatusJob(ctx context.Context, updateRequest *models.RequestUpdateStatusJob) error
+	CreateNewJob(ctx context.Context, job *models2.CreateJobRequest) error
+	GetDetailJob(ctx context.Context, jobID int64) (*models2.ESJob, error)
+	UpdateJob(ctx context.Context, updateRequest *models2.RequestUpdateJob) error
+	GetAllJob(ctx context.Context, getRequest *models2.RequestGetAllJob) (*models2.ResponseGetJob, error)
+	GetJobsByRecruiterID(ctx context.Context, req *models2.RequestGetJobsByRecruiter) (*models2.ResponseGetJob, error)
+	GetAllJobForAdmin(ctx context.Context, name string, page int64, size int64) (*models2.ResponsetListJobAdmin, error)
+	UpdateStatusJob(ctx context.Context, updateRequest *models2.RequestUpdateStatusJob) error
 	DeleteJob(ctx context.Context, job_id int64) error
-	SearchJob(ctx context.Context, searchReq models.RequestSearchJob) (*models.ResponseGetJob, error)
+	SearchJob(ctx context.Context, searchReq models2.RequestSearchJob) (*models2.ResponseGetJob, error)
 	CountJob(ctx context.Context) (int64, error)
 }
 
@@ -69,13 +70,13 @@ func NewJobService(jobGorm *JobGorm, jobES *JobES, js *job_skill.JobSkillGorm, s
 	}
 }
 
-func (j *Job) CreateNewJob(ctx context.Context, job *models.CreateJobRequest) error {
+func (j *Job) CreateNewJob(ctx context.Context, job *models2.CreateJobRequest) error {
 	recruiterInfo, err := j.RecruiterGorm.GetProfile(ctx, job.RecruiterID)
 	if err != nil {
 		j.Logger.Error(err.Error())
 		return err
 	}
-	jobData := &models.Job{
+	jobData := &models2.Job{
 		RecruiterID: job.RecruiterID,
 		CompanyName: recruiterInfo.Name,
 		Avatar:      recruiterInfo.Avartar,
@@ -96,9 +97,9 @@ func (j *Job) CreateNewJob(ctx context.Context, job *models.CreateJobRequest) er
 		return err
 	}
 
-	var jobSkill []*models.JobSkill
+	var jobSkill []*models2.JobSkill
 	for _, skillID := range job.SkillIDs {
-		jsk := &models.JobSkill{
+		jsk := &models2.JobSkill{
 			SkillID: skillID,
 			JobID:   newJob.JobID,
 		}
@@ -113,15 +114,15 @@ func (j *Job) CreateNewJob(ctx context.Context, job *models.CreateJobRequest) er
 
 	jobData.JobID = newJob.JobID
 	jobData.CreatedAt = newJob.CreatedAt
-	esJob := models.ToESJobCreate(jobData)
+	esJob := models2.ToESJobCreate(jobData)
 	skillList, err := j.SkillGorm.GetSkillByIDs(ctx, job.SkillIDs)
 	if err != nil {
 		j.Logger.Error(err.Error())
 		return err
 	}
-	var esSkill []models.ESSkill
+	var esSkill []models2.ESSkill
 	for _, skill := range skillList {
-		esSk := models.ToESSkill(&skill)
+		esSk := models2.ToESSkill(&skill)
 		esSkill = append(esSkill, esSk)
 		j.jobTrie.Insert(esSk.Name)
 	}
@@ -150,9 +151,9 @@ func (j *Job) CreateNewJob(ctx context.Context, job *models.CreateJobRequest) er
 		return nil
 	}
 
-	notis := make([]*models.Notification, 0)
+	notis := make([]*models2.Notification, 0)
 	for _, cid := range candidates {
-		noti := &models.Notification{
+		noti := &models2.Notification{
 			CandidateID: cid.CandidateID,
 			Title:       recruiterInfo.Name + " has a new job maybe fit to you. Let check it!!",
 			Content:     recruiterInfo.Name + " has a new job maybe fit to you. Let check it!!",
@@ -173,7 +174,7 @@ func (j *Job) CreateNewJob(ctx context.Context, job *models.CreateJobRequest) er
 	return nil
 }
 
-func (j *Job) GetDetailJob(ctx context.Context, jobID int64) (*models.ESJob, error) {
+func (j *Job) GetDetailJob(ctx context.Context, jobID int64) (*models2.ESJob, error) {
 	job, err := j.JobES.GetJobByID(ctx, strconv.FormatInt(jobID, 10))
 	if err != nil {
 		j.Logger.Error("Can not get Job from ES", zap.Error(err), zap.Int64("job_id", jobID))
@@ -182,9 +183,9 @@ func (j *Job) GetDetailJob(ctx context.Context, jobID int64) (*models.ESJob, err
 	return job, nil
 }
 
-func (j *Job) UpdateJob(ctx context.Context, updateRequest *models.RequestUpdateJob) error {
+func (j *Job) UpdateJob(ctx context.Context, updateRequest *models2.RequestUpdateJob) error {
 	j.Logger.Info("updateReq", zap.Reflect("Req", updateRequest))
-	updateES := models.ESJobUpdate{
+	updateES := models2.ESJobUpdate{
 		JobID:       updateRequest.JobID,
 		RecruiterID: updateRequest.RecruiterID,
 		CompanyName: updateRequest.CompanyName,
@@ -207,9 +208,9 @@ func (j *Job) UpdateJob(ctx context.Context, updateRequest *models.RequestUpdate
 			j.Logger.Error(err.Error())
 			return err
 		}
-		var esSkill []models.ESSkill
+		var esSkill []models2.ESSkill
 		for _, skill := range skillList {
-			esSk := models.ToESSkill(&skill)
+			esSk := models2.ToESSkill(&skill)
 			esSkill = append(esSkill, esSk)
 			j.jobTrie.Insert(esSk.Name)
 		}
@@ -220,9 +221,9 @@ func (j *Job) UpdateJob(ctx context.Context, updateRequest *models.RequestUpdate
 			j.Logger.Error(err.Error())
 			return err
 		}
-		var jobSkill []*models.JobSkill
+		var jobSkill []*models2.JobSkill
 		for _, skillID := range updateRequest.SkillIDs {
-			jsk := &models.JobSkill{
+			jsk := &models2.JobSkill{
 				SkillID: skillID,
 				JobID:   updateRequest.JobID,
 			}
@@ -279,28 +280,28 @@ func (j *Job) UpdateJob(ctx context.Context, updateRequest *models.RequestUpdate
 	return nil
 }
 
-func (j *Job) GetAllJob(ctx context.Context, getRequest *models.RequestGetAllJob) (*models.ResponseGetJob, error) {
+func (j *Job) GetAllJob(ctx context.Context, getRequest *models2.RequestGetAllJob) (*models2.ResponseGetJob, error) {
 	offset := (getRequest.Page - 1) * getRequest.Size
 	jobs, total, err := j.JobES.GetAllJob(ctx, offset, getRequest.Size)
 	if err != nil {
 		j.Logger.Error("Can not Get all Job from ES", zap.Error(err))
 		return nil, err
 	}
-	resp := models.ResponseGetJob{
+	resp := models2.ResponseGetJob{
 		Total:  total,
 		Result: jobs,
 	}
 	return &resp, nil
 }
 
-func (j *Job) GetJobsByRecruiterID(ctx context.Context, req *models.RequestGetJobsByRecruiter) (*models.ResponseGetJob, error) {
+func (j *Job) GetJobsByRecruiterID(ctx context.Context, req *models2.RequestGetJobsByRecruiter) (*models2.ResponseGetJob, error) {
 	offset := (req.Page - 1) * req.Size
 	jobs, total, err := j.JobES.GetJobsByRecruiterID(ctx, req.RecruiterID, offset, req.Size)
 	if err != nil {
 		j.Logger.Error("Can not Get all Job by recruiter from ES", zap.Error(err))
 		return nil, err
 	}
-	resp := models.ResponseGetJob{
+	resp := models2.ResponseGetJob{
 		Total:  total,
 		Result: jobs,
 	}
@@ -319,7 +320,7 @@ func mapStructureDecodeWithTextUnmarshaler(input, output interface{}) error {
 }
 
 //job admin
-func (j *Job) GetAllJobForAdmin(ctx context.Context, name string, page int64, size int64) (*models.ResponsetListJobAdmin, error) {
+func (j *Job) GetAllJobForAdmin(ctx context.Context, name string, page int64, size int64) (*models2.ResponsetListJobAdmin, error) {
 	acc, err := j.JobGorm.GetAllJobForAdmin(ctx, name, page, size)
 	if err != nil {
 		return nil, err
@@ -327,10 +328,10 @@ func (j *Job) GetAllJobForAdmin(ctx context.Context, name string, page int64, si
 	return acc, nil
 }
 
-func (j *Job) UpdateStatusJob(ctx context.Context, updateRequest *models.RequestUpdateStatusJob) error {
-	jobModels := &models.RequestUpdateStatusJob{
+func (j *Job) UpdateStatusJob(ctx context.Context, updateRequest *models2.RequestUpdateStatusJob) error {
+	jobModels := &models2.RequestUpdateStatusJob{
 		Status: updateRequest.Status}
-	updateES := models.ESJobUpdate{
+	updateES := models2.ESJobUpdate{
 		JobID:  updateRequest.JobID,
 		Status: int(updateRequest.Status),
 	}
@@ -363,9 +364,9 @@ func (j *Job) DeleteJob(ctx context.Context, job_id int64) error {
 	return nil
 }
 
-func (j *Job) SearchJob(ctx context.Context, searchReq models.RequestSearchJob) (*models.ResponseGetJob, error) {
+func (j *Job) SearchJob(ctx context.Context, searchReq models2.RequestSearchJob) (*models2.ResponseGetJob, error) {
 	offset := (searchReq.Page - 1) * searchReq.Size
-	jobs := make([]models.ESJob, 0)
+	jobs := make([]models2.ESJob, 0)
 	var total int64
 	var err error
 	if searchReq.Text == "" && searchReq.Location == "" {
@@ -377,7 +378,7 @@ func (j *Job) SearchJob(ctx context.Context, searchReq models.RequestSearchJob) 
 		j.Logger.Error("Can not Searhc Job from ES", zap.Error(err))
 		return nil, err
 	}
-	resp := models.ResponseGetJob{
+	resp := models2.ResponseGetJob{
 		Total:  total,
 		Result: jobs,
 	}

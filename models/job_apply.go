@@ -63,3 +63,7 @@ type RequestCheckApply struct {
 	CandidateID int64 `json:"candidate_id"`
 	JobID       int64 `json:"job_id"`
 }
+
+type RequestCountOnMonth struct {
+	Date string `json:"date"`
+}

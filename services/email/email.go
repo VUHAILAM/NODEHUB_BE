@@ -5,7 +5,7 @@ import (
 	"github.com/sendgrid/sendgrid-go"
 	"github.com/sendgrid/sendgrid-go/helpers/mail"
 	"gitlab.com/hieuxeko19991/job4e_be/cmd/config"
-	"gitlab.com/hieuxeko19991/job4e_be/pkg/models"
+	"gitlab.com/hieuxeko19991/job4e_be/models"
 	"go.uber.org/zap"
 )
 
@@ -13,6 +13,8 @@ import (
 const (
 	MailConfirmation models.MailType = iota + 1
 	PassReset
+	Approve
+	Company
 )
 
 type IMailService interface {
@@ -43,6 +45,10 @@ func (ms *SGMailService) CreateMail(mailReq *models.Mail) []byte {
 		m.SetTemplateID(ms.Configs.MailVerifTemplateID)
 	} else if mailReq.Mtype == PassReset {
 		m.SetTemplateID(ms.Configs.PassResetTemplateID)
+	} else if mailReq.Mtype == Approve {
+		m.SetTemplateID(ms.Configs.ApproveTemplateID)
+	} else if mailReq.Mtype == Company {
+		m.SetTemplateID(ms.Configs.CompanyTemplateID)
 	}
 
 	p := mail.NewPersonalization()
