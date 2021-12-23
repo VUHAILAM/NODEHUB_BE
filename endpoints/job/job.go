@@ -5,11 +5,12 @@ import (
 	"net/http"
 	"strconv"
 
+	models2 "gitlab.com/hieuxeko19991/job4e_be/models"
+
 	"github.com/gin-gonic/gin"
 	"github.com/pkg/errors"
 	"gitlab.com/hieuxeko19991/job4e_be/pkg/auth"
 	"gitlab.com/hieuxeko19991/job4e_be/pkg/ginx"
-	"gitlab.com/hieuxeko19991/job4e_be/pkg/models"
 	"gitlab.com/hieuxeko19991/job4e_be/services/job"
 	"go.uber.org/zap"
 )
@@ -36,7 +37,7 @@ func (s *JobSerializer) Create(ginCtx *gin.Context) {
 		})
 		return
 	}
-	req := models.CreateJobRequest{}
+	req := models2.CreateJobRequest{}
 	err := json.NewDecoder(ginCtx.Request.Body).Decode(&req)
 	if err != nil {
 		s.Logger.Error("Parse request Job Create error", zap.Error(err))
@@ -45,7 +46,7 @@ func (s *JobSerializer) Create(ginCtx *gin.Context) {
 		})
 		return
 	}
-	req.RecruiterID = acc.(models.Account).Id
+	req.RecruiterID = acc.(models2.Account).Id
 	err = s.JobService.CreateNewJob(ctx, &req)
 	if err != nil {
 		s.Logger.Error("Create New Job error", zap.Error(err))
@@ -60,7 +61,7 @@ func (s *JobSerializer) Create(ginCtx *gin.Context) {
 
 func (s *JobSerializer) GetDetailJob(ginCtx *gin.Context) {
 	ctx := ginCtx.Request.Context()
-	req := models.RequestGetJobDetail{}
+	req := models2.RequestGetJobDetail{}
 	err := json.NewDecoder(ginCtx.Request.Body).Decode(&req)
 	if err != nil {
 		s.Logger.Error("Parse request Get Detail Job error", zap.Error(err))
@@ -82,7 +83,7 @@ func (s *JobSerializer) GetDetailJob(ginCtx *gin.Context) {
 
 func (s *JobSerializer) UpdateJob(ginCtx *gin.Context) {
 	ctx := ginCtx.Request.Context()
-	req := models.RequestUpdateJob{}
+	req := models2.RequestUpdateJob{}
 	err := json.NewDecoder(ginCtx.Request.Body).Decode(&req)
 	if err != nil {
 		s.Logger.Error("Parse request Update Job error", zap.Error(err))
@@ -104,7 +105,7 @@ func (s *JobSerializer) UpdateJob(ginCtx *gin.Context) {
 
 func (s *JobSerializer) GetAllJob(ginCtx *gin.Context) {
 	ctx := ginCtx.Request.Context()
-	req := models.RequestGetAllJob{}
+	req := models2.RequestGetAllJob{}
 	err := json.NewDecoder(ginCtx.Request.Body).Decode(&req)
 	if err != nil {
 		s.Logger.Error("Parse request Get all Job error", zap.Error(err))
@@ -127,7 +128,7 @@ func (s *JobSerializer) GetAllJob(ginCtx *gin.Context) {
 
 func (s *JobSerializer) GetJobsByRecruiter(ginCtx *gin.Context) {
 	ctx := ginCtx.Request.Context()
-	req := models.RequestGetJobsByRecruiter{}
+	req := models2.RequestGetJobsByRecruiter{}
 	err := json.NewDecoder(ginCtx.Request.Body).Decode(&req)
 	if err != nil {
 		s.Logger.Error("Parse request Get all Job error", zap.Error(err))
@@ -150,7 +151,7 @@ func (s *JobSerializer) GetJobsByRecruiter(ginCtx *gin.Context) {
 
 func (s *JobSerializer) GetAllJobForAdmin(ginCtx *gin.Context) {
 	ctx := ginCtx.Request.Context()
-	req := models.RequestGetListJobAdmin{}
+	req := models2.RequestGetListJobAdmin{}
 	err := json.NewDecoder(ginCtx.Request.Body).Decode(&req)
 	if err != nil {
 		s.Logger.Error("Parse request Get all Job error", zap.Error(err))
@@ -173,7 +174,7 @@ func (s *JobSerializer) GetAllJobForAdmin(ginCtx *gin.Context) {
 
 func (s *JobSerializer) UpdateStatusJob(ginCtx *gin.Context) {
 	ctx := ginCtx.Request.Context()
-	req := models.RequestUpdateStatusJob{}
+	req := models2.RequestUpdateStatusJob{}
 	err := json.NewDecoder(ginCtx.Request.Body).Decode(&req)
 	if err != nil {
 		s.Logger.Error("Parse request Update status job error", zap.Error(err))
@@ -217,7 +218,7 @@ func (s *JobSerializer) DeleteJob(ginCtx *gin.Context) {
 
 func (s *JobSerializer) SearchJob(ginCtx *gin.Context) {
 	ctx := ginCtx.Request.Context()
-	req := models.RequestSearchJob{}
+	req := models2.RequestSearchJob{}
 	err := json.NewDecoder(ginCtx.Request.Body).Decode(&req)
 	if err != nil {
 		s.Logger.Error("Parse request Search Job error", zap.Error(err))

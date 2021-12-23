@@ -4,12 +4,13 @@ import (
 	"context"
 	"testing"
 
+	"gitlab.com/hieuxeko19991/job4e_be/models"
+
 	"github.com/stretchr/testify/assert"
 
 	"go.uber.org/zap"
 
 	"github.com/stretchr/testify/mock"
-	"gitlab.com/hieuxeko19991/job4e_be/pkg/models"
 )
 
 type MockBlogGorm struct {

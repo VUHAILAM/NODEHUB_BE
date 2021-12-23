@@ -4,24 +4,24 @@ import (
 	"context"
 	"strconv"
 
+	models2 "gitlab.com/hieuxeko19991/job4e_be/models"
+
 	"gitlab.com/hieuxeko19991/job4e_be/services/candidate"
 	"gitlab.com/hieuxeko19991/job4e_be/services/recruiter"
 
 	"gitlab.com/hieuxeko19991/job4e_be/services/notification"
 
-	"gitlab.com/hieuxeko19991/job4e_be/pkg/models"
-
 	"go.uber.org/zap"
 )
 
 type IFollowService interface {
-	Follow(ctx context.Context, req models.RequestFollow) error
-	UnFollow(ctx context.Context, req models.RequestUnfollow) error
-	CountOfRecruiter(ctx context.Context, recruiterID int64) (*models.ResponseCount, error)
-	CountOfCandidate(ctx context.Context, candidateID int64) (*models.ResponseCount, error)
-	FollowExist(ctx context.Context, req models.RequestFollow) (*models.Follow, error)
-	GetCandidate(ctx context.Context, req models.RequestGetCandidateFollow) (*models.ResponseGetCandidate, error)
-	GetRecruiter(ctx context.Context, req models.RequestGetRecruiterFollow) (*models.ResponseGetRecruiter, error)
+	Follow(ctx context.Context, req models2.RequestFollow) error
+	UnFollow(ctx context.Context, req models2.RequestUnfollow) error
+	CountOfRecruiter(ctx context.Context, recruiterID int64) (*models2.ResponseCount, error)
+	CountOfCandidate(ctx context.Context, candidateID int64) (*models2.ResponseCount, error)
+	FollowExist(ctx context.Context, req models2.RequestFollow) (*models2.Follow, error)
+	GetCandidate(ctx context.Context, req models2.RequestGetCandidateFollow) (*models2.ResponseGetCandidate, error)
+	GetRecruiter(ctx context.Context, req models2.RequestGetRecruiterFollow) (*models2.ResponseGetRecruiter, error)
 }
 
 type FollowService struct {
@@ -43,8 +43,8 @@ func NewFollowService(gorm *FollowGorm, notiGorm *notification.NotificationGorm,
 	}
 }
 
-func (s *FollowService) Follow(ctx context.Context, req models.RequestFollow) error {
-	follow := models.Follow{
+func (s *FollowService) Follow(ctx context.Context, req models2.RequestFollow) error {
+	follow := models2.Follow{
 		CandidateID: req.CandidateID,
 		RecruiterID: req.RecruiterID,
 	}
@@ -65,7 +65,7 @@ func (s *FollowService) Follow(ctx context.Context, req models.RequestFollow) er
 		return err
 	}
 
-	notiCandidate := &models.Notification{
+	notiCandidate := &models2.Notification{
 		CandidateID: req.CandidateID,
 		Title:       "You followed " + recruiterInfor.Name,
 		Content:     "You followed " + recruiterInfor.Name,
@@ -73,14 +73,14 @@ func (s *FollowService) Follow(ctx context.Context, req models.RequestFollow) er
 		CheckRead:   false,
 	}
 
-	notiRecruiter := &models.Notification{
+	notiRecruiter := &models2.Notification{
 		RecruiterID: recruiterInfor.RecruiterID,
 		Title:       candidateInfor.FirstName + " is following you",
 		Content:     candidateInfor.FirstName + " is following you",
 		Key:         "/candidate/profile?candidateID=" + strconv.FormatInt(req.CandidateID, 10),
 		CheckRead:   false,
 	}
-	notis := make([]*models.Notification, 0)
+	notis := make([]*models2.Notification, 0)
 	notis = append(notis, notiCandidate)
 	notis = append(notis, notiRecruiter)
 
@@ -92,8 +92,8 @@ func (s *FollowService) Follow(ctx context.Context, req models.RequestFollow) er
 	return nil
 }
 
-func (s *FollowService) UnFollow(ctx context.Context, req models.RequestUnfollow) error {
-	follow := models.Follow{
+func (s *FollowService) UnFollow(ctx context.Context, req models2.RequestUnfollow) error {
+	follow := models2.Follow{
 		CandidateID: req.CandidateID,
 		RecruiterID: req.RecruiterID,
 	}
@@ -105,31 +105,31 @@ func (s *FollowService) UnFollow(ctx context.Context, req models.RequestUnfollow
 	return nil
 }
 
-func (s *FollowService) CountOfRecruiter(ctx context.Context, recruiterID int64) (*models.ResponseCount, error) {
+func (s *FollowService) CountOfRecruiter(ctx context.Context, recruiterID int64) (*models2.ResponseCount, error) {
 	count, err := s.FollowGorm.CountFollowOfRecruiter(ctx, recruiterID)
 	if err != nil {
 		s.Logger.Error(err.Error())
 		return nil, err
 	}
 
-	return &models.ResponseCount{
+	return &models2.ResponseCount{
 		Count: count,
 	}, nil
 }
 
-func (s *FollowService) CountOfCandidate(ctx context.Context, candidateID int64) (*models.ResponseCount, error) {
+func (s *FollowService) CountOfCandidate(ctx context.Context, candidateID int64) (*models2.ResponseCount, error) {
 	count, err := s.FollowGorm.CountFollowOfCandidate(ctx, candidateID)
 	if err != nil {
 		s.Logger.Error(err.Error())
 		return nil, err
 	}
 
-	return &models.ResponseCount{
+	return &models2.ResponseCount{
 		Count: count,
 	}, nil
 }
 
-func (s *FollowService) FollowExist(ctx context.Context, req models.RequestFollow) (*models.Follow, error) {
+func (s *FollowService) FollowExist(ctx context.Context, req models2.RequestFollow) (*models2.Follow, error) {
 	follow, err := s.FollowGorm.GetFollow(ctx, req.CandidateID, req.RecruiterID)
 	if err != nil {
 		s.Logger.Error(err.Error())
@@ -138,7 +138,7 @@ func (s *FollowService) FollowExist(ctx context.Context, req models.RequestFollo
 	return follow, nil
 }
 
-func (s *FollowService) GetCandidate(ctx context.Context, req models.RequestGetCandidateFollow) (*models.ResponseGetCandidate, error) {
+func (s *FollowService) GetCandidate(ctx context.Context, req models2.RequestGetCandidateFollow) (*models2.ResponseGetCandidate, error) {
 	offset := (req.Page - 1) * req.Size
 	candidates, total, err := s.FollowGorm.GetFollowedRecruiter(ctx, req.RecruiterID, offset, req.Size)
 	if err != nil {
@@ -146,14 +146,14 @@ func (s *FollowService) GetCandidate(ctx context.Context, req models.RequestGetC
 		return nil, err
 	}
 
-	resp := &models.ResponseGetCandidate{
+	resp := &models2.ResponseGetCandidate{
 		Total:      total,
 		Candidates: candidates,
 	}
 	return resp, nil
 }
 
-func (s *FollowService) GetRecruiter(ctx context.Context, req models.RequestGetRecruiterFollow) (*models.ResponseGetRecruiter, error) {
+func (s *FollowService) GetRecruiter(ctx context.Context, req models2.RequestGetRecruiterFollow) (*models2.ResponseGetRecruiter, error) {
 	offset := (req.Page - 1) * req.Size
 	recruiters, total, err := s.FollowGorm.GetFollowingRecruiter(ctx, req.CandidateID, offset, req.Size)
 	if err != nil {
@@ -161,7 +161,7 @@ func (s *FollowService) GetRecruiter(ctx context.Context, req models.RequestGetR
 		return nil, err
 	}
 
-	resp := &models.ResponseGetRecruiter{
+	resp := &models2.ResponseGetRecruiter{
 		Total:      total,
 		Recruiters: recruiters,
 	}

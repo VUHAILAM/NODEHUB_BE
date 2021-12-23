@@ -4,9 +4,10 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"gitlab.com/hieuxeko19991/job4e_be/models"
+
 	"github.com/gin-gonic/gin"
 	"gitlab.com/hieuxeko19991/job4e_be/pkg/ginx"
-	"gitlab.com/hieuxeko19991/job4e_be/pkg/models"
 	"gitlab.com/hieuxeko19991/job4e_be/services/notification"
 	"go.uber.org/zap"
 )

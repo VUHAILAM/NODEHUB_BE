@@ -3,7 +3,7 @@ package job_apply
 import (
 	"context"
 
-	"gitlab.com/hieuxeko19991/job4e_be/pkg/models"
+	models2 "gitlab.com/hieuxeko19991/job4e_be/models"
 
 	"go.uber.org/zap"
 	"gorm.io/gorm"
@@ -17,14 +17,15 @@ const (
 )
 
 type IJobApplyDatabase interface {
-	Create(ctx context.Context, jobApply *models.JobApply) (int64, error)
-	GetAppliedJobByJobID(ctx context.Context, jobID int64, offset, size int64) ([]*models.Job, int64, error)
-	GetAppliedJobByCandidateID(ctx context.Context, candidateID int64, offset, size int64) ([]*models.Job, int64, error)
+	Create(ctx context.Context, jobApply *models2.JobApply) (int64, error)
+	GetAppliedJobByJobID(ctx context.Context, jobID int64, offset, size int64) ([]*models2.Job, int64, error)
+	GetAppliedJobByCandidateID(ctx context.Context, candidateID int64, offset, size int64) ([]*models2.Job, int64, error)
 	UpdateStatus(ctx context.Context, status string, jobID, candidateID int64) error
-	GetCandidateApplyJob(ctx context.Context, jobID int64, offset, size int64) ([]*models.Candidate, int64, error)
+	GetCandidateApplyJob(ctx context.Context, jobID int64, offset, size int64) ([]*models2.Candidate, int64, error)
 	CountByStatus(ctx context.Context, status string) (int64, error)
-	CheckApplied(ctx context.Context, jobID, candidateID int64) (*models.JobApply, error)
-	GetApply(ctx context.Context, jobID, candidateID int64) (*models.JobApply, error)
+	CheckApplied(ctx context.Context, jobID, candidateID int64) (*models2.JobApply, error)
+	GetApply(ctx context.Context, jobID, candidateID int64) (*models2.JobApply, error)
+	CountApplyOnMonth(ctx context.Context, date string) (int64, error)
 }
 
 type JobApplyGorm struct {
@@ -39,7 +40,7 @@ func NewJobApplyGorm(db *gorm.DB, logger *zap.Logger) *JobApplyGorm {
 	}
 }
 
-func (g *JobApplyGorm) Create(ctx context.Context, jobApply *models.JobApply) (int64, error) {
+func (g *JobApplyGorm) Create(ctx context.Context, jobApply *models2.JobApply) (int64, error) {
 	db := g.DB.WithContext(ctx)
 	err := db.Table(jobApplyTable).Create(jobApply).Error
 	if err != nil {
@@ -49,9 +50,9 @@ func (g *JobApplyGorm) Create(ctx context.Context, jobApply *models.JobApply) (i
 	return jobApply.ID, nil
 }
 
-func (g *JobApplyGorm) GetAppliedJobByJobID(ctx context.Context, jobID int64, offset, size int64) ([]*models.Job, int64, error) {
+func (g *JobApplyGorm) GetAppliedJobByJobID(ctx context.Context, jobID int64, offset, size int64) ([]*models2.Job, int64, error) {
 	db := g.DB.WithContext(ctx)
-	var jobs []*models.Job
+	var jobs []*models2.Job
 	err := db.Table(jobTable).
 		Joins("INNER JOIN "+jobApplyTable+" ON "+jobTable+".job_id = "+jobApplyTable+".job_id").
 		Where(jobTable+".job_id=?", jobID).
@@ -70,13 +71,13 @@ func (g *JobApplyGorm) GetAppliedJobByJobID(ctx context.Context, jobID int64, of
 	return jobs, total, nil
 }
 
-func (g *JobApplyGorm) GetAppliedJobByCandidateID(ctx context.Context, candidateID int64, offset, size int64) ([]*models.Job, int64, error) {
-	var jobs []*models.Job
+func (g *JobApplyGorm) GetAppliedJobByCandidateID(ctx context.Context, candidateID int64, offset, size int64) ([]*models2.Job, int64, error) {
+	var jobs []*models2.Job
 	db := g.DB.WithContext(ctx).Table(jobTable).Select("job.*, recruiter.name as company_name, recruiter.avartar as avartar, job_candidate.status as candidate_status").
 		Joins("JOIN "+recruiterTable+" ON job.recruiter_id=recruiter.recruiter_id").Joins("JOIN "+jobApplyTable+" ON job.job_id=job_candidate.job_id").
 		Where("job_candidate.candidate_id=?", candidateID).Find(&jobs)
 	total := db.RowsAffected
-	jobs = make([]*models.Job, 0)
+	jobs = make([]*models2.Job, 0)
 	err := db.Offset(int(offset)).Limit(int(size)).Order(jobApplyTable + ".updated_at desc").Find(&jobs).Error
 	if err != nil {
 		g.Logger.Error("JobApplyGorm: GetAppliedJobByJobID error", zap.Error(err))
@@ -96,13 +97,13 @@ func (g *JobApplyGorm) UpdateStatus(ctx context.Context, status string, jobID, c
 	return nil
 }
 
-func (g *JobApplyGorm) GetCandidateApplyJob(ctx context.Context, jobID int64, offset, size int64) ([]*models.Candidate, int64, error) {
-	var candidates []*models.Candidate
+func (g *JobApplyGorm) GetCandidateApplyJob(ctx context.Context, jobID int64, offset, size int64) ([]*models2.Candidate, int64, error) {
+	var candidates []*models2.Candidate
 	db := g.DB.WithContext(ctx).Table(candidateTable).Select("candidate.*, job_candidate.status as job_status").
 		Joins("JOIN "+jobApplyTable+" ON candidate.candidate_id=job_candidate.candidate_id").
 		Where("job_candidate.job_id=?", jobID).Find(&candidates)
 	total := db.RowsAffected
-	candidates = make([]*models.Candidate, 0)
+	candidates = make([]*models2.Candidate, 0)
 	err := db.Offset(int(offset)).Limit(int(size)).Order(jobApplyTable + ".updated_at desc").Find(&candidates).Error
 	if err != nil {
 		g.Logger.Error("JobApplyGorm: GetAppliedJobByJobID error", zap.Error(err))
@@ -124,9 +125,9 @@ func (g *JobApplyGorm) CountByStatus(ctx context.Context, status string) (int64,
 	return count, nil
 }
 
-func (g *JobApplyGorm) CheckApplied(ctx context.Context, jobID, candidateID int64) (*models.JobApply, error) {
+func (g *JobApplyGorm) CheckApplied(ctx context.Context, jobID, candidateID int64) (*models2.JobApply, error) {
 	db := g.DB.WithContext(ctx)
-	jobapply := models.JobApply{}
+	jobapply := models2.JobApply{}
 	err := db.Table(jobApplyTable).Where("job_id=? and candidate_id=?", jobID, candidateID).Take(&jobapply).Error
 	if err != nil {
 		g.Logger.Error(err.Error())
@@ -135,9 +136,9 @@ func (g *JobApplyGorm) CheckApplied(ctx context.Context, jobID, candidateID int6
 	return &jobapply, nil
 }
 
-func (g *JobApplyGorm) GetApply(ctx context.Context, jobID, candidateID int64) (*models.JobApply, error) {
+func (g *JobApplyGorm) GetApply(ctx context.Context, jobID, candidateID int64) (*models2.JobApply, error) {
 	db := g.DB.WithContext(ctx)
-	jobapply := models.JobApply{}
+	jobapply := models2.JobApply{}
 	err := db.Table(jobApplyTable).Select("job_candidate.*, job.questions as questions").
 		Joins("JOIN "+jobTable+" ON job.job_id=job_candidate.job_id").
 		Where("job_candidate.job_id=? and job_candidate.candidate_id=?", jobID, candidateID).
@@ -147,4 +148,15 @@ func (g *JobApplyGorm) GetApply(ctx context.Context, jobID, candidateID int64) (
 		return nil, err
 	}
 	return &jobapply, nil
+}
+
+func (g *JobApplyGorm) CountApplyOnMonth(ctx context.Context, date string) (int64, error) {
+	db := g.DB.WithContext(ctx)
+	var count int64
+	err := db.Table(jobApplyTable).Where("created_at>=(LAST_DAY(?) + INTERVAL 1 DAY - INTERVAL 1 MONTH) and created_at<(LAST_DAY(?) + INTERVAL 1 DAY)", date, date).Count(&count).Error
+	if err != nil {
+		g.Logger.Error(err.Error())
+		return 0, err
+	}
+	return count, nil
 }

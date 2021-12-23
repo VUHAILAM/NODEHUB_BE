@@ -4,6 +4,8 @@ import (
 	"context"
 	"testing"
 
+	"gitlab.com/hieuxeko19991/job4e_be/models"
+
 	"github.com/pkg/errors"
 
 	"gitlab.com/hieuxeko19991/job4e_be/pkg/auth"
@@ -13,7 +15,6 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/stretchr/testify/mock"
-	"gitlab.com/hieuxeko19991/job4e_be/pkg/models"
 )
 
 type MockNotificationGorm struct {

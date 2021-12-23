@@ -5,13 +5,14 @@ import (
 	"strconv"
 	"time"
 
+	models2 "gitlab.com/hieuxeko19991/job4e_be/models"
+
 	"gitlab.com/hieuxeko19991/job4e_be/services/autocomplete"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/pkg/errors"
 	"gitlab.com/hieuxeko19991/job4e_be/cmd/config"
 	"gitlab.com/hieuxeko19991/job4e_be/pkg/auth"
-	"gitlab.com/hieuxeko19991/job4e_be/pkg/models"
 	"gitlab.com/hieuxeko19991/job4e_be/pkg/utils"
 	"gitlab.com/hieuxeko19991/job4e_be/services/candidate"
 	email2 "gitlab.com/hieuxeko19991/job4e_be/services/email"
@@ -23,9 +24,9 @@ import (
 type IAccountService interface {
 	Login(ctx context.Context, email string, password string, loginType int64) (string, string, error)
 	Logout(ctx context.Context, email string) error
-	Register(ctx context.Context, account *models.RequestRegisterAccount) error
+	Register(ctx context.Context, account *models2.RequestRegisterAccount) error
 	ForgotPassword(ctx context.Context, email string) error
-	ChangePassword(ctx context.Context, req *models.RequestChangePassword) error
+	ChangePassword(ctx context.Context, req *models2.RequestChangePassword) error
 	ResetPassword(ctx context.Context, token string, newPassword string) error
 	GetAccessToken(ctx context.Context, accountID int64, customKey string) (string, error)
 	VerifyEmail(ctx context.Context, email string) error
@@ -79,7 +80,7 @@ func (a *Account) Login(ctx context.Context, email string, password string, logi
 		a.Logger.Error("Account not verified")
 		return "", "", errors.New("Account not verified")
 	}
-	reqAccount := &models.Account{
+	reqAccount := &models2.Account{
 		Email:    email,
 		Password: password,
 	}
@@ -120,9 +121,9 @@ type VerifyAccountClaims struct {
 	jwt.StandardClaims
 }
 
-func (a *Account) Register(ctx context.Context, account *models.RequestRegisterAccount) error {
+func (a *Account) Register(ctx context.Context, account *models2.RequestRegisterAccount) error {
 	hashedPassword, _ := bcrypt.GenerateFromPassword([]byte(account.Password), 8)
-	accountModels := &models.Account{
+	accountModels := &models2.Account{
 		Email:     account.Email,
 		Phone:     account.Phone,
 		Password:  string(hashedPassword),
@@ -138,7 +139,7 @@ func (a *Account) Register(ctx context.Context, account *models.RequestRegisterA
 		return nil
 	}
 	if account.Type == auth.RecruiterRole {
-		recruiterModel := &models.Recruiter{
+		recruiterModel := &models2.Recruiter{
 			RecruiterID:      accountID,
 			Name:             account.RecruiterInfor.Name,
 			Address:          account.RecruiterInfor.Address,
@@ -159,7 +160,7 @@ func (a *Account) Register(ctx context.Context, account *models.RequestRegisterA
 			a.Logger.Error("Create Recruiter error", zap.Error(err))
 			return err
 		}
-		rs := models.RecruiterSkill{
+		rs := models2.RecruiterSkill{
 			SkillId:     1,
 			RecruiterId: accountID,
 		}
@@ -169,9 +170,24 @@ func (a *Account) Register(ctx context.Context, account *models.RequestRegisterA
 			return err
 		}
 		a.RecTrie.Insert(recruiterModel.Name)
+
+		from := "lamvhhe130764@fpt.edu.vn"
+		to := []string{account.Email}
+		subject := "Thank you for register NodeHub"
+		mailType := email2.Company
+		mailData := models2.MailData{
+			Link: a.Conf.Domain + "recruiter",
+		}
+
+		mailReq := a.MailService.NewMail(from, to, subject, mailType, &mailData)
+		err = a.MailService.SendMail(mailReq)
+		if err != nil {
+			a.Logger.Error("Cannot send email", zap.Error(err))
+			return err
+		}
 	}
 	if account.Type == auth.CandidateRole {
-		candidateModel := &models.Candidate{
+		candidateModel := &models2.Candidate{
 			CandidateID:       accountID,
 			FirstName:         account.CandidateInfor.FirstName,
 			LastName:          account.CandidateInfor.LastName,
@@ -192,7 +208,7 @@ func (a *Account) Register(ctx context.Context, account *models.RequestRegisterA
 			a.Logger.Error("Create Candidate error", zap.Error(err))
 			return err
 		}
-		cs := models.CandidateSkill{
+		cs := models2.CandidateSkill{
 			SkillId:     1,
 			CandidateId: accountID,
 			Media:       "Nothing",
@@ -204,29 +220,29 @@ func (a *Account) Register(ctx context.Context, account *models.RequestRegisterA
 		}
 		a.CanTrie.Insert(candidateModel.FirstName + " " + candidateModel.LastName)
 		a.CanTrie.Insert(candidateModel.LastName + " " + candidateModel.FirstName)
-	}
 
-	token, err := a.generateVerifyToken(ctx, account.Email)
-	if err != nil {
-		a.Logger.Error("Cannot gen Verify Email token", zap.Error(err))
-		return err
-	}
-	linkReset := a.Conf.Domain + "account/verify-email?token=" + token
-	a.Logger.Info("Link verify email", zap.String("url", linkReset))
+		token, err := a.generateVerifyToken(ctx, account.Email)
+		if err != nil {
+			a.Logger.Error("Cannot gen Verify Email token", zap.Error(err))
+			return err
+		}
+		linkReset := a.Conf.Domain + "account/verify-email?token=" + token
+		a.Logger.Info("Link verify email", zap.String("url", linkReset))
 
-	from := "lamvhhe130764@fpt.edu.vn"
-	to := []string{account.Email}
-	subject := "Verify Email for NodeHub"
-	mailType := email2.MailConfirmation
-	mailData := models.MailData{
-		Link: linkReset,
-	}
+		from := "lamvhhe130764@fpt.edu.vn"
+		to := []string{account.Email}
+		subject := "Verify Email for NodeHub"
+		mailType := email2.MailConfirmation
+		mailData := models2.MailData{
+			Link: linkReset,
+		}
 
-	mailReq := a.MailService.NewMail(from, to, subject, mailType, &mailData)
-	err = a.MailService.SendMail(mailReq)
-	if err != nil {
-		a.Logger.Error("Cannot send email", zap.Error(err))
-		return err
+		mailReq := a.MailService.NewMail(from, to, subject, mailType, &mailData)
+		err = a.MailService.SendMail(mailReq)
+		if err != nil {
+			a.Logger.Error("Cannot send email", zap.Error(err))
+			return err
+		}
 	}
 
 	return nil
@@ -275,7 +291,7 @@ func (a *Account) ForgotPassword(ctx context.Context, email string) error {
 	to := []string{email}
 	subject := "Password Reset for NodeHub"
 	mailType := email2.PassReset
-	mailData := models.MailData{
+	mailData := models2.MailData{
 		Link: linkReset,
 	}
 
@@ -311,7 +327,7 @@ func (a *Account) generateResetToken(ctx context.Context, email string) (string,
 	return token.SignedString(signKey)
 }
 
-func (a *Account) ChangePassword(ctx context.Context, req *models.RequestChangePassword) error {
+func (a *Account) ChangePassword(ctx context.Context, req *models2.RequestChangePassword) error {
 	acc, err := a.AccountGorm.GetAccountByEmail(ctx, req.Email)
 	if err != nil {
 		a.Logger.Error("Get Account error", zap.Error(err))

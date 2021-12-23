@@ -210,7 +210,7 @@ func InitServer() *Server {
 	// init account service
 
 	//init recruiter service
-	recruiterService := recruiter.NewRecruiterCategory(recruiterGorm, logger)
+	recruiterService := recruiter.NewRecruiterCategory(recruiterGorm, nil, logger)
 	recruiterSerializer := recruiter2.NewRecruiterSerializer(recruiterService, logger)
 
 	//init blog service

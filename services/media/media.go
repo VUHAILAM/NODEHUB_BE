@@ -3,7 +3,8 @@ package media
 import (
 	"context"
 
-	"gitlab.com/hieuxeko19991/job4e_be/pkg/models"
+	"gitlab.com/hieuxeko19991/job4e_be/models"
+
 	"go.uber.org/zap"
 )
 

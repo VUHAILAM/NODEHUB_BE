@@ -4,9 +4,10 @@ import (
 	"context"
 	"encoding/json"
 
+	"gitlab.com/hieuxeko19991/job4e_be/models"
+
 	"github.com/olivere/elastic/v7"
 	"github.com/pkg/errors"
-	"gitlab.com/hieuxeko19991/job4e_be/pkg/models"
 	"go.uber.org/zap"
 )
 

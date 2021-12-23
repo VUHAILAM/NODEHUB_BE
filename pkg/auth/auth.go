@@ -8,10 +8,11 @@ import (
 	"fmt"
 	"time"
 
+	"gitlab.com/hieuxeko19991/job4e_be/models"
+
 	"github.com/dgrijalva/jwt-go"
 	"github.com/pkg/errors"
 	"gitlab.com/hieuxeko19991/job4e_be/cmd/config"
-	"gitlab.com/hieuxeko19991/job4e_be/pkg/models"
 	"go.uber.org/zap"
 	"golang.org/x/crypto/bcrypt"
 )

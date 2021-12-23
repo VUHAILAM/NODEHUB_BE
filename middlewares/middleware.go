@@ -6,9 +6,9 @@ import (
 	"net/http"
 	"strings"
 
-	"gitlab.com/hieuxeko19991/job4e_be/cmd/config"
+	"gitlab.com/hieuxeko19991/job4e_be/models"
 
-	"gitlab.com/hieuxeko19991/job4e_be/pkg/models"
+	"gitlab.com/hieuxeko19991/job4e_be/cmd/config"
 
 	"gitlab.com/hieuxeko19991/job4e_be/pkg/auth"
 

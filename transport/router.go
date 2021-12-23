@@ -133,6 +133,7 @@ func (g *GinDependencies) InitGinEngine(config *config.Config) *gin.Engine {
 	commonApplyCtl.POST("/jobs", g.JobApplySerializer.GetJobAppliedByCandidateID)
 	commonApplyCtl.POST("/candidates", g.JobApplySerializer.GetCandidatesAppyJob)
 	commonApplyCtl.POST("/get-apply", g.JobApplySerializer.GetApply)
+	commonApplyCtl.POST("/count-apply", g.JobApplySerializer.CountApplyOnMonth)
 	candidateApplyCtl := applyCtl.Group("/candidate").Use(middlewares.AuthorizationMiddleware(g.Auth, auth.CandidateRole))
 	candidateApplyCtl.POST("/apply", g.JobApplySerializer.Apply)
 	candidateApplyCtl.POST("/check-applied", g.JobApplySerializer.CheckApplied)

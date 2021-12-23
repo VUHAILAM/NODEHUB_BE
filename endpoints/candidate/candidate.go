@@ -5,11 +5,12 @@ import (
 	"net/http"
 	"strconv"
 
+	models2 "gitlab.com/hieuxeko19991/job4e_be/models"
+
 	"github.com/gin-gonic/gin"
 	"github.com/pkg/errors"
 	"gitlab.com/hieuxeko19991/job4e_be/pkg/auth"
 	"gitlab.com/hieuxeko19991/job4e_be/pkg/ginx"
-	"gitlab.com/hieuxeko19991/job4e_be/pkg/models"
 	"gitlab.com/hieuxeko19991/job4e_be/services/candidate"
 	"go.uber.org/zap"
 )
@@ -36,7 +37,7 @@ func (cs *CandidateSerializer) CreateProfile(ginCtx *gin.Context) {
 		})
 		return
 	}
-	req := models.CandidateRequest{}
+	req := models2.CandidateRequest{}
 	err := json.NewDecoder(ginCtx.Request.Body).Decode(&req)
 	if err != nil {
 		cs.Logger.Error("Parse request Candidate Create error", zap.Error(err))
@@ -45,7 +46,7 @@ func (cs *CandidateSerializer) CreateProfile(ginCtx *gin.Context) {
 		})
 		return
 	}
-	req.CandidateID = acc.(models.Account).Id
+	req.CandidateID = acc.(models2.Account).Id
 	_, err = cs.CandidateService.CreateCandidateProfile(ctx, req)
 	if err != nil {
 		cs.Logger.Error(err.Error())
@@ -68,7 +69,7 @@ func (cs *CandidateSerializer) UpdateProfile(ginCtx *gin.Context) {
 		})
 		return
 	}
-	req := models.CandidateRequest{}
+	req := models2.CandidateRequest{}
 	err := json.NewDecoder(ginCtx.Request.Body).Decode(&req)
 	if err != nil {
 		cs.Logger.Error("Parse request Candidate Update error", zap.Error(err))
@@ -77,7 +78,7 @@ func (cs *CandidateSerializer) UpdateProfile(ginCtx *gin.Context) {
 		})
 		return
 	}
-	req.CandidateID = acc.(models.Account).Id
+	req.CandidateID = acc.(models2.Account).Id
 	err = cs.CandidateService.UpdateCandidateProfile(ctx, req)
 	if err != nil {
 		cs.Logger.Error(err.Error())
@@ -100,7 +101,7 @@ func (cs *CandidateSerializer) GetProfile(ginCtx *gin.Context) {
 		})
 		return
 	}
-	req := models.CandidateRequest{}
+	req := models2.CandidateRequest{}
 	err := json.NewDecoder(ginCtx.Request.Body).Decode(&req)
 	if err != nil {
 		cs.Logger.Error("Parse request Candidate Get detail error", zap.Error(err))
@@ -111,7 +112,7 @@ func (cs *CandidateSerializer) GetProfile(ginCtx *gin.Context) {
 	}
 	cs.Logger.Info("", zap.Reflect("canReq", req))
 	if req.CandidateID == 0 {
-		req.CandidateID = acc.(models.Account).Id
+		req.CandidateID = acc.(models2.Account).Id
 	}
 	candidate, err := cs.CandidateService.GetCandidateProfile(ctx, req.CandidateID)
 	if err != nil {
@@ -128,7 +129,7 @@ func (cs *CandidateSerializer) GetProfile(ginCtx *gin.Context) {
 //recruiter admin
 func (cs *CandidateSerializer) GetAllCandidateForAdmin(ginCtx *gin.Context) {
 	ctx := ginCtx.Request.Context()
-	req := models.RequestGetListCandidateAdmin{}
+	req := models2.RequestGetListCandidateAdmin{}
 	err := json.NewDecoder(ginCtx.Request.Body).Decode(&req)
 	if err != nil {
 		cs.Logger.Error("Parse request get list error", zap.Error(err))
@@ -153,7 +154,7 @@ func (cs *CandidateSerializer) GetAllCandidateForAdmin(ginCtx *gin.Context) {
 
 func (cs *CandidateSerializer) UpdateReviewCandidateByAdmin(ginCtx *gin.Context) {
 	ctx := ginCtx.Request.Context()
-	req := models.RequestUpdateReviewCandidateAdmin{}
+	req := models2.RequestUpdateReviewCandidateAdmin{}
 	err := json.NewDecoder(ginCtx.Request.Body).Decode(&req)
 	if err != nil {
 		cs.Logger.Error("Parse request Update review candidate error", zap.Error(err))
@@ -175,7 +176,7 @@ func (cs *CandidateSerializer) UpdateReviewCandidateByAdmin(ginCtx *gin.Context)
 
 func (cs *CandidateSerializer) UpdateStatusCandidate(ginCtx *gin.Context) {
 	ctx := ginCtx.Request.Context()
-	req := models.RequestUpdateStatusCandidate{}
+	req := models2.RequestUpdateStatusCandidate{}
 	err := json.NewDecoder(ginCtx.Request.Body).Decode(&req)
 	if err != nil {
 		cs.Logger.Error("Parse request Update status candidate error", zap.Error(err))
@@ -198,7 +199,7 @@ func (cs *CandidateSerializer) UpdateStatusCandidate(ginCtx *gin.Context) {
 // CandidateSkill
 func (cs *CandidateSerializer) AddCandidateSkill(ginCtx *gin.Context) {
 	ctx := ginCtx.Request.Context()
-	req := models.CandidateSkill{}
+	req := models2.CandidateSkill{}
 	err := json.NewDecoder(ginCtx.Request.Body).Decode(&req)
 
 	if err != nil {
@@ -245,7 +246,7 @@ func (cs *CandidateSerializer) DeleteCandidateSkill(ginCtx *gin.Context) {
 
 func (cs *CandidateSerializer) UpdateCandidateSkill(ginCtx *gin.Context) {
 	ctx := ginCtx.Request.Context()
-	req := models.RequestUpdateCandidateSkill{}
+	req := models2.RequestUpdateCandidateSkill{}
 	err := json.NewDecoder(ginCtx.Request.Body).Decode(&req)
 	if err != nil {
 		cs.Logger.Error("Parse request Update Candidate Skill error", zap.Error(err))
@@ -292,7 +293,7 @@ func (cs *CandidateSerializer) GetCandidateSkill(ginCtx *gin.Context) {
 
 func (cs *CandidateSerializer) SearchCandidate(ginCtx *gin.Context) {
 	ctx := ginCtx.Request.Context()
-	req := models.RequestSearchCandidate{}
+	req := models2.RequestSearchCandidate{}
 	err := json.NewDecoder(ginCtx.Request.Body).Decode(&req)
 	if err != nil {
 		cs.Logger.Error("Parse request Search Candidate error", zap.Error(err))
@@ -315,7 +316,7 @@ func (cs *CandidateSerializer) SearchCandidate(ginCtx *gin.Context) {
 
 func (cs *CandidateSerializer) GetAllCandidate(ginCtx *gin.Context) {
 	ctx := ginCtx.Request.Context()
-	req := models.RequestSearchCandidate{}
+	req := models2.RequestSearchCandidate{}
 	err := json.NewDecoder(ginCtx.Request.Body).Decode(&req)
 	if err != nil {
 		cs.Logger.Error("Parse request Get All Candidate error", zap.Error(err))
@@ -352,7 +353,7 @@ func (cs *CandidateSerializer) CountCandidate(ginCtx *gin.Context) {
 
 func (cs *CandidateSerializer) PublicProfile(ginCtx *gin.Context) {
 	ctx := ginCtx.Request.Context()
-	req := models.RequestPublicProfile{}
+	req := models2.RequestPublicProfile{}
 	err := json.NewDecoder(ginCtx.Request.Body).Decode(&req)
 	if err != nil {
 		cs.Logger.Error("Parse request PublicProfile error", zap.Error(err))

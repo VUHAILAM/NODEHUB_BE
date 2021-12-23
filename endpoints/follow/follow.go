@@ -4,11 +4,12 @@ import (
 	"encoding/json"
 	"net/http"
 
+	models2 "gitlab.com/hieuxeko19991/job4e_be/models"
+
 	"github.com/gin-gonic/gin"
 	"github.com/pkg/errors"
 	"gitlab.com/hieuxeko19991/job4e_be/pkg/auth"
 	"gitlab.com/hieuxeko19991/job4e_be/pkg/ginx"
-	"gitlab.com/hieuxeko19991/job4e_be/pkg/models"
 	"gitlab.com/hieuxeko19991/job4e_be/services/follow"
 	"go.uber.org/zap"
 )
@@ -36,7 +37,7 @@ func (s *FollowSerializer) Follow(ginCtx *gin.Context) {
 		return
 	}
 
-	req := models.RequestFollow{}
+	req := models2.RequestFollow{}
 	err := json.NewDecoder(ginCtx.Request.Body).Decode(&req)
 	if err != nil {
 		s.Logger.Error("Parse request Follow error", zap.Error(err))
@@ -46,7 +47,7 @@ func (s *FollowSerializer) Follow(ginCtx *gin.Context) {
 		return
 	}
 
-	req.CandidateID = acc.(models.Account).Id
+	req.CandidateID = acc.(models2.Account).Id
 	err = s.FollowService.Follow(ctx, req)
 	if err != nil {
 		s.Logger.Error("Follow error", zap.Error(err))
@@ -70,7 +71,7 @@ func (s *FollowSerializer) UnFollow(ginCtx *gin.Context) {
 		return
 	}
 
-	req := models.RequestUnfollow{}
+	req := models2.RequestUnfollow{}
 	err := json.NewDecoder(ginCtx.Request.Body).Decode(&req)
 	if err != nil {
 		s.Logger.Error("Parse request UnFollow error", zap.Error(err))
@@ -80,7 +81,7 @@ func (s *FollowSerializer) UnFollow(ginCtx *gin.Context) {
 		return
 	}
 
-	req.CandidateID = acc.(models.Account).Id
+	req.CandidateID = acc.(models2.Account).Id
 	err = s.FollowService.UnFollow(ctx, req)
 	if err != nil {
 		s.Logger.Error("UnFollow error", zap.Error(err))
@@ -95,7 +96,7 @@ func (s *FollowSerializer) UnFollow(ginCtx *gin.Context) {
 
 func (s *FollowSerializer) CountFollowOfCandidate(ginCtx *gin.Context) {
 	ctx := ginCtx.Request.Context()
-	req := models.RequestFollow{}
+	req := models2.RequestFollow{}
 	err := json.NewDecoder(ginCtx.Request.Body).Decode(&req)
 	if err != nil {
 		s.Logger.Error("Parse request Follow error", zap.Error(err))
@@ -119,7 +120,7 @@ func (s *FollowSerializer) CountFollowOfCandidate(ginCtx *gin.Context) {
 
 func (s *FollowSerializer) CountFollowOfRecruiter(ginCtx *gin.Context) {
 	ctx := ginCtx.Request.Context()
-	req := models.RequestFollow{}
+	req := models2.RequestFollow{}
 	err := json.NewDecoder(ginCtx.Request.Body).Decode(&req)
 	if err != nil {
 		s.Logger.Error("Parse request Follow error", zap.Error(err))
@@ -143,7 +144,7 @@ func (s *FollowSerializer) CountFollowOfRecruiter(ginCtx *gin.Context) {
 
 func (s *FollowSerializer) FollowExist(ginCtx *gin.Context) {
 	ctx := ginCtx.Request.Context()
-	req := models.RequestFollow{}
+	req := models2.RequestFollow{}
 	err := json.NewDecoder(ginCtx.Request.Body).Decode(&req)
 	if err != nil {
 		s.Logger.Error("Parse request Follow error", zap.Error(err))
@@ -156,7 +157,7 @@ func (s *FollowSerializer) FollowExist(ginCtx *gin.Context) {
 	follow, err := s.FollowService.FollowExist(ctx, req)
 	if err != nil {
 		s.Logger.Error("Follow Exist error", zap.Error(err))
-		ginx.BuildSuccessResponse(ginCtx, http.StatusAccepted, models.Follow{})
+		ginx.BuildSuccessResponse(ginCtx, http.StatusAccepted, models2.Follow{})
 		return
 	}
 	ginx.BuildSuccessResponse(ginCtx, http.StatusAccepted, follow)
@@ -173,7 +174,7 @@ func (s *FollowSerializer) GetListCandidate(ginCtx *gin.Context) {
 		return
 	}
 
-	req := models.RequestGetCandidateFollow{}
+	req := models2.RequestGetCandidateFollow{}
 	err := json.NewDecoder(ginCtx.Request.Body).Decode(&req)
 	if err != nil {
 		s.Logger.Error("Parse request List Follow Candidate error", zap.Error(err))
@@ -183,7 +184,7 @@ func (s *FollowSerializer) GetListCandidate(ginCtx *gin.Context) {
 		return
 	}
 
-	req.RecruiterID = acc.(models.Account).Id
+	req.RecruiterID = acc.(models2.Account).Id
 	resp, err := s.FollowService.GetCandidate(ctx, req)
 	if err != nil {
 		s.Logger.Error("Get List Follow of Recruiter error", zap.Error(err))
@@ -206,7 +207,7 @@ func (s *FollowSerializer) GetListRecruiter(ginCtx *gin.Context) {
 		return
 	}
 
-	req := models.RequestGetRecruiterFollow{}
+	req := models2.RequestGetRecruiterFollow{}
 	err := json.NewDecoder(ginCtx.Request.Body).Decode(&req)
 	if err != nil {
 		s.Logger.Error("Parse request List Follow Candidate error", zap.Error(err))
@@ -216,7 +217,7 @@ func (s *FollowSerializer) GetListRecruiter(ginCtx *gin.Context) {
 		return
 	}
 
-	req.CandidateID = acc.(models.Account).Id
+	req.CandidateID = acc.(models2.Account).Id
 	resp, err := s.FollowService.GetRecruiter(ctx, req)
 	if err != nil {
 		s.Logger.Error("Get List Follow of Candidate error", zap.Error(err))

@@ -3,7 +3,8 @@ package job_skill
 import (
 	"context"
 
-	"gitlab.com/hieuxeko19991/job4e_be/pkg/models"
+	models2 "gitlab.com/hieuxeko19991/job4e_be/models"
+
 	"go.uber.org/zap"
 	"gorm.io/gorm"
 )
@@ -15,9 +16,9 @@ const (
 )
 
 type IJobSkillDatabase interface {
-	Create(ctx context.Context, jobSkill []*models.JobSkill) error
-	GetAllSkillByJob(ctx context.Context, jobID int64) ([]*models.Skill, error)
-	GetAllJobBySkill(ctx context.Context, skillID, offset, size int64) ([]*models.Job, int64, error)
+	Create(ctx context.Context, jobSkill []*models2.JobSkill) error
+	GetAllSkillByJob(ctx context.Context, jobID int64) ([]*models2.Skill, error)
+	GetAllJobBySkill(ctx context.Context, skillID, offset, size int64) ([]*models2.Job, int64, error)
 	Delete(ctx context.Context, jobID int64) error
 }
 
@@ -33,7 +34,7 @@ func NewJobSkillGorm(db *gorm.DB, logger *zap.Logger) *JobSkillGorm {
 	}
 }
 
-func (g *JobSkillGorm) Create(ctx context.Context, jobSkill []*models.JobSkill) error {
+func (g *JobSkillGorm) Create(ctx context.Context, jobSkill []*models2.JobSkill) error {
 	db := g.DB.WithContext(ctx)
 	err := db.Table(jobSkillTable).Create(&jobSkill).Error
 	if err != nil {
@@ -45,7 +46,7 @@ func (g *JobSkillGorm) Create(ctx context.Context, jobSkill []*models.JobSkill) 
 
 func (g *JobSkillGorm) Delete(ctx context.Context, jobID int64) error {
 	db := g.DB.WithContext(ctx)
-	err := db.Table(jobSkillTable).Where("job_id=?", jobID).Delete(&models.JobSkill{}).Error
+	err := db.Table(jobSkillTable).Where("job_id=?", jobID).Delete(&models2.JobSkill{}).Error
 	if err != nil {
 		g.Logger.Error("JobSkillGorm: Delete job skill error", zap.Error(err))
 		return err
@@ -53,9 +54,9 @@ func (g *JobSkillGorm) Delete(ctx context.Context, jobID int64) error {
 	return nil
 }
 
-func (g *JobSkillGorm) GetAllSkillByJob(ctx context.Context, jobID int64) ([]*models.Skill, error) {
+func (g *JobSkillGorm) GetAllSkillByJob(ctx context.Context, jobID int64) ([]*models2.Skill, error) {
 	db := g.DB.WithContext(ctx)
-	var skills []*models.Skill
+	var skills []*models2.Skill
 	err := db.Table(skillTable).
 		Joins("INNER JOIN "+jobSkillTable+" ON "+skillTable+".skill_id = "+jobSkillTable+".job_id").
 		Where(jobSkillTable+".job_id=?", jobID).
@@ -67,9 +68,9 @@ func (g *JobSkillGorm) GetAllSkillByJob(ctx context.Context, jobID int64) ([]*mo
 	return skills, nil
 }
 
-func (g *JobSkillGorm) GetAllJobBySkill(ctx context.Context, skillID, offset, size int64) ([]*models.Job, int64, error) {
+func (g *JobSkillGorm) GetAllJobBySkill(ctx context.Context, skillID, offset, size int64) ([]*models2.Job, int64, error) {
 	db := g.DB.WithContext(ctx)
-	var jobs []*models.Job
+	var jobs []*models2.Job
 	err := db.Table(jobTable).
 		Joins("JOIN "+jobSkillTable+" ON "+jobTable+".job_id = "+jobSkillTable+".job_id").
 		Where(jobSkillTable+".skill_id=?", skillID).

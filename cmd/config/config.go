@@ -33,6 +33,8 @@ type Config struct {
 
 	MailVerifTemplateID string `envconfig:"MAIL_VERIFICATION_TEMPLATE_ID" mapstructure:"mail_verification_template_id" default:"d-fb85ced2fa3146c1a72f05f5cde5635c"`
 	PassResetTemplateID string `envconfig:"PASSWORD_RESET_TEMPLATE_ID" mapstructure:"password_reset_template_id" default:"d-8d495f1e9ee84611a63440c52d338f9d"`
+	ApproveTemplateID   string `envconfig:"APPROVE_TEMPLATE_ID" mapstructure:"approve_template_id" default:"d-1e3a00852e2b4a208afc1f15c94c082f"`
+	CompanyTemplateID   string `envconfig:"COMPANY_TEMPLATE_ID" mapstructure:"company_template_id" default:"d-f8954bddd3524181aeb293571af60a5f"`
 	SendGridApiKey      string `envconfig:"SENDGRID_API_KEY" mapstructure:"sendgrid_api_key"`
 }
 
@@ -45,6 +47,8 @@ func NewConfig() (*Config, error) {
 	viper.SetDefault("VERIFY_EMAIL_EXPIRATION", 5)
 	viper.SetDefault("MAIL_VERIFICATION_TEMPLATE_ID", "d-fb85ced2fa3146c1a72f05f5cde5635c")
 	viper.SetDefault("PASSWORD_RESET_TEMPLATE_ID", "d-8d495f1e9ee84611a63440c52d338f9d")
+	viper.SetDefault("APPROVE_TEMPLATE_ID", "d-1e3a00852e2b4a208afc1f15c94c082f")
+	viper.SetDefault("COMPANY_TEMPLATE_ID", "d-f8954bddd3524181aeb293571af60a5f")
 	viper.SetDefault("DOMAIN", "http://nodehub-web.s3-website-ap-southeast-1.amazonaws.com/")
 	viper.AddConfigPath(".")
 	viper.SetConfigName("app")

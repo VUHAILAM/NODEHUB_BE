@@ -4,19 +4,22 @@ import (
 	"context"
 	"testing"
 
+	"gitlab.com/hieuxeko19991/job4e_be/cmd/config"
+
+	models2 "gitlab.com/hieuxeko19991/job4e_be/models"
+
 	"github.com/stretchr/testify/assert"
 
 	"go.uber.org/zap"
 
 	"github.com/stretchr/testify/mock"
-	"gitlab.com/hieuxeko19991/job4e_be/pkg/models"
 )
 
 type MockRecruiterGorm struct {
 	mock.Mock
 }
 
-func (g *MockRecruiterGorm) Create(ctx context.Context, recruiter *models.Recruiter) (int64, error) {
+func (g *MockRecruiterGorm) Create(ctx context.Context, recruiter *models2.Recruiter) (int64, error) {
 	args := g.Called(ctx, recruiter)
 	return int64(args.Int(0)), args.Error(1)
 }
@@ -26,29 +29,29 @@ func (g *MockRecruiterGorm) GetAllRecruiterName(ctx context.Context) ([]string, 
 	return args.Get(0).([]string), args.Error(1)
 }
 
-func (g *MockRecruiterGorm) AddRecruiterSkill(ctx context.Context, recruiterSkill *models.RecruiterSkill) error {
+func (g *MockRecruiterGorm) AddRecruiterSkill(ctx context.Context, recruiterSkill *models2.RecruiterSkill) error {
 	args := g.Called(ctx, recruiterSkill)
 	return args.Error(0)
 }
 
-func (g *MockRecruiterGorm) UpdateProfile(ctx context.Context, recruiter *models.RequestUpdateRecruiter, recruiter_id int64) error {
+func (g *MockRecruiterGorm) UpdateProfile(ctx context.Context, recruiter *models2.RequestUpdateRecruiter, recruiter_id int64) error {
 	args := g.Called(ctx, recruiter, recruiter_id)
 	return args.Error(0)
 }
 
-func (g *MockRecruiterGorm) GetRecruiterSkill(ctx context.Context, recruiter_id int64) ([]models.ResponseRecruiterSkill, error) {
+func (g *MockRecruiterGorm) GetRecruiterSkill(ctx context.Context, recruiter_id int64) ([]models2.ResponseRecruiterSkill, error) {
 	args := g.Called(ctx, recruiter_id)
-	return args.Get(0).([]models.ResponseRecruiterSkill), args.Error(1)
+	return args.Get(0).([]models2.ResponseRecruiterSkill), args.Error(1)
 }
 
-func (g *MockRecruiterGorm) GetProfile(ctx context.Context, id int64) (*models.Recruiter, error) {
+func (g *MockRecruiterGorm) GetProfile(ctx context.Context, id int64) (*models2.Recruiter, error) {
 	args := g.Called(ctx, id)
-	return args.Get(0).(*models.Recruiter), args.Error(1)
+	return args.Get(0).(*models2.Recruiter), args.Error(1)
 }
 
-func (g *MockRecruiterGorm) GetAllRecruiterForAdmin(ctx context.Context, name string, page int64, size int64) (*models.ResponsetListRecruiter, error) {
+func (g *MockRecruiterGorm) GetAllRecruiterForAdmin(ctx context.Context, name string, page int64, size int64) (*models2.ResponsetListRecruiter, error) {
 	args := g.Called(ctx, name, page, size)
-	return args.Get(0).(*models.ResponsetListRecruiter), args.Error(1)
+	return args.Get(0).(*models2.ResponsetListRecruiter), args.Error(1)
 }
 
 func (g *MockRecruiterGorm) UpdateRecruiterByAdmin(ctx context.Context, recruiter_id int64, data map[string]interface{}) error {
@@ -56,14 +59,14 @@ func (g *MockRecruiterGorm) UpdateRecruiterByAdmin(ctx context.Context, recruite
 	return args.Error(0)
 }
 
-func (g *MockRecruiterGorm) UpdateStatusRecruiter(ctx context.Context, updateRequest *models.RequestUpdateStatusRecruiter, recruiter_id int64) error {
+func (g *MockRecruiterGorm) UpdateStatusRecruiter(ctx context.Context, updateRequest *models2.RequestUpdateStatusRecruiter, recruiter_id int64) error {
 	args := g.Called(ctx, updateRequest, recruiter_id)
 	return args.Error(0)
 }
 
-func (g *MockRecruiterGorm) GetAllRecruiterForCandidate(ctx context.Context, recruiterName string, skillName string, address string, page int64, size int64) (*models.ResponsetListRecruiterForCandidate, error) {
+func (g *MockRecruiterGorm) GetAllRecruiterForCandidate(ctx context.Context, recruiterName string, skillName string, address string, page int64, size int64) (*models2.ResponsetListRecruiterForCandidate, error) {
 	args := g.Called(ctx, recruiterName, skillName, address, page, size)
-	return args.Get(0).(*models.ResponsetListRecruiterForCandidate), args.Error(1)
+	return args.Get(0).(*models2.ResponsetListRecruiterForCandidate), args.Error(1)
 }
 
 func (g *MockRecruiterGorm) DeleteRecruiterSkill(ctx context.Context, recruiter_skill_id int64) error {
@@ -71,19 +74,19 @@ func (g *MockRecruiterGorm) DeleteRecruiterSkill(ctx context.Context, recruiter_
 	return args.Error(0)
 }
 
-func (g *MockRecruiterGorm) SearchRecruiter(ctx context.Context, text string, offset, size int64) ([]*models.Recruiter, int64, error) {
+func (g *MockRecruiterGorm) SearchRecruiter(ctx context.Context, text string, offset, size int64) ([]*models2.Recruiter, int64, error) {
 	args := g.Called(ctx, text, offset, size)
-	return args.Get(0).([]*models.Recruiter), int64(args.Int(1)), args.Error(2)
+	return args.Get(0).([]*models2.Recruiter), int64(args.Int(1)), args.Error(2)
 }
 
-func (g *MockRecruiterGorm) GetAllRecruiter(ctx context.Context, offset, size int64) ([]*models.Recruiter, int64, error) {
+func (g *MockRecruiterGorm) GetAllRecruiter(ctx context.Context, offset, size int64) ([]*models2.Recruiter, int64, error) {
 	args := g.Called(ctx, offset, size)
-	return args.Get(0).([]*models.Recruiter), int64(args.Int(1)), args.Error(2)
+	return args.Get(0).([]*models2.Recruiter), int64(args.Int(1)), args.Error(2)
 }
 
-func (g *MockRecruiterGorm) GetAllSkillByRecruiterID(ctx context.Context, recruiterID int64) ([]*models.Skill, error) {
+func (g *MockRecruiterGorm) GetAllSkillByRecruiterID(ctx context.Context, recruiterID int64) ([]*models2.Skill, error) {
 	args := g.Called(ctx, recruiterID)
-	return args.Get(0).([]*models.Skill), args.Error(1)
+	return args.Get(0).([]*models2.Skill), args.Error(1)
 }
 
 func (g *MockRecruiterGorm) Count(ctx context.Context) (int64, error) {
@@ -96,8 +99,32 @@ func (g *MockRecruiterGorm) GetPremiumField(ctx context.Context, recruiterID int
 	return args.Bool(0), args.Error(1)
 }
 
+type MockEmailService struct {
+	mock.Mock
+}
+
+func (s *MockEmailService) CreateMail(mailReq *models2.Mail) []byte {
+	args := s.Called(mailReq)
+	return args.Get(0).([]byte)
+}
+
+func (s *MockEmailService) SendMail(mailReq *models2.Mail) error {
+	args := s.Called(mailReq)
+	return args.Error(0)
+}
+
+func (s *MockEmailService) NewMail(from string, to []string, subject string, mailType models2.MailType, data *models2.MailData) *models2.Mail {
+	return &models2.Mail{
+		From:    from,
+		To:      to,
+		Subject: subject,
+		Mtype:   mailType,
+		Data:    data,
+	}
+}
+
 func TestNewRecruiterCategory(t *testing.T) {
-	recruiter := NewRecruiterCategory(&RecruiterGorm{}, zap.L())
+	recruiter := NewRecruiterCategory(&RecruiterGorm{}, nil, zap.L())
 	assert.NotNil(t, recruiter)
 }
 
@@ -105,7 +132,7 @@ func TestRecruiter_AddRecruiterSkill(t *testing.T) {
 	testcases := []struct {
 		Name        string
 		TestObj     Recruiter
-		Req         *models.RecruiterSkill
+		Req         *models2.RecruiterSkill
 		ExpectedErr error
 	}{
 		{
@@ -114,7 +141,7 @@ func TestRecruiter_AddRecruiterSkill(t *testing.T) {
 				RecruiterGorm: &MockRecruiterGorm{},
 				Logger:        zap.L(),
 			},
-			Req: &models.RecruiterSkill{
+			Req: &models2.RecruiterSkill{
 				RecruiterId: 1,
 				SkillId:     2,
 			},
@@ -126,7 +153,7 @@ func TestRecruiter_AddRecruiterSkill(t *testing.T) {
 				RecruiterGorm: &MockRecruiterGorm{},
 				Logger:        zap.L(),
 			},
-			Req: &models.RecruiterSkill{
+			Req: &models2.RecruiterSkill{
 				RecruiterId: 1,
 				SkillId:     2,
 			},
@@ -149,7 +176,7 @@ func TestRecruiter_UpdateProfile(t *testing.T) {
 	testcases := []struct {
 		Name        string
 		TestObj     Recruiter
-		Req         *models.RequestUpdateRecruiter
+		Req         *models2.RequestUpdateRecruiter
 		RecruiterID int64
 		ExpectedErr error
 	}{
@@ -159,7 +186,7 @@ func TestRecruiter_UpdateProfile(t *testing.T) {
 				RecruiterGorm: &MockRecruiterGorm{},
 				Logger:        zap.L(),
 			},
-			Req: &models.RequestUpdateRecruiter{
+			Req: &models2.RequestUpdateRecruiter{
 				Name: "One mount",
 			},
 			RecruiterID: 1,
@@ -182,7 +209,7 @@ func TestRecruiter_GetProfileRecruiter(t *testing.T) {
 		Name        string
 		TestObj     Recruiter
 		ID          int64
-		ExpectedRes *models.Recruiter
+		ExpectedRes *models2.Recruiter
 		ExpectedErr error
 	}{
 		{
@@ -192,7 +219,7 @@ func TestRecruiter_GetProfileRecruiter(t *testing.T) {
 				Logger:        zap.L(),
 			},
 			ID: 1,
-			ExpectedRes: &models.Recruiter{
+			ExpectedRes: &models2.Recruiter{
 				RecruiterID: 1,
 			},
 			ExpectedErr: nil,
@@ -202,7 +229,7 @@ func TestRecruiter_GetProfileRecruiter(t *testing.T) {
 	for _, test := range testcases {
 		t.Run(test.Name, func(t *testing.T) {
 			mockObj := new(MockRecruiterGorm)
-			mockObj.On("GetProfile", context.Background(), test.ID).Return(&models.Recruiter{
+			mockObj.On("GetProfile", context.Background(), test.ID).Return(&models2.Recruiter{
 				RecruiterID: 1,
 			}, nil)
 			test.TestObj.RecruiterGorm = mockObj
@@ -218,7 +245,7 @@ func TestRecruiter_GetRecruiterSkill(t *testing.T) {
 		Name        string
 		TestObj     Recruiter
 		ID          int64
-		ExpectedRes []models.ResponseRecruiterSkill
+		ExpectedRes []models2.ResponseRecruiterSkill
 		ExpectedErr error
 	}{
 		{
@@ -228,7 +255,7 @@ func TestRecruiter_GetRecruiterSkill(t *testing.T) {
 				Logger:        zap.L(),
 			},
 			ID: 1,
-			ExpectedRes: []models.ResponseRecruiterSkill{
+			ExpectedRes: []models2.ResponseRecruiterSkill{
 				{
 					Id: 1,
 				},
@@ -240,7 +267,7 @@ func TestRecruiter_GetRecruiterSkill(t *testing.T) {
 	for _, test := range testcases {
 		t.Run(test.Name, func(t *testing.T) {
 			mockObj := new(MockRecruiterGorm)
-			mockObj.On("GetRecruiterSkill", context.Background(), test.ID).Return([]models.ResponseRecruiterSkill{
+			mockObj.On("GetRecruiterSkill", context.Background(), test.ID).Return([]models2.ResponseRecruiterSkill{
 				{
 					Id: 1,
 				},
@@ -289,7 +316,7 @@ func TestRecruiter_GetAllRecruiterForAdmin(t *testing.T) {
 		Name        string
 		Page        int64
 		Size        int64
-		ExpectedRes *models.ResponsetListRecruiter
+		ExpectedRes *models2.ResponsetListRecruiter
 		ExpectedErr error
 	}{
 		{
@@ -301,11 +328,11 @@ func TestRecruiter_GetAllRecruiterForAdmin(t *testing.T) {
 			Name: "One mount",
 			Page: 1,
 			Size: 5,
-			ExpectedRes: &models.ResponsetListRecruiter{
+			ExpectedRes: &models2.ResponsetListRecruiter{
 				Total:       1,
 				TotalPage:   1,
 				CurrentPage: 1,
-				Data: []models.RecruiterForAdmin{
+				Data: []models2.RecruiterForAdmin{
 					{
 						RecruiterID: 1,
 						Name:        "One mount",
@@ -319,11 +346,11 @@ func TestRecruiter_GetAllRecruiterForAdmin(t *testing.T) {
 		t.Run(test.TestName, func(t *testing.T) {
 			mockObj := new(MockRecruiterGorm)
 			mockObj.On("GetAllRecruiterForAdmin", context.Background(), test.Name, test.Page, test.Size).
-				Return(&models.ResponsetListRecruiter{
+				Return(&models2.ResponsetListRecruiter{
 					Total:       1,
 					TotalPage:   1,
 					CurrentPage: 1,
-					Data: []models.RecruiterForAdmin{
+					Data: []models2.RecruiterForAdmin{
 						{
 							RecruiterID: 1,
 							Name:        "One mount",
@@ -342,7 +369,7 @@ func TestRecruiter_UpdateReciuterByAdmin(t *testing.T) {
 	testcases := []struct {
 		Name        string
 		TestObj     Recruiter
-		Req         *models.RequestUpdateRecruiterAdmin
+		Req         *models2.RequestUpdateRecruiterAdmin
 		ExpectedErr error
 	}{
 		{
@@ -351,7 +378,7 @@ func TestRecruiter_UpdateReciuterByAdmin(t *testing.T) {
 				RecruiterGorm: &MockRecruiterGorm{},
 				Logger:        zap.L(),
 			},
-			Req: &models.RequestUpdateRecruiterAdmin{
+			Req: &models2.RequestUpdateRecruiterAdmin{
 				RecruiterID:    1,
 				Nodehub_review: "Good",
 				Premium:        true,
@@ -378,17 +405,20 @@ func TestRecruiter_UpdateStatusReciuter(t *testing.T) {
 		Name        string
 		TestObj     Recruiter
 		RecruiterID int64
-		Req         *models.RequestUpdateStatusRecruiter
+		Req         *models2.RequestUpdateStatusRecruiter
 		ExpectedErr error
 	}{
 		{
 			Name: "Happy case",
 			TestObj: Recruiter{
 				RecruiterGorm: &MockRecruiterGorm{},
-				Logger:        zap.L(),
+				Email:         &MockEmailService{},
+
+				Conf:   &config.Config{},
+				Logger: zap.L(),
 			},
 			RecruiterID: 1,
-			Req: &models.RequestUpdateStatusRecruiter{
+			Req: &models2.RequestUpdateStatusRecruiter{
 				Status: true,
 			},
 			ExpectedErr: nil,
@@ -398,8 +428,24 @@ func TestRecruiter_UpdateStatusReciuter(t *testing.T) {
 	for _, test := range testcases {
 		t.Run(test.Name, func(t *testing.T) {
 			mockObj := new(MockRecruiterGorm)
+			mockEmail := new(MockEmailService)
 			mockObj.On("UpdateStatusRecruiter", context.Background(), test.Req, test.RecruiterID).Return(nil)
+			mockObj.On("GetProfile", context.Background(), test.RecruiterID).Return(&models2.Recruiter{
+				RecruiterID: test.RecruiterID,
+				Email:       "abc@def.com",
+			}, nil)
+			mockEmail.On("SendMail", &models2.Mail{
+				From:    "lamvhhe130764@fpt.edu.vn",
+				Subject: "Approved your Company on NodeHub",
+				Mtype:   3,
+				To:      []string{"abc@def.com"},
+				Data: &models2.MailData{
+					Link: test.TestObj.Conf.Domain + "recruiter/login",
+				},
+			}).Return(nil)
+
 			test.TestObj.RecruiterGorm = mockObj
+			test.TestObj.Email = mockEmail
 			err := test.TestObj.UpdateStatusReciuter(context.Background(), test.Req, test.RecruiterID)
 			assert.Nil(t, err)
 		})
@@ -415,7 +461,7 @@ func TestRecruiter_GetAllRecruiterForCandidate(t *testing.T) {
 		Address       string
 		Page          int64
 		Size          int64
-		ExpectedRes   *models.ResponsetListRecruiterForCandidate
+		ExpectedRes   *models2.ResponsetListRecruiterForCandidate
 		ExpectedErr   error
 	}{
 		{
@@ -429,11 +475,11 @@ func TestRecruiter_GetAllRecruiterForCandidate(t *testing.T) {
 			Address:       "Hanoi",
 			Page:          1,
 			Size:          5,
-			ExpectedRes: &models.ResponsetListRecruiterForCandidate{
+			ExpectedRes: &models2.ResponsetListRecruiterForCandidate{
 				Total:       1,
 				TotalPage:   1,
 				CurrentPage: 1,
-				Data: []models.RecruiterForCandidateCheck{
+				Data: []models2.RecruiterForCandidateCheck{
 					{
 						RecruiterID: 1,
 						Name:        "One mount",
@@ -449,11 +495,11 @@ func TestRecruiter_GetAllRecruiterForCandidate(t *testing.T) {
 		t.Run(test.Name, func(t *testing.T) {
 			mockObj := new(MockRecruiterGorm)
 			mockObj.On("GetAllRecruiterForCandidate", context.Background(), test.RecruiterName, test.SkillName, test.Address, test.Page, test.Size).
-				Return(&models.ResponsetListRecruiterForCandidate{
+				Return(&models2.ResponsetListRecruiterForCandidate{
 					Total:       1,
 					TotalPage:   1,
 					CurrentPage: 1,
-					Data: []models.RecruiterForCandidateCheck{
+					Data: []models2.RecruiterForCandidateCheck{
 						{
 							RecruiterID: 1,
 							Name:        "One mount",

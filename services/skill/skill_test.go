@@ -4,13 +4,14 @@ import (
 	"context"
 	"testing"
 
+	"gitlab.com/hieuxeko19991/job4e_be/models"
+
 	"github.com/stretchr/testify/assert"
 
 	"gitlab.com/hieuxeko19991/job4e_be/services/autocomplete"
 	"go.uber.org/zap"
 
 	"github.com/stretchr/testify/mock"
-	"gitlab.com/hieuxeko19991/job4e_be/pkg/models"
 )
 
 type MockSkillGorm struct {
