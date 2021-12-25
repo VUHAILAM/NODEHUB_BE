@@ -124,7 +124,7 @@ func (s *MockEmailService) NewMail(from string, to []string, subject string, mai
 }
 
 func TestNewRecruiterCategory(t *testing.T) {
-	recruiter := NewRecruiterCategory(&RecruiterGorm{}, nil, zap.L())
+	recruiter := NewRecruiterCategory(&RecruiterGorm{}, nil, nil, zap.L())
 	assert.NotNil(t, recruiter)
 }
 
