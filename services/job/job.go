@@ -2,7 +2,6 @@ package job
 
 import (
 	"context"
-	"encoding/json"
 	"strconv"
 	"time"
 
@@ -250,16 +249,6 @@ func (j *Job) UpdateJob(ctx context.Context, updateRequest *models2.RequestUpdat
 	_, ok := updateData["skills"]
 	if ok {
 		delete(updateData, "skills")
-	}
-	_, ok = updateData["questions"]
-	if ok {
-		questions, err := json.Marshal(updateES.Questions)
-		if err != nil {
-			j.Logger.Error("Marshal question error", zap.Error(err))
-			delete(updateData, "questions")
-		} else {
-			updateData["questions"] = string(questions)
-		}
 	}
 	_, ok = updateData["company_name"]
 	if ok {
