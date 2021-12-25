@@ -36,10 +36,11 @@ type Recruiter struct {
 	Logger *zap.Logger
 }
 
-func NewRecruiterCategory(recruiterGorm *RecruiterGorm, emailSV *email.SGMailService, logger *zap.Logger) *Recruiter {
+func NewRecruiterCategory(recruiterGorm *RecruiterGorm, emailSV *email.SGMailService, conf *config.Config, logger *zap.Logger) *Recruiter {
 	return &Recruiter{
 		RecruiterGorm: recruiterGorm,
 		Email:         emailSV,
+		Conf:          conf,
 		Logger:        logger,
 	}
 }
