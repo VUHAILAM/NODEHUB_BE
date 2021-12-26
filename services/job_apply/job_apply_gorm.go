@@ -22,7 +22,7 @@ type IJobApplyDatabase interface {
 	GetAppliedJobByCandidateID(ctx context.Context, candidateID int64, offset, size int64) ([]*models2.Job, int64, error)
 	UpdateStatus(ctx context.Context, status string, jobID, candidateID int64) error
 	GetCandidateApplyJob(ctx context.Context, jobID int64, offset, size int64) ([]*models2.Candidate, int64, error)
-	CountByStatus(ctx context.Context, status string) (int64, error)
+	CountByStatus(ctx context.Context, recruiterId int64, status string) (int64, error)
 	CheckApplied(ctx context.Context, jobID, candidateID int64) (*models2.JobApply, error)
 	GetApply(ctx context.Context, jobID, candidateID int64) (*models2.JobApply, error)
 	CountApplyOnMonth(ctx context.Context, date string) (int64, error)
@@ -113,10 +113,11 @@ func (g *JobApplyGorm) GetCandidateApplyJob(ctx context.Context, jobID int64, of
 	return candidates, total, nil
 }
 
-func (g *JobApplyGorm) CountByStatus(ctx context.Context, status string) (int64, error) {
+func (g *JobApplyGorm) CountByStatus(ctx context.Context, recruiterId int64, status string) (int64, error) {
 	var count int64
 	db := g.DB.WithContext(ctx).Table(jobApplyTable).Select("COUNT(candidate_id) as count").
-		Where("status=?", status).Count(&count)
+		Joins("JOIN "+jobTable+" ON job_candidate.job_id = job.job_id").
+		Where("status=? and job.recruiter_id=?", status, recruiterId).Count(&count)
 	err := db.Error
 	if err != nil {
 		g.Logger.Error(err.Error())

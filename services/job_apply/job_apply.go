@@ -155,7 +155,7 @@ func (ja *JobApply) UpdateStatusJobApplied(ctx context.Context, req models2.Requ
 }
 
 func (ja *JobApply) CountCandidateByStatus(ctx context.Context, req models2.RequestCountStatus) (int64, error) {
-	return ja.JobApplyGorm.CountByStatus(ctx, req.Status)
+	return ja.JobApplyGorm.CountByStatus(ctx, req.RecruiterID, req.Status)
 }
 func (ja *JobApply) CheckApplied(ctx context.Context, req models2.RequestCheckApply) (*models2.JobApply, error) {
 	return ja.JobApplyGorm.CheckApplied(ctx, req.JobID, req.CandidateID)

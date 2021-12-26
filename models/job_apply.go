@@ -51,7 +51,8 @@ type ResponseGetCandidateApply struct {
 }
 
 type RequestCountStatus struct {
-	Status string `json:"status"`
+	RecruiterID int64  `json:"recruiter_id"`
+	Status      string `json:"status"`
 }
 
 type JobWithSkill struct {
