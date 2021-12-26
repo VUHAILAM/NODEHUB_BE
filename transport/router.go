@@ -99,12 +99,13 @@ func (g *GinDependencies) InitGinEngine(config *config.Config) *gin.Engine {
 	recruiterProfile.POST("/getAllRecruiter", g.RecruiterSerializer.GetAllRecruiter)
 	recruiterProfile.GET("/count", g.RecruiterSerializer.CountRecruiter)
 	recruiterProfile.POST("/public-profile", g.RecruiterSerializer.PublicProfile)
+	recruiterProfile.GET("/getRecruiterSkill", g.RecruiterSerializer.GetRecruiterSkill)
 	recruiterProfile.Use(middlewares.AuthorizationMiddleware(g.Auth, auth.CommonRole)).GET("/getProfile", g.RecruiterSerializer.GetProfileRecruiter)
 	recruiterProfile.Use(middlewares.AuthorizationMiddleware(g.Auth, auth.CommonRole)).POST("/search", g.RecruiterSerializer.SearchRecruiter)
 
 	recruiterProfile.Use(middlewares.AuthorizationMiddleware(g.Auth, auth.RecruiterRole)).PUT("/updateProfile", g.RecruiterSerializer.UpdateProfile)
 	recruiterProfile.Use(middlewares.AuthorizationMiddleware(g.Auth, auth.RecruiterRole)).POST("/addRecruiterSkill", g.RecruiterSerializer.AddRecruiterSkill)
-	recruiterProfile.GET("/getRecruiterSkill", g.RecruiterSerializer.GetRecruiterSkill)
+
 	recruiterProfile.Use(middlewares.AuthorizationMiddleware(g.Auth, auth.RecruiterRole)).DELETE("/deleteRecruiterSkill", g.RecruiterSerializer.DeleteRecruiterSkill)
 	recruiterProfile.Use(middlewares.AuthorizationMiddleware(g.Auth, auth.RecruiterRole)).GET("premium", g.RecruiterSerializer.CheckPremium)
 
@@ -145,10 +146,10 @@ func (g *GinDependencies) InitGinEngine(config *config.Config) *gin.Engine {
 	canCtl.POST("/getAllCandidate", g.CandidateSerializer.GetAllCandidate)
 	canCtl.GET("/count", g.CandidateSerializer.CountCandidate)
 	canCtl.POST("/public-profile", g.CandidateSerializer.PublicProfile)
+	canCtl.GET("/getCandidateSkillCommon", g.CandidateSerializer.GetCandidateSkill)
 	canCtlAdmin := nodehub.Group("/private/candidate").Use(middlewares.AuthorizationMiddleware(g.Auth, auth.AdminRole))
 	canCtl.Use(middlewares.AuthorizationMiddleware(g.Auth, auth.CommonRole)).POST("/profile", g.CandidateSerializer.GetProfile)
 	canCtl.Use(middlewares.AuthorizationMiddleware(g.Auth, auth.CommonRole)).POST("/search", g.CandidateSerializer.SearchCandidate)
-	canCtl.Use(middlewares.AuthorizationMiddleware(g.Auth, auth.CommonRole)).GET("/getCandidateSkillCommon", g.CandidateSerializer.GetCandidateSkill)
 	canCtl.Use(middlewares.AuthorizationMiddleware(g.Auth, auth.CandidateRole)).POST("/create", g.CandidateSerializer.CreateProfile)
 	canCtl.Use(middlewares.AuthorizationMiddleware(g.Auth, auth.CandidateRole)).PUT("/update", g.CandidateSerializer.UpdateProfile)
 	canCtl.Use(middlewares.AuthorizationMiddleware(g.Auth, auth.CandidateRole)).POST("/addCandidateSkill", g.CandidateSerializer.AddCandidateSkill)
