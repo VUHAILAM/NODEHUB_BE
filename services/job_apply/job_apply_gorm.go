@@ -117,7 +117,7 @@ func (g *JobApplyGorm) CountByStatus(ctx context.Context, recruiterId int64, sta
 	var count int64
 	db := g.DB.WithContext(ctx).Table(jobApplyTable).Select("COUNT(candidate_id) as count").
 		Joins("JOIN "+jobTable+" ON job_candidate.job_id = job.job_id").
-		Where("status=? and job.recruiter_id=?", status, recruiterId).Count(&count)
+		Where("job_candidate.status=? and job.recruiter_id=?", status, recruiterId).Count(&count)
 	err := db.Error
 	if err != nil {
 		g.Logger.Error(err.Error())
